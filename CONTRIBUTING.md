@@ -77,7 +77,9 @@ An actual domain will be assigned so you can test the federation.
 
 ## Release
 ### Release Instructions
-1. Commit version changes in the `develop` branch ([package.json](https://github.com/misskey-dev/misskey/blob/develop/package.json))
+1. Commit version changes in the `develop` branch ([package.json](https://github.
+   com/nacika-ins/misskey/blob/develop/package.
+   json))
 2. Create a release PR.
 	- Into `master` from `develop` branch.
 	- The title must be in the format `Release: x.y.z`.
@@ -99,21 +101,48 @@ If your language is not listed in Crowdin, please open an issue.
 ![Crowdin](https://d322cqt584bo4o.cloudfront.net/misskey/localized.svg)
 
 ## Development
-During development, it is useful to use the `npm run dev` command.
-This command monitors the server-side and client-side source files and automatically builds them if they are modified.
-In addition, it will also automatically start the Misskey server process.
+During development, it is useful to use the 
+
+```
+npm run dev
+```
+
+command.
+
+- Server-side source files and automatically builds them if they are modified. Automatically start the server process(es).
+- Vite HMR (just the `vite` command) is available. The behavior may be different from production.
+- Service Worker is watched by esbuild.
+
+### Dev Container
+Instead of running `npm` locally, you can use Dev Container to set up your development environment.
+To use Dev Container, open the project directory on VSCode with Dev Containers installed.
+
+It will run the following command automatically inside the container.
+``` bash
+git submodule update --init
+npm ci
+cp .devcontainer/devcontainer.yml .config/default.yml
+npm run build
+npm run migrate
+```
+
+After finishing the migration, run the `npm run dev` command to start the development server.
+
+``` bash
+npm run dev
+```
 
 ## Testing
-- Test codes are located in [`/test`](/test).
+- Test codes are located in [`/packages/backend/test`](/packages/backend/test).
 
 ### Run test
 Create a config file.
 ```
-cp test/test.yml .config/
+cp .github/misskey/test.yml .config/
 ```
 Prepare DB/Redis for testing.
 ```
-docker-compose -f test/docker-compose.yml up
+docker compose -f packages/backend/test/docker-compose.yml up
 ```
 Alternatively, prepare an empty (data can be erased) DB and edit `.config/test.yml`. 
 
@@ -124,7 +153,7 @@ npm run test
 
 #### Run specify test
 ```
-npx cross-env TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT="./test/tsconfig.json" npx mocha test/foo.ts --require ts-node/register
+npm run jest -- foo.ts
 ```
 
 ### e2e tests
@@ -169,9 +198,9 @@ vue-routerとの最大の違いは、niraxは複数のルーターが存在す�
 これにより、アプリ内ウィンドウでブラウザとは個別にルーティングすることなどが可能になります。
 
 ## Notes
-### How to resolve conflictions occurred at package-lock.json?
+### How to resolve conflictions occurred at yarn.lock?
 
-Just execute `npm` to fix it.
+Just execute `yarn` to fix it.
 
 ### INSERTするときにはsaveではなくinsertを使用する
 #6441
@@ -257,7 +286,7 @@ MongoDBは`null`で返してきてたので、その感覚で`if (x === null)`�
 ### Migration作成方法
 packages/backendで:
 ```sh
-npx typeorm migration:generate -d ormconfig.js -o <migration name>
+npm run dlx typeorm migration:generate -d ormconfig.js -o <migration name>
 ```
 
 - 生成後、ファイルをmigration下に移してください
