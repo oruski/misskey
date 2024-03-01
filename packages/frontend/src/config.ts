@@ -1,4 +1,5 @@
 import { miLocalStorage } from './local-storage';
+// @ts-ignore
 
 const address = new URL(location.href);
 const siteName = (document.querySelector('meta[property="og:site_name"]') as HTMLMetaElement).content;
@@ -12,7 +13,9 @@ export const lang = miLocalStorage.getItem('lang');
 export const langs = _LANGS_;
 // @ts-ignore
 export let locale = JSON.parse(miLocalStorage.getItem('locale'));
+
 export const version = _VERSION_;
+
 export const instanceName = siteName === 'Misskey' ? host : siteName;
 export const ui = miLocalStorage.getItem('ui');
 // @ts-ignore

@@ -2,6 +2,33 @@ import { execa } from 'execa';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
+// 全てのプロセスを終了する
+// SIGINT以外の終了イベントも考慮する
+const exitFunc = () => {
+  global.ps1?.kill();
+  global.ps2?.kill();
+  global.ps3?.kill();
+  global.ps4?.kill();
+  global.ps5?.kill();
+};
+process.on('SIGINT', () => {
+  exitFunc();
+  process.exit();
+});
+process.on('exit', exitFunc);
+process.on('uncaughtException', () => {
+  exitFunc();
+  process.exit();
+});
+process.on('unhandledRejection', () => {
+  exitFunc();
+  process.exit();
+});
+process.on('SIGTERM', () => {
+  exitFunc();
+  process.exit();
+});
+
 (async () => {
   await execa('npm', ['run', 'clean'], {
     cwd: __dirname + '/../',
@@ -48,6 +75,7 @@ const __dirname = new URL('.', import.meta.url).pathname;
         stderr: process.stderr,
       });
     } catch (e) {
+      console.error(e);
       await new Promise(resolve => setTimeout(resolve, 3000));
       start();
     }
@@ -56,13 +84,5 @@ const __dirname = new URL('.', import.meta.url).pathname;
   start();
 })();
 
-// 全てのプロセスを終了する
-process.on('SIGINT', () => {
-  global.ps1?.kill();
-  global.ps2?.kill();
-  global.ps3?.kill();
-  global.ps4?.kill();
-  global.ps5?.kill();
-  process.exit();
-});
+
 
