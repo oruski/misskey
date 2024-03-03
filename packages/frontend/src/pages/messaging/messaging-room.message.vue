@@ -2,35 +2,58 @@
   <div class="thvuemwp" :class="{ isMe }">
     <MkAvatar class="avatar" :user="message.user" indicator link preview />
     <div class="content">
-      <div class="balloon" :class="{ noText: message.text == null }">
-        <button v-if="isMe" class="delete-button" :title="$ts.delete" @click="del">
-          <img src="/client-assets/remove.png" alt="Delete" />
-        </button>
-        <div v-if="!message.isDeleted" class="content">
-          <Mfm v-if="message.text" ref="text" class="text" :text="message.text" :i="$i" />
-          <div v-if="message.file" class="file">
-            <a :href="message.file.url" rel="noopener" target="_blank" :title="message.file.name">
-              <img v-if="message.file.type.split('/')[0] == 'image'" :src="message.file.url" :alt="message.file.name" />
-              <p v-else>{{ message.file.name }}</p>
-            </a>
+      <div class="inner">
+        <template v-if="isGroup && !isMe">
+          <div class="name">
+            <MkUserName :user="message.user" />
+          </div>
+        </template>
+        <div class="inner2">
+          <div class="balloon" :class="{ noText: message.text == null }">
+            <button v-if="isMe" class="delete-button" :title="$ts.delete" @click="del">
+              <img src="/client-assets/remove.png" alt="Delete" />
+            </button>
+            <div v-if="!message.isDeleted" class="content">
+              <Mfm v-if="message.text" ref="text" class="text" :text="message.text" :i="$i" />
+              <div v-if="message.file" class="file">
+                <a :href="message.file.url" rel="noopener" target="_blank" :title="message.file.name">
+                  <img
+                    v-if="message.file.type.split('/')[0] == 'image'"
+                    :src="message.file.url"
+                    :alt="message.file.name"
+                  />
+                  <p v-else>{{ message.file.name }}</p>
+                </a>
+              </div>
+            </div>
+            <div v-else class="content">
+              <p class="is-deleted">{{ $ts.deleted }}</p>
+            </div>
+          </div>
+
+          <div class="context">
+            <div>
+              <template v-if="isGroup">
+                <span v-if="message.reads.length > 0" class="read"
+                  >{{ $ts.messageRead }} {{ message.reads.length }}</span
+                >
+              </template>
+              <template v-else>
+                <span v-if="isMe && message.isRead" class="read">{{ $ts.messageRead }}</span>
+              </template>
+            </div>
+
+            <div>
+              <MkTime :time="message.createdAt" />
+              <template v-if="message.is_edited"><i class="ti ti-pencil"></i></template>
+            </div>
           </div>
         </div>
-        <div v-else class="content">
-          <p class="is-deleted">{{ $ts.deleted }}</p>
-        </div>
       </div>
+
       <div></div>
       <MkUrlPreview v-for="url in urls" :key="url" :url="url" style="margin: 8px 0" />
-      <footer>
-        <template v-if="isGroup">
-          <span v-if="message.reads.length > 0" class="read">{{ $ts.messageRead }} {{ message.reads.length }}</span>
-        </template>
-        <template v-else>
-          <span v-if="isMe && message.isRead" class="read">{{ $ts.messageRead }}</span>
-        </template>
-        <MkTime :time="message.createdAt" />
-        <template v-if="message.is_edited"><i class="ti ti-pencil"></i></template>
-      </footer>
+      <footer></footer>
     </div>
   </div>
 </template>
@@ -79,116 +102,144 @@ function del(): void {
   > .content {
     min-width: 0;
 
-    > .balloon {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      padding: 0;
-      min-height: 38px;
-      border-radius: 16px;
-      max-width: 100%;
-
-      &:before {
-        content: '';
-        pointer-events: none;
-        display: block;
-        position: absolute;
-        top: 12px;
+    > .inner {
+      > .name {
+        margin: 0 0 4px 0;
+        font-size: 0.85em;
+        color: var(--fgOnAccent);
+        opacity: 0.75;
       }
 
-      & + * {
-        clear: both;
-      }
+      > .inner2 {
+        display: flex;
+        gap: 4px;
 
-      &:hover {
-        > .delete-button {
-          display: block;
+        > .context {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          gap: 2px;
+          font-size: 0.65em;
+          color: var(--fgOnAccent);
+          opacity: 0.5;
+          margin-left: 4px;
+          margin-right: 4px;
+          margin-bottom: 2px;
+          white-space: nowrap;
         }
-      }
 
-      > .delete-button {
-        display: none;
-        position: absolute;
-        z-index: 1;
-        top: -4px;
-        right: -4px;
-        margin: 0;
-        padding: 0;
-        cursor: pointer;
-        outline: none;
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-        background: transparent;
-
-        > img {
-          vertical-align: bottom;
-          width: 16px;
-          height: 16px;
-          cursor: pointer;
-        }
-      }
-
-      > .content {
-        max-width: 100%;
-
-        > .is-deleted {
-          display: block;
-          margin: 0;
+        > .balloon {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
           padding: 0;
-          overflow: hidden;
-          overflow-wrap: break-word;
-          font-size: 1em;
-          color: rgba(#000, 0.5);
-        }
+          min-height: 38px;
+          border-radius: 16px;
+          max-width: 100%;
 
-        > .text {
-          display: block;
-          margin: 0;
-          padding: 12px 18px;
-          overflow: hidden;
-          overflow-wrap: break-word;
-          word-break: break-word;
-          font-size: 1em;
-          color: rgba(#000, 0.8);
+          &:before {
+            content: '';
+            pointer-events: none;
+            display: block;
+            position: absolute;
+            top: 12px;
+          }
 
-          & + .file {
-            > a {
-              border-radius: 0 0 16px 16px;
+          & + * {
+            clear: both;
+          }
+
+          &:hover {
+            > .delete-button {
+              display: block;
             }
           }
-        }
 
-        > .file {
-          > a {
-            display: block;
+          > .delete-button {
+            display: none;
+            position: absolute;
+            z-index: 1;
+            top: -4px;
+            right: -4px;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            outline: none;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            background: transparent;
+
+            > img {
+              vertical-align: bottom;
+              width: 16px;
+              height: 16px;
+              cursor: pointer;
+            }
+          }
+
+          > .content {
             max-width: 100%;
-            border-radius: 16px;
-            overflow: hidden;
-            text-decoration: none;
 
-            &:hover {
-              text-decoration: none;
+            > .is-deleted {
+              display: block;
+              margin: 0;
+              padding: 0;
+              overflow: hidden;
+              overflow-wrap: break-word;
+              font-size: 1em;
+              color: rgba(#000, 0.5);
+            }
 
-              > p {
-                background: #ccc;
+            > .text {
+              display: block;
+              margin: 0;
+              padding: 12px 18px;
+              overflow: hidden;
+              overflow-wrap: break-word;
+              word-break: break-word;
+              font-size: 1em;
+              color: rgba(#000, 0.8);
+
+              & + .file {
+                > a {
+                  border-radius: 0 0 16px 16px;
+                }
               }
             }
 
-            > * {
-              display: block;
-              margin: 0;
-              width: 100%;
-              max-height: 512px;
-              object-fit: contain;
-              box-sizing: border-box;
-            }
+            > .file {
+              > a {
+                display: block;
+                max-width: 100%;
+                border-radius: 16px;
+                overflow: hidden;
+                text-decoration: none;
 
-            > p {
-              padding: 30px;
-              text-align: center;
-              color: #555;
-              background: #ddd;
+                &:hover {
+                  text-decoration: none;
+
+                  > p {
+                    background: #ccc;
+                  }
+                }
+
+                > * {
+                  display: block;
+                  margin: 0;
+                  width: 100%;
+                  max-height: 512px;
+                  object-fit: contain;
+                  box-sizing: border-box;
+                }
+
+                > p {
+                  padding: 30px;
+                  text-align: center;
+                  color: #555;
+                  background: #ddd;
+                }
+              }
             }
           }
         }
@@ -213,29 +264,40 @@ function del(): void {
   &:not(.isMe) {
     padding-left: var(--margin);
 
+    > .avatar {
+      margin-top: 8px;
+    }
+
     > .content {
       padding-left: 16px;
       padding-right: 32px;
 
-      > .balloon {
-        $color: var(--messageBg);
-        background: $color;
+      > .inner {
+        > .inner2 {
+          display: flex;
+          gap: 4px;
 
-        &.noText {
-          background: transparent;
-        }
+          > .balloon {
+            $color: var(--messageBg);
+            background: $color;
 
-        &:not(.noText):before {
-          left: -14px;
-          border-top: solid 8px transparent;
-          border-right: solid 8px $color;
-          border-bottom: solid 8px transparent;
-          border-left: solid 8px transparent;
-        }
+            &.noText {
+              background: transparent;
+            }
 
-        > .content {
-          > .text {
-            color: var(--fg);
+            &:not(.noText):before {
+              left: -14px;
+              border-top: solid 8px transparent;
+              border-right: solid 8px $color;
+              border-bottom: solid 8px transparent;
+              border-left: solid 8px transparent;
+            }
+
+            > .content {
+              > .text {
+                color: var(--fg);
+              }
+            }
           }
         }
       }
@@ -256,37 +318,45 @@ function del(): void {
       padding-left: 32px;
       text-align: right;
 
-      > .balloon {
-        background: $me-balloon-color;
-        text-align: left;
+      > .inner {
+        > .inner2 {
+          display: flex;
+          gap: 4px;
+          flex-direction: row-reverse;
 
-        ::selection {
-          color: var(--accent);
-          background-color: #fff;
-        }
+          > .balloon {
+            background: $me-balloon-color;
+            text-align: left;
 
-        &.noText {
-          background: transparent;
-        }
+            ::selection {
+              color: var(--accent);
+              background-color: #fff;
+            }
 
-        &:not(.noText):before {
-          right: -14px;
-          left: auto;
-          border-top: solid 8px transparent;
-          border-right: solid 8px transparent;
-          border-bottom: solid 8px transparent;
-          border-left: solid 8px $me-balloon-color;
-        }
+            &.noText {
+              background: transparent;
+            }
 
-        > .content {
-          > p.is-deleted {
-            color: rgba(#fff, 0.5);
-          }
+            &:not(.noText):before {
+              right: -14px;
+              left: auto;
+              border-top: solid 8px transparent;
+              border-right: solid 8px transparent;
+              border-bottom: solid 8px transparent;
+              border-left: solid 8px $me-balloon-color;
+            }
 
-          > .text {
-            &,
-            ::v-deep(*) {
-              color: var(--fgOnAccent) !important;
+            > .content {
+              > p.is-deleted {
+                color: rgba(#fff, 0.5);
+              }
+
+              > .text {
+                &,
+                ::v-deep(*) {
+                  color: var(--fgOnAccent) !important;
+                }
+              }
             }
           }
         }
