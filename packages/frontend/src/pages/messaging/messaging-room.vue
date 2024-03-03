@@ -5,7 +5,12 @@
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
-        <MkPagination v-if="pagination" ref="pagingComponent" :key="userAcct || groupId" :pagination="pagination">
+        <MkMessagePagination
+          v-if="pagination"
+          ref="pagingComponent"
+          :key="userAcct || groupId"
+          :pagination="pagination"
+        >
           <template #empty>
             <div class="_fullinfo">
               <img src="https://xn--931a.moe/assets/info.jpg" class="_ghost" />
@@ -24,7 +29,7 @@
               <XMessage :key="message.id" :message="message" :is-group="group != null" />
             </MkDateSeparatedList>
           </template>
-        </MkPagination>
+        </MkMessagePagination>
       </div>
       <footer :class="$style['footer']">
         <div v-if="typers.length > 0" :class="$style['typers']">
@@ -56,7 +61,7 @@ import { acct as Acct } from 'misskey-js';
 import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
 import MkDateSeparatedList from '@/components/MkDateSeparatedList.vue';
-import MkPagination, { Paging } from '@/components/MkPagination.vue';
+import MkMessagePagination, { Paging } from '@/components/MkMessagePagination.vue';
 import { isBottomVisible, onScrollBottom, scrollToBottom } from '@/scripts/scroll';
 import * as os from '@/os';
 import { stream } from '@/stream';
@@ -76,7 +81,7 @@ let rootEl = $shallowRef<HTMLDivElement>();
 // @ts-ignore
 let formEl = $shallowRef<InstanceType<typeof XForm>>();
 // @ts-ignore
-let pagingComponent = $shallowRef<InstanceType<typeof MkPagination>>();
+let pagingComponent = $shallowRef<InstanceType<typeof MkMessagePagination>>();
 // @ts-ignore
 
 let fetching = $ref(true);
