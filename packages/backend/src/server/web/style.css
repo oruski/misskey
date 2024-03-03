@@ -23,8 +23,8 @@ html {
 	bottom: 0;
 	left: 0;
 	margin: auto;
-	width: 64px;
-	height: 64px;
+	height: 44px;
+  aspect-ratio: auto;
 	pointer-events: none;
 }
 
