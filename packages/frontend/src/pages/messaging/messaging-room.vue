@@ -43,7 +43,7 @@
             </button>
           </div>
         </Transition>
-        <XForm v-if="!fetching" ref="formEl" :user="user" :group="group" :class="$style['form']" />
+        <XForm ref="formEl" :user="user" :group="group" :class="$style['form']" />
       </footer>
     </div>
   </MkStickyContainer>
@@ -156,12 +156,15 @@ async function fetch() {
   document.addEventListener('visibilitychange', onVisibilitychange);
 
   nextTick(() => {
-    // pagingComponent.inited.then(() => {
-    //   thisScrollToBottom();
-    // });
-    window.setTimeout(() => {
-      fetching = false;
-    }, 300);
+    const url = new URL(location.href);
+    if (url.pathname.includes('/my/messaging/group/')) {
+      pagingComponent.inited.then(() => {
+        thisScrollToBottom();
+      });
+      window.setTimeout(() => {
+        fetching = false;
+      }, 300);
+    }
   });
 }
 
@@ -314,6 +317,7 @@ onBeforeUnmount(() => {
 });
 
 definePageMetadata(
+  // @ts-ignore
   computed(() =>
     !fetching
       ? user
@@ -332,6 +336,7 @@ definePageMetadata(
 
 <style lang="scss" module>
 .root {
+  // @ts-ignore
   display: content;
 }
 
