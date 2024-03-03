@@ -21,5 +21,6 @@
 		mentionMe: '#de6161',
 		hashtag: '#68bad0',
 		link: '#a1c758',
+    messageBg: '#2b2d2b',
 	},
 }

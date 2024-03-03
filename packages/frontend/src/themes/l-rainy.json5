@@ -17,5 +17,6 @@
 		link: '@accent',
 		mention: '@accent',
 		hashtag: '@accent',
+    messageBg: '#fff',
 	},
 }

@@ -22,5 +22,6 @@
 		mentionMe: '#d44c4c',
 		hashtag: '#4cb8d4',
 		link: '@accent',
+    messageBg: '#2d2d2d',
 	},
 }

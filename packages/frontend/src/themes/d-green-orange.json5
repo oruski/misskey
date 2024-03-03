@@ -20,5 +20,6 @@
 		renote: '@accent',
 		mentionMe: '#b4e900',
 		link: '#24d7ce',
+    messageBg: '#1e1e22',
 	},
 }

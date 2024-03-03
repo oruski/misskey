@@ -16,5 +16,6 @@
 		mention: '@accent',
 		hashtag: '@accent',
 		divider: 'rgb(63, 63, 80)',
+    messageBg: 'rgb(35, 35, 47)',
 	},
 }

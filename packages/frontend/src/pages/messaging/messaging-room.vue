@@ -71,18 +71,28 @@ const props = defineProps<{
   groupId?: string;
 }>();
 
+// @ts-ignore
 let rootEl = $shallowRef<HTMLDivElement>();
+// @ts-ignore
 let formEl = $shallowRef<InstanceType<typeof XForm>>();
+// @ts-ignore
 let pagingComponent = $shallowRef<InstanceType<typeof MkPagination>>();
+// @ts-ignore
 
 let fetching = $ref(true);
+// @ts-ignore
 let user: Misskey.entities.UserDetailed | null = $ref(null);
+// @ts-ignore
 let group: Misskey.entities.UserGroup | null = $ref(null);
+// @ts-ignore
 let typers: Misskey.entities.User[] = $ref([]);
+// @ts-ignore
 let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null = $ref(null);
+// @ts-ignore
 let showIndicator = $ref(false);
 const { animation } = defaultStore.reactiveState;
 
+// @ts-ignore
 let pagination: Paging | null = $ref(null);
 
 watch([() => props.userAcct, () => props.groupId], () => {
@@ -99,15 +109,20 @@ async function fetch() {
     group = null;
 
     pagination = {
+      // @ts-ignore
       endpoint: 'messaging/messages',
       limit: 20,
       params: {
+        // @ts-ignore
         userId: user.id,
       },
       reversed: true,
+      // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+    // @ts-ignore
     connection = stream.useChannel('messaging', {
+      // @ts-ignore
       otherparty: user.id,
     });
   } else {
@@ -115,14 +130,17 @@ async function fetch() {
     group = await os.api('users/groups/show', { groupId: props.groupId });
 
     pagination = {
+      // @ts-ignore
       endpoint: 'messaging/messages',
       limit: 20,
       params: {
         groupId: group?.id,
       },
       reversed: true,
+      // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+    // @ts-ignore
     connection = stream.useChannel('messaging', {
       group: group?.id,
     });
@@ -138,9 +156,9 @@ async function fetch() {
   document.addEventListener('visibilitychange', onVisibilitychange);
 
   nextTick(() => {
-    pagingComponent.inited.then(() => {
-      // thisScrollToBottom();
-    });
+    // pagingComponent.inited.then(() => {
+    //   thisScrollToBottom();
+    // });
     window.setTimeout(() => {
       fetching = false;
     }, 300);

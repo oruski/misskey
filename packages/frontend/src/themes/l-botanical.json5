@@ -5,7 +5,7 @@
 	author: 'ThinaticSystem',
 
   base: 'light',
-	
+
 	props: {
 		accent: '#77b58c',
 		bg: 'e2deda',
@@ -24,6 +24,7 @@
 		link: '@accent',
 		buttonGradateB: ':hue<-70<@accent',
 		success: '#86b300',
-    X14: '#ebe7e5'
+    X14: '#ebe7e5',
+    messageBg: '#fff',
 	},
 }
