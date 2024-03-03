@@ -14,5 +14,6 @@
 		link: '@accent',
 		mention: '@accent',
 		hashtag: '#229e82',
+    messageBg: '#fff',
 	},
 }

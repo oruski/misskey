@@ -17,5 +17,6 @@
 		mention: '@accent',
 		mentionMe: 'rgb(170, 149, 98)',
 		hashtag: '@accent',
+    messageBg: '#fff',
 	},
 }

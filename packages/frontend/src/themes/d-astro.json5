@@ -32,7 +32,7 @@
 		cwHoverBg: '#707b97',
 		indicator: '@accent',
 		mentionMe: '#fb5d38',
-		messageBg: '@bg',
+		messageBg: '#2a272b',
 		navActive: '@accent',
 		infoWarnBg: '#42321c',
 		infoWarnFg: '#ffbd3e',

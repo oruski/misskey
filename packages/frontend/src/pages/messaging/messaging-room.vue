@@ -5,7 +5,12 @@
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
-        <MkPagination v-if="pagination" ref="pagingComponent" :key="userAcct || groupId" :pagination="pagination">
+        <MkMessagePagination
+          v-if="pagination"
+          ref="pagingComponent"
+          :key="userAcct || groupId"
+          :pagination="pagination"
+        >
           <template #empty>
             <div class="_fullinfo">
               <img src="https://xn--931a.moe/assets/info.jpg" class="_ghost" />
@@ -24,7 +29,7 @@
               <XMessage :key="message.id" :message="message" :is-group="group != null" />
             </MkDateSeparatedList>
           </template>
-        </MkPagination>
+        </MkMessagePagination>
       </div>
       <footer :class="$style['footer']">
         <div v-if="typers.length > 0" :class="$style['typers']">
@@ -43,7 +48,7 @@
             </button>
           </div>
         </Transition>
-        <XForm v-if="!fetching" ref="formEl" :user="user" :group="group" :class="$style['form']" />
+        <XForm ref="formEl" :user="user" :group="group" :class="$style['form']" />
       </footer>
     </div>
   </MkStickyContainer>
@@ -56,7 +61,7 @@ import { acct as Acct } from 'misskey-js';
 import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
 import MkDateSeparatedList from '@/components/MkDateSeparatedList.vue';
-import MkPagination, { Paging } from '@/components/MkPagination.vue';
+import MkMessagePagination, { Paging } from '@/components/MkMessagePagination.vue';
 import { isBottomVisible, onScrollBottom, scrollToBottom } from '@/scripts/scroll';
 import * as os from '@/os';
 import { stream } from '@/stream';
@@ -71,18 +76,28 @@ const props = defineProps<{
   groupId?: string;
 }>();
 
+// @ts-ignore
 let rootEl = $shallowRef<HTMLDivElement>();
+// @ts-ignore
 let formEl = $shallowRef<InstanceType<typeof XForm>>();
-let pagingComponent = $shallowRef<InstanceType<typeof MkPagination>>();
+// @ts-ignore
+let pagingComponent = $shallowRef<InstanceType<typeof MkMessagePagination>>();
+// @ts-ignore
 
 let fetching = $ref(true);
+// @ts-ignore
 let user: Misskey.entities.UserDetailed | null = $ref(null);
+// @ts-ignore
 let group: Misskey.entities.UserGroup | null = $ref(null);
+// @ts-ignore
 let typers: Misskey.entities.User[] = $ref([]);
+// @ts-ignore
 let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null = $ref(null);
+// @ts-ignore
 let showIndicator = $ref(false);
 const { animation } = defaultStore.reactiveState;
 
+// @ts-ignore
 let pagination: Paging | null = $ref(null);
 
 watch([() => props.userAcct, () => props.groupId], () => {
@@ -99,15 +114,20 @@ async function fetch() {
     group = null;
 
     pagination = {
+      // @ts-ignore
       endpoint: 'messaging/messages',
       limit: 20,
       params: {
+        // @ts-ignore
         userId: user.id,
       },
       reversed: true,
+      // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+    // @ts-ignore
     connection = stream.useChannel('messaging', {
+      // @ts-ignore
       otherparty: user.id,
     });
   } else {
@@ -115,14 +135,17 @@ async function fetch() {
     group = await os.api('users/groups/show', { groupId: props.groupId });
 
     pagination = {
+      // @ts-ignore
       endpoint: 'messaging/messages',
       limit: 20,
       params: {
         groupId: group?.id,
       },
       reversed: true,
+      // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+    // @ts-ignore
     connection = stream.useChannel('messaging', {
       group: group?.id,
     });
@@ -138,12 +161,15 @@ async function fetch() {
   document.addEventListener('visibilitychange', onVisibilitychange);
 
   nextTick(() => {
-    pagingComponent.inited.then(() => {
-      // thisScrollToBottom();
-    });
-    window.setTimeout(() => {
-      fetching = false;
-    }, 300);
+    const url = new URL(location.href);
+    if (url.pathname.includes('/my/messaging/group/')) {
+      pagingComponent.inited.then(() => {
+        thisScrollToBottom();
+      });
+      window.setTimeout(() => {
+        fetching = false;
+      }, 300);
+    }
   });
 }
 
@@ -296,6 +322,7 @@ onBeforeUnmount(() => {
 });
 
 definePageMetadata(
+  // @ts-ignore
   computed(() =>
     !fetching
       ? user
@@ -314,6 +341,7 @@ definePageMetadata(
 
 <style lang="scss" module>
 .root {
+  // @ts-ignore
   display: content;
 }
 

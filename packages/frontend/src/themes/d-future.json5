@@ -23,5 +23,6 @@
 		link: '#e88080',
 		buttonGradateA: '@accent',
 		buttonGradateB: ':saturate<30<:hue<30<@accent',
+    messageBg: '#1e1e22',
 	},
 }

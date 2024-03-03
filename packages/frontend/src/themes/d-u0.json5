@@ -49,7 +49,7 @@
 		cwHoverBg: '#707b97',
 		indicator: '@accent',
 		mentionMe: '@mention',
-		messageBg: '@bg',
+		messageBg: 'rgba(255, 255, 255, 0.05)',
 		navActive: '@accent',
 		accentedBg: ':alpha<0.15<@accent',
 		codeNumber: '#cfff9e',

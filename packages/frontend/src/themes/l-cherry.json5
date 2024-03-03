@@ -17,5 +17,6 @@
 		hashtag: '@accent',
 		divider: 'rgba(134, 51, 51, 0.1)',
 		inputBorderHover: 'rgb(238, 221, 222)',
+    messageBg: '#fff',
 	},
 }
