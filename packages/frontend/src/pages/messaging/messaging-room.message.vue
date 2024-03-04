@@ -106,7 +106,7 @@ function del(): void {
       > .name {
         margin: 0 0 4px 0;
         font-size: 0.85em;
-        color: var(--fgOnAccent);
+        color: var(--fg);
         opacity: 0.75;
       }
 
@@ -120,7 +120,7 @@ function del(): void {
           justify-content: flex-end;
           gap: 2px;
           font-size: 0.65em;
-          color: var(--fgOnAccent);
+          color: var(--fg);
           opacity: 0.5;
           margin-left: 4px;
           margin-right: 4px;
