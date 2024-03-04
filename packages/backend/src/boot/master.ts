@@ -17,8 +17,6 @@ import { jobQueue, server } from './common.js';
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
 
-const meta = JSON.parse(fs.readFileSync(`${_dirname}/../../../../built/_vite_/meta.json`, 'utf-8'));
-
 const logger = new Logger('core', 'cyan');
 const bootLogger = logger.createSubLogger('boot', 'magenta', false);
 
@@ -120,7 +118,8 @@ function loadConfigBoot(): Config {
 		if (typeof exception === 'string') {
 			configLogger.error(exception);
 			process.exit(1);
-		} else if ((exception as any).code === 'ENOENT') {
+			// @ts-ignore
+		} else if ((exception as unknown).code === 'ENOENT') {
 			configLogger.error('Configuration file not found', null, true);
 			process.exit(1);
 		}
