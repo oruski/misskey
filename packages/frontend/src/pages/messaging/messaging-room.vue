@@ -10,6 +10,7 @@
           ref="pagingComponent"
           :key="userAcct || groupId"
           :pagination="pagination"
+          :is-first-load="isFirstLoad"
         >
           <template #empty>
             <div class="_fullinfo">
@@ -62,7 +63,7 @@ import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
 import MkDateSeparatedList from '@/components/MkDateSeparatedList.vue';
 import MkMessagePagination, { Paging } from '@/components/MkMessagePagination.vue';
-import { isBottomVisible, onScrollBottom, scrollToBottom } from '@/scripts/scroll';
+import { isBottomVisible, onScrollBottom, scrollToBottomForWindow } from '@/scripts/scroll';
 import * as os from '@/os';
 import { stream } from '@/stream';
 import * as sound from '@/scripts/sound';
@@ -95,6 +96,8 @@ let typers: Misskey.entities.User[] = $ref([]);
 let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null = $ref(null);
 // @ts-ignore
 let showIndicator = $ref(false);
+let isFirstLoad = $ref(true);
+
 const { animation } = defaultStore.reactiveState;
 
 // @ts-ignore
@@ -116,7 +119,7 @@ async function fetch() {
     pagination = {
       // @ts-ignore
       endpoint: 'messaging/messages',
-      limit: 20,
+      limit: 40,
       params: {
         // @ts-ignore
         userId: user.id,
@@ -137,7 +140,7 @@ async function fetch() {
     pagination = {
       // @ts-ignore
       endpoint: 'messaging/messages',
-      limit: 20,
+      limit: 40,
       params: {
         groupId: group?.id,
       },
@@ -162,14 +165,15 @@ async function fetch() {
 
   nextTick(() => {
     const url = new URL(location.href);
-    if (url.pathname.includes('/my/messaging/group/')) {
+    if (url.pathname.includes(`/my/messaging/group/${group?.id}`)) {
       pagingComponent.inited.then(() => {
         thisScrollToBottom();
       });
-      window.setTimeout(() => {
-        fetching = false;
-      }, 300);
     }
+
+    window.setTimeout(() => {
+      fetching = false;
+    }, 300);
   });
 }
 
@@ -240,7 +244,10 @@ function onMessage(message) {
   if (_isBottom) {
     // Scroll to bottom
     nextTick(() => {
-      thisScrollToBottom();
+      const url = new URL(location.href);
+      if (url.pathname.includes(`/my/messaging/group/${group?.id}`)) {
+        thisScrollToBottom();
+      }
     });
   } else if (message.userId !== $i?.id) {
     // Notify
@@ -280,8 +287,8 @@ function onDeleted(id) {
   }
 }
 
-function thisScrollToBottom() {
-  scrollToBottom($$(rootEl).value, { behavior: 'smooth' });
+function thisScrollToBottom(option: { behavior: 'smooth' | 'auto' } = { behavior: 'smooth' }) {
+  scrollToBottomForWindow(option);
 }
 
 function onIndicatorClick() {
@@ -311,8 +318,8 @@ function onVisibilitychange() {
   }
 }
 
-onMounted(() => {
-  fetch();
+onMounted(async () => {
+  await fetch();
 });
 
 onBeforeUnmount(() => {
@@ -342,7 +349,7 @@ definePageMetadata(
 <style lang="scss" module>
 .root {
   // @ts-ignore
-  display: content;
+  display: contents;
 }
 
 .body {

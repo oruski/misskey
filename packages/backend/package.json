@@ -4,7 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-    "dev": "npx nodemon --watch src --watch ../../built/_vite_ --exec ' npm run start'",
+    "dev": "npx nodemon --watch ../../built/_vite_ --exec 'npm run start'",
+    "livereload": "npx livereload 'built' -op 'http://localhost:3000/favicon.ico' -w 3000",
     "build:start": "npm run build && npm run start",
 		"start": "node --experimental-json-modules --experimental-specifier-resolution=node ./built/boot/index.js",
     "clean": "rm -rf built",

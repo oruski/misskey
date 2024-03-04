@@ -30,8 +30,11 @@
 		"typeRoots": [
 			"node_modules/@types",
 			"@types",
+      "vite-plugin-build-metadata",
 			"node_modules/unplugin-vue-macros/macros-global.d.ts",
-      "node_modules/unplugin-vue-macros/vue2-macros-global.d.ts"
+      "node_modules/unplugin-vue-macros/vue2-macros-global.d.ts",
+      "node_modules/unplugin-vue-macros/macros.d.ts",
+      "node_modules/unplugin-vue-macros/vue2-macros.d.ts"
 		],
 		"types": [
 			"vite/client",

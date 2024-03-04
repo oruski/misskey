@@ -77,6 +77,7 @@ import {
   scrollToBottom,
   scroll,
   isBottomVisible,
+  scrollToBottomForWindow,
 } from '@/scripts/scroll';
 import MkButton from '@/components/MkButton.vue';
 import { defaultStore } from '@/store';
@@ -113,9 +114,11 @@ const props = withDefaults(
     pagination: Paging;
     disableAutoLoad?: boolean;
     displayLimit?: number;
+    isFirstLoad?: boolean;
   }>(),
   {
     displayLimit: 20,
+    isFirstLoad: false,
   },
 );
 
@@ -198,6 +201,14 @@ watch(
   { deep: true },
 );
 
+watch(fetching, () => {
+  setTimeout(() => {
+    if (props.isFirstLoad) {
+      scrollToBottomForWindow({ behavior: 'instant' });
+    }
+  }, 300);
+});
+
 async function init(): Promise<void> {
   queue.value = [];
   fetching.value = true;
@@ -219,7 +230,7 @@ async function init(): Promise<void> {
         }
         if (!props.pagination.noPaging && res.length > (props.pagination.limit || 10)) {
           res.pop();
-          if (props.pagination.reversed) moreFetching.value = true;
+          // if (props.pagination.reversed) moreFetching.value = true;
           items.value = res;
           more.value = true;
         } else {
@@ -244,6 +255,7 @@ const reload = (): Promise<void> => {
 
 const fetchMore = async (): Promise<void> => {
   if (!more.value || fetching.value || moreFetching.value || items.value.length === 0) return;
+
   moreFetching.value = true;
   const params = props.pagination.params
     ? isRef(props.pagination.params)
@@ -326,49 +338,6 @@ const fetchMore = async (): Promise<void> => {
     );
 };
 
-const fetchMoreAhead = async (): Promise<void> => {
-  if (!more.value || fetching.value || moreFetching.value || items.value.length === 0) return;
-  moreFetching.value = true;
-  const params = props.pagination.params
-    ? isRef(props.pagination.params)
-      ? props.pagination.params.value
-      : props.pagination.params
-    : {};
-  await os
-    .api(props.pagination.endpoint, {
-      ...params,
-      limit: SECOND_FETCH_LIMIT + 1,
-      ...(props.pagination.offsetMode
-        ? {
-            offset: offset.value,
-          }
-        : props.pagination.reversed
-        ? {
-            untilId: items.value[0].id,
-          }
-        : {
-            sinceId: items.value[items.value.length - 1].id,
-          }),
-    })
-    .then(
-      (res) => {
-        if (res.length > SECOND_FETCH_LIMIT) {
-          res.pop();
-          items.value = items.value.concat(res);
-          more.value = true;
-        } else {
-          items.value = items.value.concat(res);
-          more.value = false;
-        }
-        offset.value += res.length;
-        moreFetching.value = false;
-      },
-      (err) => {
-        moreFetching.value = false;
-      },
-    );
-};
-
 const prepend = (item: MisskeyEntity): void => {
   // 初回表示時はunshiftだけでOK
   if (!rootEl) {
@@ -429,7 +398,7 @@ onDeactivated(() => {
 });
 
 function toBottom() {
-  scrollToBottom(contentEl);
+  scrollToBottomForWindow({ behavior: 'instant' });
 }
 
 onMounted(() => {
