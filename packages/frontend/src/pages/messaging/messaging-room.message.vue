@@ -3,7 +3,7 @@
     <MkAvatar class="avatar" :user="message.user" indicator link preview />
     <div class="content">
       <div class="inner">
-        <template v-if="isGroup && !isMe">
+        <template v-if="!isMe">
           <div class="name">
             <MkUserName :user="message.user" />
           </div>
