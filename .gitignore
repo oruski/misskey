@@ -60,3 +60,4 @@ ormconfig.json
 *.blend4
 *.blend5
 packages/backend/.start-time
+*.start-time

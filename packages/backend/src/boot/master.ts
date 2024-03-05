@@ -87,7 +87,9 @@ export async function masterMain() {
 	// ファイルにサーバー起動時間を記録
 	if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
 		const startTime = Date.now();
-		fs.writeFileSync(`${_dirname}/../../.start-time`, startTime.toString());
+		// mkdir tmp
+		fs.mkdirSync(`${_dirname}/../../tmp`, { recursive: true });
+		fs.writeFileSync(`${_dirname}/../../tmp/server.start-time`, startTime.toString());
 	}
 }
 
