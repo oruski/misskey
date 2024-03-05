@@ -11,6 +11,7 @@
           :key="userAcct || groupId"
           :pagination="pagination"
           :is-first-load="isFirstLoad"
+          :display-limit="1000"
         >
           <template #empty>
             <div class="_fullinfo">
@@ -97,6 +98,12 @@ let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null 
 // @ts-ignore
 let showIndicator = $ref(false);
 let isFirstLoad = $ref(true);
+let currentScrollOffset = $ref(document.body.scrollHeight - window.innerHeight - window.scrollY);
+
+function updateCurrentScrollOffset() {
+  console.debug('updateCurrentScrollOffset');
+  currentScrollOffset = document.body.scrollHeight - window.innerHeight - window.scrollY;
+}
 
 const { animation } = defaultStore.reactiveState;
 
@@ -110,6 +117,7 @@ watch([() => props.userAcct, () => props.groupId], () => {
 
 async function fetch() {
   fetching = true;
+  updateCurrentScrollOffset();
 
   if (props.userAcct) {
     const acct = Acct.parse(props.userAcct);
@@ -229,10 +237,15 @@ function onDrop(ev: DragEvent): void {
   //#endregion
 }
 
+/**
+ * メッセージを受信
+ */
 function onMessage(message) {
   sound.play('chat');
 
-  const _isBottom = isBottomVisible(rootEl, 64);
+  updateCurrentScrollOffset();
+
+  const _isBottom = currentScrollOffset <= 16;
 
   pagingComponent.prepend(message);
   if (message.userId !== $i?.id && !document.hidden) {
@@ -281,6 +294,8 @@ function onRead(x) {
 }
 
 function onDeleted(id) {
+  updateCurrentScrollOffset();
+
   const msg = pagingComponent.items.find((m) => m.id === id);
   if (msg) {
     pagingComponent.items = pagingComponent.items.filter((m) => m.id !== msg.id);
@@ -288,6 +303,10 @@ function onDeleted(id) {
 }
 
 function thisScrollToBottom(option: { behavior: 'smooth' | 'auto' } = { behavior: 'smooth' }) {
+  // 一番したまでスクロールしている
+  const isScrollBelow = currentScrollOffset <= 16;
+  console.debug('isScrollBelow =', isScrollBelow);
+  if (!isScrollBelow) return;
   scrollToBottomForWindow(option);
 }
 

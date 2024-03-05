@@ -84,7 +84,7 @@ import { defaultStore } from '@/store';
 import { MisskeyEntity } from '@/types/date-separated-list';
 import { i18n } from '@/i18n';
 
-const SECOND_FETCH_LIMIT = 30;
+const SECOND_FETCH_LIMIT = 40;
 const TOLERANCE = 16;
 
 export type Paging<E extends keyof misskey.Endpoints = keyof misskey.Endpoints> = {
@@ -145,14 +145,13 @@ const error = ref(false);
 const { enableInfiniteScroll } = defaultStore.reactiveState;
 
 const contentEl = $computed(() => props.pagination.pageEl || rootEl);
-const scrollableElement = $computed(() => getScrollContainer(contentEl));
 
 // 先頭が表示されているかどうかを検出
 // https://qiita.com/mkataigi/items/0154aefd2223ce23398e
 let scrollObserver = $ref<IntersectionObserver>();
 
 watch(
-  [() => props.pagination.reversed, $$(scrollableElement)],
+  [() => props.pagination.reversed],
   () => {
     if (scrollObserver) scrollObserver.disconnect();
 
@@ -161,7 +160,6 @@ watch(
         backed = entries[0].isIntersecting;
       },
       {
-        root: scrollableElement,
         rootMargin: props.pagination.reversed ? '-100% 0px 100% 0px' : '100% 0px -100% 0px',
         threshold: 0.01,
       },
@@ -286,21 +284,13 @@ const fetchMore = async (): Promise<void> => {
         }
 
         const reverseConcat = (_res) => {
-          const oldHeight = scrollableElement ? scrollableElement.scrollHeight : getBodyScrollHeight();
-          const oldScroll = scrollableElement ? scrollableElement.scrollTop : window.scrollY;
+          const oldHeight = getBodyScrollHeight();
+          const oldScroll = window.scrollY;
 
           items.value = items.value.concat(_res);
 
           return nextTick(() => {
-            if (scrollableElement) {
-              scroll(scrollableElement, {
-                top: oldScroll + (scrollableElement.scrollHeight - oldHeight),
-                behavior: 'instant',
-              });
-            } else {
-              window.scroll({ top: oldScroll + (getBodyScrollHeight() - oldHeight), behavior: 'instant' });
-            }
-
+            window.scroll({ top: oldScroll, behavior: 'instant' });
             return nextTick();
           });
         };
@@ -332,7 +322,7 @@ const fetchMore = async (): Promise<void> => {
         }
         offset.value += res.length;
       },
-      (err) => {
+      () => {
         moreFetching.value = false;
       },
     );
