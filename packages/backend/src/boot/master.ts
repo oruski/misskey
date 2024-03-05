@@ -83,6 +83,12 @@ export async function masterMain() {
 	}
 
 	bootLogger.succ(`Now listening on port ${config.port} on ${config.url}`, null, true);
+
+	// ファイルにサーバー起動時間を記録
+	if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+		const startTime = Date.now();
+		fs.writeFileSync(`${_dirname}/../../.start-time`, startTime.toString());
+	}
 }
 
 function showEnvironment(): void {
