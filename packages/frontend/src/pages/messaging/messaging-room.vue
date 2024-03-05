@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, nextTick, onBeforeUnmount } from 'vue';
+import { computed, watch, onMounted, nextTick, onBeforeUnmount, onUnmounted } from 'vue';
 import * as Misskey from 'misskey-js';
 import { acct as Acct } from 'misskey-js';
 import XMessage from './messaging-room.message.vue';
@@ -246,6 +246,7 @@ function onMessage(message) {
   updateCurrentScrollOffset();
 
   const _isBottom = currentScrollOffset <= 16;
+  console.debug('[chat] _isBottom =', _isBottom);
 
   pagingComponent.prepend(message);
   if (message.userId !== $i?.id && !document.hidden) {
@@ -254,17 +255,19 @@ function onMessage(message) {
     });
   }
 
-  if (_isBottom) {
+  const url = new URL(location.href);
+  const isCurrentPage = url.pathname.includes(`/my/messaging/group/${group?.id}`);
+
+  if (_isBottom && isCurrentPage) {
     // Scroll to bottom
     nextTick(() => {
-      const url = new URL(location.href);
-      if (url.pathname.includes(`/my/messaging/group/${group?.id}`)) {
-        thisScrollToBottom();
-      }
+      thisScrollToBottom();
     });
   } else if (message.userId !== $i?.id) {
     // Notify
     notifyNewMessage();
+  } else {
+    console.debug('[chat] Not notify');
   }
 }
 
@@ -318,9 +321,16 @@ function onIndicatorClick() {
 let scrollRemove: (() => void) | null = $ref(null);
 
 function notifyNewMessage() {
+  console.debug('[chat] notifyNewMessage');
   showIndicator = true;
 
   scrollRemove = onScrollBottom(rootEl, () => {
+    console.debug('[chat] onScrollBottom');
+
+    const url = new URL(location.href);
+    const isCurrentPage = url.pathname.includes(`/my/messaging/group/${group?.id}`);
+    if (!isCurrentPage) return;
+
     showIndicator = false;
     scrollRemove = null;
   });
