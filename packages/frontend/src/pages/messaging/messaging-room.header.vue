@@ -227,7 +227,7 @@ onUnmounted(() => {
   font-size: 0.65em;
   width: fit-content;
   position: absolute;
-  right: 32px;
+  right: 16px;
 }
 
 .avatar {
