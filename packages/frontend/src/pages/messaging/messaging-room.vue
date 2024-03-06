@@ -1,7 +1,7 @@
 <template>
   <MkStickyContainer>
     <template #header>
-      <XPageHeader />
+      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" />
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
@@ -108,6 +108,31 @@ let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null 
 // @ts-ignore
 let showIndicator = $ref(false);
 let currentScrollOffset = $ref(document.body.scrollHeight - window.innerHeight - window.scrollY);
+
+let onlineUserCount = $ref(0);
+let groupUsers = $ref([]);
+
+console.debug('group =', group);
+
+watch(
+  () => group,
+  async () => {
+    if (!group) {
+      return 0;
+    }
+    const userIds: string[] = group.userIds;
+    const users = await Promise.all(
+      userIds.map((userId) => {
+        return os.api('users/show', {
+          userId: userId,
+        });
+      }),
+    );
+    groupUsers = users;
+    onlineUserCount = users.filter((user) => user.onlineStatus === 'online').length;
+    return 0;
+  },
+);
 
 function updateCurrentScrollOffset() {
   console.debug('updateCurrentScrollOffset');

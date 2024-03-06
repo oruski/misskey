@@ -1,58 +1,49 @@
 <template>
   <div v-if="show" ref="el" :class="[$style.root]" :style="{ background: bg }">
     <div :class="[$style.upper, { [$style.slim]: narrow, [$style.thin]: thin_ }]">
-      <div
-        v-if="!thin_ && narrow && props.displayMyAvatar && $i"
-        class="_button"
-        :class="$style.buttonsLeft"
-        @click="openAccountMenu"
-      >
-        <MkAvatar :class="$style.avatar" :user="$i" />
-      </div>
-      <div v-else-if="!thin_ && narrow && !hideTitle" :class="$style.buttonsLeft" />
-
       <template v-if="metadata">
         <div v-if="!hideTitle" :class="$style.titleContainer" @click="top">
           <MkAvatar v-if="metadata.avatar" :class="$style.titleAvatar" :user="metadata.avatar" indicator />
           <i v-else-if="metadata.icon" :class="[$style.titleIcon, metadata.icon]"></i>
 
           <div :class="$style.title">
-            <MkUserName v-if="metadata.userName" :user="metadata.userName" :nowrap="true" />
-            <div v-else-if="metadata.title">{{ metadata.title }}</div>
-            <div v-if="metadata.subtitle" :class="$style.subtitle">
-              {{ metadata.subtitle }}
-            </div>
+            <div v-if="metadata.title">{{ metadata.title }}</div>
           </div>
         </div>
       </template>
-      <div v-if="(!thin_ && narrow && !hideTitle) || (actions && actions.length > 0)" :class="$style.buttonsRight">
-        <template v-for="action in actions">
-          <button
-            v-tooltip.noDelay="action.text"
-            class="_button"
-            :class="[$style.button, { [$style.highlighted]: action.highlighted }]"
-            @click.stop="action.handler"
-            @touchstart="preventDrag"
-          >
-            <i :class="action.icon"></i>
-          </button>
-        </template>
+
+      <div v-if="!thin_ && narrow && !hideTitle" :class="$style.buttonsRight">
+        <button
+          ref="buttonEl"
+          class="_button"
+          :class="$style.button"
+          @click.stop="actionHandler"
+          @touchstart="preventDrag"
+        >
+          <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
+            <template #n>
+              <b>{{ props.onlineUserCount }}</b>
+            </template>
+          </I18n>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, inject } from 'vue';
+import { onMounted, onUnmounted, ref, inject, shallowRef, defineAsyncComponent } from 'vue';
 import tinycolor from 'tinycolor2';
 import { scrollToTop } from '@/scripts/scroll';
 import { globalEvents } from '@/events';
 import { injectPageMetadata } from '@/scripts/page-metadata';
-import { $i, openAccountMenu as openAccountMenu_ } from '@/account';
+import { i18n } from '@/i18n';
+import * as os from '@/os';
 
 const props = withDefaults(
   defineProps<{
-    tab?: string;
+    onlineUserCount?: number;
+    groupUsers?: string[];
     actions?: {
       text: string;
       icon: string;
@@ -62,7 +53,10 @@ const props = withDefaults(
     thin?: boolean;
     displayMyAvatar?: boolean;
   }>(),
-  {},
+  {
+    onlineUserCount: 0,
+    groupUsers: [] as unknown as string[],
+  },
 );
 
 const emit = defineEmits<{
@@ -77,10 +71,37 @@ const thin_ = props.thin || inject('shouldHeaderThin', false);
 let el = $shallowRef<HTMLElement | undefined>(undefined);
 const bg = ref<string | undefined>(undefined);
 let narrow = $ref(false);
-const hasActions = $computed(() => props.actions && props.actions.length > 0);
 const show = $computed(() => {
-  return !hideTitle || hasActions;
+  return !hideTitle;
 });
+let buttonEl = shallowRef<HTMLElement | undefined>(undefined);
+let showing = $ref(false);
+let popupModal = $ref(undefined);
+
+const actionHandler: (ev: MouseEvent) => void = async () => {
+  showing = !showing;
+
+  if (!showing) {
+    if (popupModal) {
+      console.debug('popupModal =', await popupModal);
+      (await popupModal).dispose();
+      popupModal = undefined;
+    }
+    return;
+  }
+
+  popupModal = os.popup(
+    defineAsyncComponent(() => import('./messaging-room.member-details.vue')),
+    {
+      showing,
+      users: props.groupUsers,
+      count: props.onlineUserCount,
+      targetElement: buttonEl.value as HTMLElement,
+    },
+    {},
+    'end',
+  );
+};
 
 const preventDrag = (ev: TouchEvent) => {
   ev.stopPropagation();
@@ -91,16 +112,6 @@ const top = () => {
     scrollToTop(el as HTMLElement, { behavior: 'smooth' });
   }
 };
-
-function openAccountMenu(ev: MouseEvent) {
-  openAccountMenu_(
-    {
-      withExtraOperation: true,
-    },
-    ev,
-  );
-}
-
 const calcBg = () => {
   const rawBg = metadata?.bg || 'var(--bg)';
   const tinyBg = tinycolor(
@@ -148,6 +159,7 @@ onUnmounted(() => {
 }
 
 .upper {
+  position: relative;
   --height: 50px;
   display: flex;
   gap: var(--margin);
@@ -212,6 +224,10 @@ onUnmounted(() => {
 .buttonsRight {
   composes: buttons;
   margin: 0 0 0 var(--margin);
+  font-size: 0.65em;
+  width: fit-content;
+  position: absolute;
+  right: 32px;
 }
 
 .avatar {
@@ -228,7 +244,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   height: var(--height);
-  width: calc(var(--height) - (var(--margin)));
+  width: 100%;
   box-sizing: border-box;
   position: relative;
   border-radius: 5px;
