@@ -29,16 +29,11 @@
 		},
 		"typeRoots": [
 			"node_modules/@types",
-      "vite-plugin-build-metadata",
-			"@types",
-			"node_modules/unplugin-vue-macros/macros-global.d.ts",
-      "node_modules/unplugin-vue-macros/vue2-macros-global.d.ts",
-      "node_modules/unplugin-vue-macros/macros.d.ts",
-      "node_modules/unplugin-vue-macros/vue2-macros.d.ts",
-      "node_modules/@vue-macros/macro.d.ts",
+			"@types"
 		],
 		"types": [
-			"vite/client"
+			"vite/client",
+      "unplugin-vue-macros/macros-global",
 		],
 		"lib": [
 			"esnext",
