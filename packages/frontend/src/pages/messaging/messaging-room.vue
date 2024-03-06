@@ -1,7 +1,7 @@
 <template>
   <MkStickyContainer>
     <template #header>
-      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" />
+      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" :group-owner-id="groupOwnerId" />
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
@@ -112,8 +112,9 @@ let currentScrollOffset = $ref(document.body.scrollHeight - window.innerHeight -
 
 let onlineUserCount = $ref(0);
 let groupUsers = $ref([]);
-
-console.debug('group =', group);
+let groupOwnerId = $computed(() => {
+  return group?.ownerId;
+});
 
 watch(
   () => group,

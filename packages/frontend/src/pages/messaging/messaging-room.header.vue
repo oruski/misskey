@@ -41,6 +41,7 @@ const props = withDefaults(
   defineProps<{
     onlineUserCount?: number;
     groupUsers?: string[];
+    groupOwnerId?: string;
     actions?: {
       text: string;
       icon: string;
@@ -72,6 +73,10 @@ let buttonEl = shallowRef<HTMLElement | undefined>(undefined);
 let showing = $ref(false);
 let popupModal = $ref(undefined);
 
+let isAdmin = $computed(() => {
+  return true;
+});
+
 const actionHandler: (ev: MouseEvent) => void = async () => {
   showing = !showing;
 
@@ -89,6 +94,7 @@ const actionHandler: (ev: MouseEvent) => void = async () => {
       showing,
       users: props.groupUsers,
       count: props.onlineUserCount,
+      groupOwnerId: props.groupOwnerId,
       targetElement: buttonEl.value as HTMLElement,
     },
     {},
