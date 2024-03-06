@@ -9,21 +9,23 @@
         </div>
       </template>
 
-      <div :class="$style.buttonsRight">
-        <button
-          ref="buttonEl"
-          class="_button"
-          :class="$style.button"
-          @click.stop="actionHandler"
-          @touchstart="preventDrag"
-        >
-          <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
-            <template #n>
-              <b>{{ props.onlineUserCount }}</b>
-            </template>
-          </I18n>
-        </button>
-      </div>
+      <template v-if="props.groupUsers?.length">
+        <div :class="$style.buttonsRight">
+          <button
+            ref="buttonEl"
+            class="_button"
+            :class="$style.button"
+            @click.stop="actionHandler"
+            @touchstart="preventDrag"
+          >
+            <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
+              <template #n>
+                <b>{{ props.onlineUserCount }}</b>
+              </template>
+            </I18n>
+          </button>
+        </div>
+      </template>
     </div>
   </div>
 </template>
