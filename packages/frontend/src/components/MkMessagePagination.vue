@@ -195,7 +195,15 @@ watch(fetching, () => {
     setTimeout(() => {
       scrollToBottomForWindow({ behavior: 'instant' });
     }, 300);
+    setTimeout(() => {
+      scrollToBottomForWindow({ behavior: 'instant' });
+    }, 600);
   }
+});
+
+let isFirstFetch = $ref(props.isFirstFetch);
+watch(isFirstFetch, () => {
+  scrollToBottomForWindow({ behavior: 'instant' });
 });
 
 async function init(): Promise<void> {

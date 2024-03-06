@@ -196,7 +196,7 @@ async function fetch() {
 
     window.setTimeout(() => {
       fetching = false;
-      finishFirstFetch();
+      if (isFirstFetch) finishFirstFetch();
     }, 300);
   });
 }
@@ -325,8 +325,13 @@ function thisScrollToBottom(option: { behavior: 'smooth' | 'auto' } = { behavior
   // 一番したまでスクロールしている
   const isScrollBelow = currentScrollOffset <= 16;
   console.debug('isScrollBelow =', isScrollBelow);
-  if (!isScrollBelow) return;
-  scrollToBottomForWindow(option);
+  console.debug('isFirstFetch =', isFirstFetch);
+  if (!isScrollBelow && !isFirstFetch) return;
+  console.debug('scrollToBottomForWindow');
+  scrollToBottomForWindow({
+    ...option,
+    behavior: isFirstFetch ? 'instant' : option.behavior,
+  });
 }
 
 function onIndicatorClick() {
@@ -368,8 +373,8 @@ onMounted(async () => {
 });
 
 onActivated(async () => {
-  console.debug('isFirstFetch =', isFirstFetch);
   if (isFirstFetch) return;
+  isFirstFetch = true;
 
   if (connection) connection.dispose();
   await fetch();
