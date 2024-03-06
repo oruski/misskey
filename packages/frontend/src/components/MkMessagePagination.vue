@@ -290,7 +290,7 @@ const fetchMore = async (): Promise<void> => {
           items.value = items.value.concat(_res);
 
           return nextTick(() => {
-            window.scroll({ top: oldScroll, behavior: 'instant' });
+            window.scroll({ top: oldScroll + 100, behavior: 'instant' });
             return nextTick();
           });
         };
