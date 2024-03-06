@@ -359,6 +359,7 @@ onMounted(async () => {
 });
 
 onActivated(async () => {
+  if (connection) connection.dispose();
   await fetch();
 });
 
