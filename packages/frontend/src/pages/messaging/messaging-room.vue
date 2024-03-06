@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, nextTick, onBeforeUnmount, onUnmounted } from 'vue';
+import { computed, watch, onMounted, nextTick, onBeforeUnmount, onUnmounted, onActivated, onDeactivated } from 'vue';
 import * as Misskey from 'misskey-js';
 import { acct as Acct } from 'misskey-js';
 import XMessage from './messaging-room.message.vue';
@@ -347,11 +347,11 @@ function onVisibilitychange() {
   }
 }
 
-onMounted(async () => {
+onActivated(async () => {
   await fetch();
 });
 
-onBeforeUnmount(() => {
+onDeactivated(() => {
   connection?.dispose();
   document.removeEventListener('visibilitychange', onVisibilitychange);
   if (scrollRemove) scrollRemove();
