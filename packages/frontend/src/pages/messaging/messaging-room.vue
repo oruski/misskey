@@ -1,15 +1,17 @@
 <template>
   <MkStickyContainer>
     <template #header>
-      <MkPageHeader />
+      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" />
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
-        <MkMessagePagination
+        <XPagination
           v-if="pagination"
           ref="pagingComponent"
           :key="userAcct || groupId"
           :pagination="pagination"
+          :is-first-fetch="isFirstFetch"
+          :display-limit="1000"
         >
           <template #empty>
             <div class="_fullinfo">
@@ -29,13 +31,15 @@
               <XMessage :key="message.id" :message="message" :is-group="group != null" />
             </MkDateSeparatedList>
           </template>
-        </MkMessagePagination>
+        </XPagination>
       </div>
       <footer :class="$style['footer']">
         <div v-if="typers.length > 0" :class="$style['typers']">
           <I18n :src="i18n.ts.typingUsers" text-tag="span">
             <template #users>
-              <b v-for="typer in typers" :key="typer.id" :class="$style['user']">{{ typer.username }}</b>
+              <b v-for="typer in typers" :key="typer.id" :class="$style['user']"
+                ><MkUserName class="name" :user="typer"
+              /></b>
             </template>
           </I18n>
           <MkEllipsis />
@@ -55,14 +59,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, nextTick, onBeforeUnmount } from 'vue';
+import { computed, watch, onMounted, nextTick, onBeforeUnmount, onActivated, onDeactivated } from 'vue';
 import * as Misskey from 'misskey-js';
 import { acct as Acct } from 'misskey-js';
+import debounce from 'lodash/debounce';
 import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
+import XPageHeader from './messaging-room.header.vue';
+import XPagination, { Paging } from './messaging-room.pagination.vue';
 import MkDateSeparatedList from '@/components/MkDateSeparatedList.vue';
-import MkMessagePagination, { Paging } from '@/components/MkMessagePagination.vue';
-import { isBottomVisible, onScrollBottom, scrollToBottom } from '@/scripts/scroll';
+import { onScrollBottom, scrollToBottomForWindow } from '@/scripts/scroll';
 import * as os from '@/os';
 import { stream } from '@/stream';
 import * as sound from '@/scripts/sound';
@@ -70,6 +76,7 @@ import { i18n } from '@/i18n';
 import { $i } from '@/account';
 import { defaultStore } from '@/store';
 import { definePageMetadata } from '@/scripts/page-metadata';
+import { useRouter } from '@/router';
 
 const props = defineProps<{
   userAcct?: string;
@@ -81,8 +88,14 @@ let rootEl = $shallowRef<HTMLDivElement>();
 // @ts-ignore
 let formEl = $shallowRef<InstanceType<typeof XForm>>();
 // @ts-ignore
-let pagingComponent = $shallowRef<InstanceType<typeof MkMessagePagination>>();
+let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 // @ts-ignore
+
+let isFirstFetch = $ref(true);
+let finishFirstFetch = debounce(() => {
+  console.debug('初回ローディング完了');
+  isFirstFetch = false;
+}, 300);
 
 let fetching = $ref(true);
 // @ts-ignore
@@ -95,6 +108,38 @@ let typers: Misskey.entities.User[] = $ref([]);
 let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null = $ref(null);
 // @ts-ignore
 let showIndicator = $ref(false);
+let currentScrollOffset = $ref(document.body.scrollHeight - window.innerHeight - window.scrollY);
+
+let onlineUserCount = $ref(0);
+let groupUsers = $ref([]);
+
+console.debug('group =', group);
+
+watch(
+  () => group,
+  async () => {
+    if (!group) {
+      return 0;
+    }
+    const userIds: string[] = group.userIds;
+    const users = await Promise.all(
+      userIds.map((userId) => {
+        return os.api('users/show', {
+          userId: userId,
+        });
+      }),
+    );
+    groupUsers = users;
+    onlineUserCount = users.filter((user) => user.onlineStatus === 'online').length;
+    return 0;
+  },
+);
+
+function updateCurrentScrollOffset() {
+  console.debug('updateCurrentScrollOffset');
+  currentScrollOffset = document.body.scrollHeight - window.innerHeight - window.scrollY;
+}
+
 const { animation } = defaultStore.reactiveState;
 
 // @ts-ignore
@@ -106,7 +151,10 @@ watch([() => props.userAcct, () => props.groupId], () => {
 });
 
 async function fetch() {
+  console.log('fetch');
+
   fetching = true;
+  updateCurrentScrollOffset();
 
   if (props.userAcct) {
     const acct = Acct.parse(props.userAcct);
@@ -116,7 +164,7 @@ async function fetch() {
     pagination = {
       // @ts-ignore
       endpoint: 'messaging/messages',
-      limit: 20,
+      limit: 40,
       params: {
         // @ts-ignore
         userId: user.id,
@@ -125,6 +173,9 @@ async function fetch() {
       // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+
+    if (connection) connection.dispose();
+
     // @ts-ignore
     connection = stream.useChannel('messaging', {
       // @ts-ignore
@@ -137,7 +188,7 @@ async function fetch() {
     pagination = {
       // @ts-ignore
       endpoint: 'messaging/messages',
-      limit: 20,
+      limit: 40,
       params: {
         groupId: group?.id,
       },
@@ -145,12 +196,14 @@ async function fetch() {
       // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+
+    if (connection) connection.dispose();
+
     // @ts-ignore
     connection = stream.useChannel('messaging', {
       group: group?.id,
     });
   }
-
   connection.on('message', onMessage);
   connection.on('read', onRead);
   connection.on('deleted', onDeleted);
@@ -162,14 +215,21 @@ async function fetch() {
 
   nextTick(() => {
     const url = new URL(location.href);
-    if (url.pathname.includes('/my/messaging/group/')) {
+
+    if (
+      url.pathname === `/my/messaging/group/${group?.id}` ||
+      url.pathname === `/my/messaging/${user?.username}` ||
+      url.pathname === `/my/messaging/${user?.username}@${user?.host}`
+    ) {
       pagingComponent.inited.then(() => {
         thisScrollToBottom();
       });
-      window.setTimeout(() => {
-        fetching = false;
-      }, 300);
     }
+
+    window.setTimeout(() => {
+      fetching = false;
+      if (isFirstFetch) finishFirstFetch();
+    }, 300);
   });
 }
 
@@ -225,10 +285,16 @@ function onDrop(ev: DragEvent): void {
   //#endregion
 }
 
+/**
+ * メッセージを受信
+ */
 function onMessage(message) {
   sound.play('chat');
 
-  const _isBottom = isBottomVisible(rootEl, 64);
+  updateCurrentScrollOffset();
+
+  const _isBottom = currentScrollOffset <= 16;
+  console.debug('[chat] _isBottom =', _isBottom);
 
   pagingComponent.prepend(message);
   if (message.userId !== $i?.id && !document.hidden) {
@@ -237,7 +303,18 @@ function onMessage(message) {
     });
   }
 
-  if (_isBottom) {
+  const url = new URL(location.href);
+
+  console.debug('url.pathname =', url.pathname);
+  console.debug('user =', user);
+
+  const isCurrentPage =
+    url.pathname === `/my/messaging/group/${group?.id}` ||
+    url.pathname === `/my/messaging/${user?.username}` ||
+    url.pathname === `/my/messaging/${user?.username}@${user?.host}`;
+  console.debug('isCurrentPage =', isCurrentPage);
+
+  if (_isBottom && isCurrentPage) {
     // Scroll to bottom
     nextTick(() => {
       thisScrollToBottom();
@@ -245,6 +322,8 @@ function onMessage(message) {
   } else if (message.userId !== $i?.id) {
     // Notify
     notifyNewMessage();
+  } else {
+    console.debug('[chat] Not notify');
   }
 }
 
@@ -274,14 +353,25 @@ function onRead(x) {
 }
 
 function onDeleted(id) {
+  updateCurrentScrollOffset();
+
   const msg = pagingComponent.items.find((m) => m.id === id);
   if (msg) {
     pagingComponent.items = pagingComponent.items.filter((m) => m.id !== msg.id);
   }
 }
 
-function thisScrollToBottom() {
-  scrollToBottom($$(rootEl).value, { behavior: 'smooth' });
+function thisScrollToBottom(option: { behavior: 'smooth' | 'auto' } = { behavior: 'smooth' }) {
+  // 一番したまでスクロールしている
+  const isScrollBelow = currentScrollOffset <= 16;
+  console.debug('isScrollBelow =', isScrollBelow);
+  console.debug('isFirstFetch =', isFirstFetch);
+  if (!isScrollBelow && !isFirstFetch) return;
+  console.debug('scrollToBottomForWindow');
+  scrollToBottomForWindow({
+    ...option,
+    behavior: isFirstFetch ? 'instant' : option.behavior,
+  });
 }
 
 function onIndicatorClick() {
@@ -292,9 +382,19 @@ function onIndicatorClick() {
 let scrollRemove: (() => void) | null = $ref(null);
 
 function notifyNewMessage() {
+  console.debug('[chat] notifyNewMessage');
   showIndicator = true;
 
   scrollRemove = onScrollBottom(rootEl, () => {
+    console.debug('[chat] onScrollBottom');
+
+    const url = new URL(location.href);
+    const isCurrentPage =
+      url.pathname === `/my/messaging/group/${group?.id}` ||
+      url.pathname === `/my/messaging/${user?.username}` ||
+      url.pathname === `/my/messaging/${user?.username}@${user?.host}`;
+    if (!isCurrentPage) return;
+
     showIndicator = false;
     scrollRemove = null;
   });
@@ -311,8 +411,24 @@ function onVisibilitychange() {
   }
 }
 
-onMounted(() => {
-  fetch();
+onMounted(async () => {
+  await fetch();
+});
+
+onActivated(async () => {
+  if (isFirstFetch) return;
+  isFirstFetch = true;
+  if (pagingComponent) {
+    if (connection) connection.dispose();
+    await fetch();
+    pagingComponent.reload();
+  }
+});
+
+onDeactivated(() => {
+  connection?.dispose();
+  document.removeEventListener('visibilitychange', onVisibilitychange);
+  if (scrollRemove) scrollRemove();
 });
 
 onBeforeUnmount(() => {
@@ -342,7 +458,7 @@ definePageMetadata(
 <style lang="scss" module>
 .root {
   // @ts-ignore
-  display: content;
+  display: contents;
 }
 
 .body {

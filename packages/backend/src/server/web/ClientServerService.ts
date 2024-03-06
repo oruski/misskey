@@ -155,7 +155,8 @@ export class ClientServerService {
 		});
 
 		serverAdapter.setBasePath(bullBoardPath);
-		(fastify.register as any)(serverAdapter.registerPlugin(), { prefix: bullBoardPath });
+		// @ts-ignore
+		(fastify.register as unknown)(serverAdapter.registerPlugin(), { prefix: bullBoardPath });
 		//#endregion
 
 		fastify.register(fastifyView, {

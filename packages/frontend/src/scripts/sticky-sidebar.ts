@@ -43,6 +43,8 @@ export class StickySidebar {
             0,
             this.globalHeaderHeight + this.lastScrollTop + this.marginTop - this.offsetTop,
           )}px`;
+        } else {
+          this.spacer.style.marginTop = '0';
         }
       }
     } else {
@@ -52,6 +54,8 @@ export class StickySidebar {
         // @ts-ignore
         this.el.style.top = null;
         this.el.style.bottom = `${-overflow}px`;
+      } else {
+        this.el.style.top = '0';
       }
 
       this.isTop = scrollTop + this.marginTop + this.globalHeaderHeight <= this.el.offsetTop;
@@ -63,6 +67,8 @@ export class StickySidebar {
           this.spacer.style.marginTop = `${
             this.globalHeaderHeight + this.lastScrollTop + this.marginTop - this.offsetTop - overflow
           }px`;
+        } else {
+          this.spacer.style.marginTop = '0';
         }
       }
     }

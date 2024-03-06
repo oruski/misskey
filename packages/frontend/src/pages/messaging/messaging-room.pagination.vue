@@ -68,22 +68,12 @@ import {
 } from 'vue';
 import * as misskey from 'misskey-js';
 import * as os from '@/os';
-import {
-  onScrollTop,
-  isTopVisible,
-  getBodyScrollHeight,
-  getScrollContainer,
-  onScrollBottom,
-  scrollToBottom,
-  scroll,
-  isBottomVisible,
-} from '@/scripts/scroll';
-import MkButton from '@/components/MkButton.vue';
+import { onScrollTop, isTopVisible, onScrollBottom, isBottomVisible, scrollToBottomForWindow } from '@/scripts/scroll';
 import { defaultStore } from '@/store';
 import { MisskeyEntity } from '@/types/date-separated-list';
 import { i18n } from '@/i18n';
 
-const SECOND_FETCH_LIMIT = 30;
+const SECOND_FETCH_LIMIT = 20;
 const TOLERANCE = 16;
 
 export type Paging<E extends keyof misskey.Endpoints = keyof misskey.Endpoints> = {
@@ -113,9 +103,11 @@ const props = withDefaults(
     pagination: Paging;
     disableAutoLoad?: boolean;
     displayLimit?: number;
+    isFirstFetch?: boolean;
   }>(),
   {
     displayLimit: 20,
+    isFirstFetch: false,
   },
 );
 
@@ -142,14 +134,13 @@ const error = ref(false);
 const { enableInfiniteScroll } = defaultStore.reactiveState;
 
 const contentEl = $computed(() => props.pagination.pageEl || rootEl);
-const scrollableElement = $computed(() => getScrollContainer(contentEl));
 
 // 先頭が表示されているかどうかを検出
 // https://qiita.com/mkataigi/items/0154aefd2223ce23398e
 let scrollObserver = $ref<IntersectionObserver>();
 
 watch(
-  [() => props.pagination.reversed, $$(scrollableElement)],
+  [() => props.pagination.reversed],
   () => {
     if (scrollObserver) scrollObserver.disconnect();
 
@@ -158,7 +149,6 @@ watch(
         backed = entries[0].isIntersecting;
       },
       {
-        root: scrollableElement,
         rootMargin: props.pagination.reversed ? '-100% 0px 100% 0px' : '100% 0px -100% 0px',
         threshold: 0.01,
       },
@@ -198,7 +188,27 @@ watch(
   { deep: true },
 );
 
+watch(fetching, () => {
+  if (props.isFirstFetch) {
+    console.debug('[初回ローディング] Pagination scrollToBottomForWindow');
+    scrollToBottomForWindow({ behavior: 'instant' });
+    setTimeout(() => {
+      scrollToBottomForWindow({ behavior: 'instant' });
+    }, 300);
+    setTimeout(() => {
+      scrollToBottomForWindow({ behavior: 'instant' });
+    }, 600);
+  }
+});
+
+let isFirstFetch = $ref(props.isFirstFetch);
+watch(isFirstFetch, () => {
+  scrollToBottomForWindow({ behavior: 'instant' });
+});
+
 async function init(): Promise<void> {
+  console.debug('[pagination] init');
+
   queue.value = [];
   fetching.value = true;
   const params = props.pagination.params
@@ -219,7 +229,7 @@ async function init(): Promise<void> {
         }
         if (!props.pagination.noPaging && res.length > (props.pagination.limit || 10)) {
           res.pop();
-          if (props.pagination.reversed) moreFetching.value = true;
+          // if (props.pagination.reversed) moreFetching.value = true;
           items.value = res;
           more.value = true;
         } else {
@@ -243,7 +253,10 @@ const reload = (): Promise<void> => {
 };
 
 const fetchMore = async (): Promise<void> => {
-  if (!more.value || fetching.value || moreFetching.value || items.value.length === 0) return;
+  if (!more.value || fetching.value || moreFetching.value || items.value.length === 0 || props.isFirstFetch) return;
+
+  console.debug('fetchMore');
+
   moreFetching.value = true;
   const params = props.pagination.params
     ? isRef(props.pagination.params)
@@ -260,7 +273,7 @@ const fetchMore = async (): Promise<void> => {
           }
         : props.pagination.reversed
         ? {
-            sinceId: items.value[0].id,
+            untilId: items.value[items.value.length - 1].id,
           }
         : {
             untilId: items.value[items.value.length - 1].id,
@@ -274,21 +287,12 @@ const fetchMore = async (): Promise<void> => {
         }
 
         const reverseConcat = (_res) => {
-          const oldHeight = scrollableElement ? scrollableElement.scrollHeight : getBodyScrollHeight();
-          const oldScroll = scrollableElement ? scrollableElement.scrollTop : window.scrollY;
+          const oldScroll = window.scrollY;
 
           items.value = items.value.concat(_res);
 
           return nextTick(() => {
-            if (scrollableElement) {
-              scroll(scrollableElement, {
-                top: oldScroll + (scrollableElement.scrollHeight - oldHeight),
-                behavior: 'instant',
-              });
-            } else {
-              window.scroll({ top: oldScroll + (getBodyScrollHeight() - oldHeight), behavior: 'instant' });
-            }
-
+            window.scroll({ top: oldScroll + 100, behavior: 'instant' });
             return nextTick();
           });
         };
@@ -319,51 +323,13 @@ const fetchMore = async (): Promise<void> => {
           }
         }
         offset.value += res.length;
-      },
-      (err) => {
-        moreFetching.value = false;
-      },
-    );
-};
 
-const fetchMoreAhead = async (): Promise<void> => {
-  if (!more.value || fetching.value || moreFetching.value || items.value.length === 0) return;
-  moreFetching.value = true;
-  const params = props.pagination.params
-    ? isRef(props.pagination.params)
-      ? props.pagination.params.value
-      : props.pagination.params
-    : {};
-  await os
-    .api(props.pagination.endpoint, {
-      ...params,
-      limit: SECOND_FETCH_LIMIT + 1,
-      ...(props.pagination.offsetMode
-        ? {
-            offset: offset.value,
-          }
-        : props.pagination.reversed
-        ? {
-            untilId: items.value[0].id,
-          }
-        : {
-            sinceId: items.value[items.value.length - 1].id,
-          }),
-    })
-    .then(
-      (res) => {
-        if (res.length > SECOND_FETCH_LIMIT) {
-          res.pop();
-          items.value = items.value.concat(res);
-          more.value = true;
-        } else {
-          items.value = items.value.concat(res);
-          more.value = false;
+        if (props.isFirstFetch) {
+          console.debug('scrollToBottomForWindow');
+          scrollToBottomForWindow({ behavior: 'instant' });
         }
-        offset.value += res.length;
-        moreFetching.value = false;
       },
-      (err) => {
+      () => {
         moreFetching.value = false;
       },
     );
@@ -385,7 +351,6 @@ const prepend = (item: MisskeyEntity): void => {
 function unshiftItems(newItems: MisskeyEntity[]) {
   const length = newItems.length + items.value.length;
   items.value = [...newItems, ...items.value].slice(0, props.displayLimit);
-
   if (length >= props.displayLimit) more.value = true;
 }
 
@@ -429,7 +394,7 @@ onDeactivated(() => {
 });
 
 function toBottom() {
-  scrollToBottom(contentEl);
+  scrollToBottomForWindow({ behavior: 'instant' });
 }
 
 onMounted(() => {
