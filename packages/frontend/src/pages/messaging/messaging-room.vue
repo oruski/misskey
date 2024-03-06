@@ -76,6 +76,7 @@ import { i18n } from '@/i18n';
 import { $i } from '@/account';
 import { defaultStore } from '@/store';
 import { definePageMetadata } from '@/scripts/page-metadata';
+import { useRouter } from '@/router';
 
 const props = defineProps<{
   userAcct?: string;
@@ -214,7 +215,12 @@ async function fetch() {
 
   nextTick(() => {
     const url = new URL(location.href);
-    if (url.pathname.includes(`/my/messaging/group/${group?.id}`)) {
+
+    if (
+      url.pathname === `/my/messaging/group/${group?.id}` ||
+      url.pathname === `/my/messaging/${user?.username}` ||
+      url.pathname === `/my/messaging/${user?.username}@${user?.host}`
+    ) {
       pagingComponent.inited.then(() => {
         thisScrollToBottom();
       });
@@ -298,7 +304,15 @@ function onMessage(message) {
   }
 
   const url = new URL(location.href);
-  const isCurrentPage = url.pathname.includes(`/my/messaging/group/${group?.id}`);
+
+  console.debug('url.pathname =', url.pathname);
+  console.debug('user =', user);
+
+  const isCurrentPage =
+    url.pathname === `/my/messaging/group/${group?.id}` ||
+    url.pathname === `/my/messaging/${user?.username}` ||
+    url.pathname === `/my/messaging/${user?.username}@${user?.host}`;
+  console.debug('isCurrentPage =', isCurrentPage);
 
   if (_isBottom && isCurrentPage) {
     // Scroll to bottom
@@ -375,7 +389,10 @@ function notifyNewMessage() {
     console.debug('[chat] onScrollBottom');
 
     const url = new URL(location.href);
-    const isCurrentPage = url.pathname.includes(`/my/messaging/group/${group?.id}`);
+    const isCurrentPage =
+      url.pathname === `/my/messaging/group/${group?.id}` ||
+      url.pathname === `/my/messaging/${user?.username}` ||
+      url.pathname === `/my/messaging/${user?.username}@${user?.host}`;
     if (!isCurrentPage) return;
 
     showIndicator = false;

@@ -148,8 +148,6 @@ let isMessagingRoom = $computed(
   () => currentPage?.route?.name === 'messaging-group' || currentPage?.route?.name === 'messaging-user',
 );
 
-console.debug('currentPage =', currentPage);
-
 provide('router', mainRouter);
 provideMetadataReceiver((info) => {
   pageMetadata = info;
