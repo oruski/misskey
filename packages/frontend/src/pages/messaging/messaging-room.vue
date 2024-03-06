@@ -1,11 +1,11 @@
 <template>
   <MkStickyContainer>
     <template #header>
-      <MkPageHeader />
+      <XPageHeader />
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
-        <MkMessagePagination
+        <XPagination
           v-if="pagination"
           ref="pagingComponent"
           :key="userAcct || groupId"
@@ -31,7 +31,7 @@
               <XMessage :key="message.id" :message="message" :is-group="group != null" />
             </MkDateSeparatedList>
           </template>
-        </MkMessagePagination>
+        </XPagination>
       </div>
       <footer :class="$style['footer']">
         <div v-if="typers.length > 0" :class="$style['typers']">
@@ -65,8 +65,9 @@ import { acct as Acct } from 'misskey-js';
 import debounce from 'lodash/debounce';
 import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
+import XPageHeader from './messaging-room.header.vue';
+import XPagination, { Paging } from './messaging-room.pagination.vue';
 import MkDateSeparatedList from '@/components/MkDateSeparatedList.vue';
-import MkMessagePagination, { Paging } from '@/components/MkMessagePagination.vue';
 import { onScrollBottom, scrollToBottomForWindow } from '@/scripts/scroll';
 import * as os from '@/os';
 import { stream } from '@/stream';
@@ -86,7 +87,7 @@ let rootEl = $shallowRef<HTMLDivElement>();
 // @ts-ignore
 let formEl = $shallowRef<InstanceType<typeof XForm>>();
 // @ts-ignore
-let pagingComponent = $shallowRef<InstanceType<typeof MkMessagePagination>>();
+let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 // @ts-ignore
 
 let isFirstFetch = $ref(true);
