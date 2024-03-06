@@ -1,8 +1,5 @@
 <template>
-  <KeepAlive
-    :max="defaultStore.state.numberOfPageCache"
-    exclude="messaging-group,messaging-user,messaging-room,MessagingRoom,messaging_room"
-  >
+  <KeepAlive :max="defaultStore.state.numberOfPageCache">
     <Suspense :timeout="0">
       <component :is="currentPageComponent" :key="key" v-bind="Object.fromEntries(currentPageProps)" />
       <template #fallback>
