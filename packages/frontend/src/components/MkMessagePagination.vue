@@ -68,23 +68,12 @@ import {
 } from 'vue';
 import * as misskey from 'misskey-js';
 import * as os from '@/os';
-import {
-  onScrollTop,
-  isTopVisible,
-  getBodyScrollHeight,
-  getScrollContainer,
-  onScrollBottom,
-  scrollToBottom,
-  scroll,
-  isBottomVisible,
-  scrollToBottomForWindow,
-} from '@/scripts/scroll';
-import MkButton from '@/components/MkButton.vue';
+import { onScrollTop, isTopVisible, onScrollBottom, isBottomVisible, scrollToBottomForWindow } from '@/scripts/scroll';
 import { defaultStore } from '@/store';
 import { MisskeyEntity } from '@/types/date-separated-list';
 import { i18n } from '@/i18n';
 
-const SECOND_FETCH_LIMIT = 40;
+const SECOND_FETCH_LIMIT = 20;
 const TOLERANCE = 16;
 
 export type Paging<E extends keyof misskey.Endpoints = keyof misskey.Endpoints> = {
@@ -114,11 +103,11 @@ const props = withDefaults(
     pagination: Paging;
     disableAutoLoad?: boolean;
     displayLimit?: number;
-    isFirstLoad?: boolean;
+    isFirstFetch?: boolean;
   }>(),
   {
     displayLimit: 20,
-    isFirstLoad: false,
+    isFirstFetch: false,
   },
 );
 
@@ -200,11 +189,10 @@ watch(
 );
 
 watch(fetching, () => {
-  setTimeout(() => {
-    if (props.isFirstLoad) {
-      scrollToBottomForWindow({ behavior: 'instant' });
-    }
-  }, 300);
+  if (props.isFirstFetch) {
+    console.debug('scrollToBottomForWindow');
+    scrollToBottomForWindow({ behavior: 'instant' });
+  }
 });
 
 async function init(): Promise<void> {
@@ -252,7 +240,9 @@ const reload = (): Promise<void> => {
 };
 
 const fetchMore = async (): Promise<void> => {
-  if (!more.value || fetching.value || moreFetching.value || items.value.length === 0) return;
+  if (!more.value || fetching.value || moreFetching.value || items.value.length === 0 || props.isFirstFetch) return;
+
+  console.debug('fetchMore');
 
   moreFetching.value = true;
   const params = props.pagination.params
@@ -284,7 +274,6 @@ const fetchMore = async (): Promise<void> => {
         }
 
         const reverseConcat = (_res) => {
-          const oldHeight = getBodyScrollHeight();
           const oldScroll = window.scrollY;
 
           items.value = items.value.concat(_res);
@@ -321,6 +310,11 @@ const fetchMore = async (): Promise<void> => {
           }
         }
         offset.value += res.length;
+
+        if (props.isFirstFetch) {
+          console.debug('scrollToBottomForWindow');
+          scrollToBottomForWindow({ behavior: 'instant' });
+        }
       },
       () => {
         moreFetching.value = false;

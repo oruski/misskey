@@ -10,7 +10,7 @@
           ref="pagingComponent"
           :key="userAcct || groupId"
           :pagination="pagination"
-          :is-first-load="isFirstLoad"
+          :is-first-fetch="isFirstFetch"
           :display-limit="1000"
         >
           <template #empty>
@@ -57,14 +57,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, nextTick, onBeforeUnmount, onUnmounted, onActivated, onDeactivated } from 'vue';
+import { computed, watch, onMounted, nextTick, onBeforeUnmount, onActivated, onDeactivated } from 'vue';
 import * as Misskey from 'misskey-js';
 import { acct as Acct } from 'misskey-js';
+import debounce from 'lodash/debounce';
 import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
 import MkDateSeparatedList from '@/components/MkDateSeparatedList.vue';
 import MkMessagePagination, { Paging } from '@/components/MkMessagePagination.vue';
-import { isBottomVisible, onScrollBottom, scrollToBottomForWindow } from '@/scripts/scroll';
+import { onScrollBottom, scrollToBottomForWindow } from '@/scripts/scroll';
 import * as os from '@/os';
 import { stream } from '@/stream';
 import * as sound from '@/scripts/sound';
@@ -85,6 +86,12 @@ let formEl = $shallowRef<InstanceType<typeof XForm>>();
 // @ts-ignore
 let pagingComponent = $shallowRef<InstanceType<typeof MkMessagePagination>>();
 // @ts-ignore
+
+let isFirstFetch = $ref(true);
+let finishFirstFetch = debounce(() => {
+  console.debug('初回ローディング完了');
+  isFirstFetch = false;
+}, 300);
 
 let fetching = $ref(true);
 // @ts-ignore
@@ -168,7 +175,6 @@ async function fetch() {
       group: group?.id,
     });
   }
-
   connection.on('message', onMessage);
   connection.on('read', onRead);
   connection.on('deleted', onDeleted);
@@ -188,6 +194,7 @@ async function fetch() {
 
     window.setTimeout(() => {
       fetching = false;
+      finishFirstFetch();
     }, 300);
   });
 }
@@ -359,6 +366,9 @@ onMounted(async () => {
 });
 
 onActivated(async () => {
+  console.debug('isFirstFetch =', isFirstFetch);
+  if (isFirstFetch) return;
+
   if (connection) connection.dispose();
   await fetch();
 });
