@@ -77,7 +77,6 @@ const actionHandler: (ev: MouseEvent) => void = async () => {
 
   if (!showing) {
     if (popupModal) {
-      console.debug('popupModal =', await popupModal);
       (await popupModal).dispose();
       popupModal = undefined;
     }

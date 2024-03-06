@@ -401,9 +401,11 @@ onMounted(async () => {
 onActivated(async () => {
   if (isFirstFetch) return;
   isFirstFetch = true;
-
-  if (connection) connection.dispose();
-  await fetch();
+  if (pagingComponent) {
+    if (connection) connection.dispose();
+    await fetch();
+    pagingComponent.reload();
+  }
 });
 
 onDeactivated(() => {

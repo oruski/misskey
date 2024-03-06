@@ -207,6 +207,8 @@ watch(isFirstFetch, () => {
 });
 
 async function init(): Promise<void> {
+  console.debug('[pagination] init');
+
   queue.value = [];
   fetching.value = true;
   const params = props.pagination.params
