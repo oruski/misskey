@@ -1,18 +1,15 @@
 <template>
   <div v-if="show" ref="el" :class="[$style.root]" :style="{ background: bg }">
-    <div :class="[$style.upper, { [$style.slim]: narrow, [$style.thin]: thin_ }]">
+    <div :class="$style.upper">
       <template v-if="metadata">
-        <div v-if="!hideTitle" :class="$style.titleContainer" @click="top">
-          <MkAvatar v-if="metadata.avatar" :class="$style.titleAvatar" :user="metadata.avatar" indicator />
-          <i v-else-if="metadata.icon" :class="[$style.titleIcon, metadata.icon]"></i>
-
+        <div :class="$style.titleContainer" @click="top">
           <div :class="$style.title">
             <div v-if="metadata.title">{{ metadata.title }}</div>
           </div>
         </div>
       </template>
 
-      <div v-if="!thin_ && narrow && !hideTitle" :class="$style.buttonsRight">
+      <div :class="$style.buttonsRight">
         <button
           ref="buttonEl"
           class="_button"
@@ -50,7 +47,6 @@ const props = withDefaults(
       highlighted?: boolean;
       handler: (ev: MouseEvent) => void;
     }[];
-    thin?: boolean;
     displayMyAvatar?: boolean;
   }>(),
   {
@@ -66,11 +62,9 @@ const emit = defineEmits<{
 const metadata = injectPageMetadata();
 
 const hideTitle = inject('shouldOmitHeaderTitle', false);
-const thin_ = props.thin || inject('shouldHeaderThin', false);
 
 let el = $shallowRef<HTMLElement | undefined>(undefined);
 const bg = ref<string | undefined>(undefined);
-let narrow = $ref(false);
 const show = $computed(() => {
   return !hideTitle;
 });
@@ -126,16 +120,6 @@ let ro: ResizeObserver | null;
 onMounted(() => {
   calcBg();
   globalEvents.on('themeChanged', calcBg);
-
-  if (el && el.parentElement) {
-    narrow = el.parentElement.offsetWidth < 500;
-    ro = new ResizeObserver((entries, observer) => {
-      if (el && el.parentElement && document.body.contains(el as HTMLElement)) {
-        narrow = el.parentElement.offsetWidth < 500;
-      }
-    });
-    ro.observe(el.parentElement as HTMLElement);
-  }
 });
 
 onUnmounted(() => {
@@ -174,16 +158,6 @@ onUnmounted(() => {
   }
   .tabs {
     margin-right: auto;
-  }
-
-  &.thin {
-    --height: 42px;
-
-    > .buttons {
-      > .button {
-        font-size: 0.9em;
-      }
-    }
   }
 
   &.slim {
