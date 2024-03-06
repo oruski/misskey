@@ -347,11 +347,21 @@ function onVisibilitychange() {
   }
 }
 
+onMounted(async () => {
+  await fetch();
+});
+
 onActivated(async () => {
   await fetch();
 });
 
 onDeactivated(() => {
+  connection?.dispose();
+  document.removeEventListener('visibilitychange', onVisibilitychange);
+  if (scrollRemove) scrollRemove();
+});
+
+onBeforeUnmount(() => {
   connection?.dispose();
   document.removeEventListener('visibilitychange', onVisibilitychange);
   if (scrollRemove) scrollRemove();
