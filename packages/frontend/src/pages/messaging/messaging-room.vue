@@ -97,7 +97,6 @@ let typers: Misskey.entities.User[] = $ref([]);
 let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null = $ref(null);
 // @ts-ignore
 let showIndicator = $ref(false);
-let isFirstLoad = $ref(true);
 let currentScrollOffset = $ref(document.body.scrollHeight - window.innerHeight - window.scrollY);
 
 function updateCurrentScrollOffset() {
@@ -116,6 +115,8 @@ watch([() => props.userAcct, () => props.groupId], () => {
 });
 
 async function fetch() {
+  console.log('fetch');
+
   fetching = true;
   updateCurrentScrollOffset();
 
@@ -136,6 +137,9 @@ async function fetch() {
       // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+
+    if (connection) connection.dispose();
+
     // @ts-ignore
     connection = stream.useChannel('messaging', {
       // @ts-ignore
@@ -156,6 +160,9 @@ async function fetch() {
       // @ts-ignore
       pageEl: $$(rootEl).value,
     };
+
+    if (connection) connection.dispose();
+
     // @ts-ignore
     connection = stream.useChannel('messaging', {
       group: group?.id,
