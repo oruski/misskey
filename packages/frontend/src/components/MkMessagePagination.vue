@@ -190,8 +190,11 @@ watch(
 
 watch(fetching, () => {
   if (props.isFirstFetch) {
-    console.debug('scrollToBottomForWindow');
+    console.debug('[初回ローディング] Pagination scrollToBottomForWindow');
     scrollToBottomForWindow({ behavior: 'instant' });
+    setTimeout(() => {
+      scrollToBottomForWindow({ behavior: 'instant' });
+    }, 300);
   }
 });
 
@@ -338,7 +341,6 @@ const prepend = (item: MisskeyEntity): void => {
 function unshiftItems(newItems: MisskeyEntity[]) {
   const length = newItems.length + items.value.length;
   items.value = [...newItems, ...items.value].slice(0, props.displayLimit);
-
   if (length >= props.displayLimit) more.value = true;
 }
 
