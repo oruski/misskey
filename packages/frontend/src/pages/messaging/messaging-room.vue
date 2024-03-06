@@ -37,7 +37,9 @@
         <div v-if="typers.length > 0" :class="$style['typers']">
           <I18n :src="i18n.ts.typingUsers" text-tag="span">
             <template #users>
-              <b v-for="typer in typers" :key="typer.id" :class="$style['user']">{{ typer.username }}</b>
+              <b v-for="typer in typers" :key="typer.id" :class="$style['user']"
+                ><MkUserName class="name" :user="typer"
+              /></b>
             </template>
           </I18n>
           <MkEllipsis />
