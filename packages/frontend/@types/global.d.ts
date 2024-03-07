@@ -9,3 +9,5 @@ declare const _PERF_PREFIX_: string;
 declare const _DATA_TRANSFER_DRIVE_FILE_: string;
 declare const _DATA_TRANSFER_DRIVE_FOLDER_: string;
 declare const _DATA_TRANSFER_DECK_COLUMN_: string;
+declare const $ts: typeof import('i18n').i18n.ts;
+declare const $ref: typeof import('unplugin-vue-macros/macros-global').$ref;
