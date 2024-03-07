@@ -7,7 +7,7 @@
             <i v-if="metadata.icon" :class="[$style.titleIcon, metadata.icon]"></i>
             <template v-if="metadata.userName">
               <div :class="$style.nameContainer">
-                <MkAvatar v-if="metadata.avatar" :user="metadata.avatar" :class="$style.avatar" />
+                <MkAvatar v-if="metadata.avatar" :user="metadata.avatar" :class="$style.avatar" indicator />
                 <MkUserName :user="metadata.userName" />
               </div>
             </template>

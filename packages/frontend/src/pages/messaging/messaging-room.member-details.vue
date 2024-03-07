@@ -8,7 +8,7 @@
               <MkEmoji :normal="true" :no-style="true" emoji="👑" :class="$style.crown" />
             </div>
           </template>
-          <MkAvatar :class="$style.avatar" :user="u" :indicator="u.onlineStatus === 'online'" />
+          <MkAvatar :class="$style.avatar" :user="u" indicator />
           <MkUserName :user="u" :nowrap="true" />
         </div>
       </div>
