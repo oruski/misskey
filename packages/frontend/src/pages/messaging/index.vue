@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { markRaw, onMounted, onUnmounted } from 'vue';
+import { markRaw, onActivated, onDeactivated, onMounted, onUnmounted } from 'vue';
 import { acct as Acct } from 'misskey-js';
 import MkButton from '@/components/MkButton.vue';
 import { acct } from '@/filters/user';
@@ -76,13 +76,21 @@ const router = useRouter();
 let fetching = $ref(true);
 let messages = $ref([]);
 let connection = $ref(null);
-
 const getAcct = Acct.toString;
+let isFirstLoad = $ref(true);
 
+/**
+ * 自分
+ * @param message
+ */
 function isMe(message) {
+  // @ts-ignore
   return message.userId === $i.id;
 }
 
+/**
+ * メッセージ受信
+ */
 function onMessage(message) {
   if (message.recipientId) {
     messages = messages.filter(
@@ -107,6 +115,9 @@ function onMessage(message) {
   }
 }
 
+/**
+ * 既読フラグ
+ */
 function onRead(ids) {
   for (const id of ids) {
     // @ts-ignore
@@ -125,6 +136,9 @@ function onRead(ids) {
   }
 }
 
+/**
+ * チャット開始ポップアップ
+ */
 function start(ev) {
   os.popupMenu(
     [
@@ -147,10 +161,16 @@ function start(ev) {
   );
 }
 
+/**
+ * グループに遷移
+ */
 function gotoGroup() {
   router.push('/my/groups');
 }
 
+/**
+ * ユーザーチャットを開始
+ */
 async function startUser() {
   os.selectUser().then((user) => {
     // @ts-ignore
@@ -158,6 +178,9 @@ async function startUser() {
   });
 }
 
+/**
+ * グループチャットを開始
+ */
 async function startGroup() {
   const groups1 = await os.api('users/groups/owned');
   const groups2 = await os.api('users/groups/joined');
@@ -180,7 +203,15 @@ async function startGroup() {
   router.push(`/my/messaging/group/${group.id}`);
 }
 
-onMounted(() => {
+/**
+ * 通信開始
+ */
+function attach() {
+  console.debug('[chat index] attach');
+
+  // @ts-ignore
+  if (connection) connection.dispose();
+
   // @ts-ignore
   connection = markRaw(stream.useChannel('messagingIndex'));
 
@@ -190,18 +221,43 @@ onMounted(() => {
   connection.on('read', onRead);
 
   os.api('messaging/history', { group: false }).then((userMessages) => {
-    os.api('messaging/history', { group: true }).then((groupMessages) => {
-      const _messages = userMessages.concat(groupMessages);
-      _messages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      messages = _messages;
-      fetching = false;
-    });
+    os.api('messaging/history', { group: true })
+      .then((groupMessages) => {
+        const _messages = userMessages.concat(groupMessages);
+        _messages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        messages = _messages;
+        fetching = false;
+      })
+      .finally(() => {
+        isFirstLoad = false;
+      });
   });
+}
+
+/**
+ * 通信終了
+ */
+function detach() {
+  console.debug('[chat index] detach');
+  // @ts-ignore
+  if (connection) connection.dispose();
+}
+
+onMounted(() => {
+  attach();
 });
 
 onUnmounted(() => {
-  // @ts-ignore
-  if (connection) connection.dispose();
+  detach();
+});
+
+onActivated(() => {
+  if (isFirstLoad) return;
+  attach();
+});
+
+onDeactivated(() => {
+  detach();
 });
 
 const headerActions = $computed(() => []);
