@@ -1,9 +1,14 @@
 <template>
   <MkStickyContainer>
-    <template #header><MkPageHeader :actions="headerActions" :tabs="headerTabs" /></template>
+    <template #header>
+      <MkPageHeader :actions="headerActions" :tabs="headerTabs" />
+    </template>
     <MkSpacer :content-max="800">
       <div class="yweeujhr">
-        <MkButton primary class="start" @click="start"><i class="ti ti-plus"></i> {{ $ts.startMessaging }}</MkButton>
+        <div class="buttons">
+          <MkButton primary class="start" @click="start"><i class="ti ti-plus"></i> {{ $ts.startMessaging }}</MkButton>
+          <MkButton primary class="start" @click="gotoGroup"><i class="ti ti-users"></i> {{ $ts.groups }}</MkButton>
+        </div>
 
         <div v-if="messages.length > 0" class="history">
           <MkA
@@ -142,6 +147,10 @@ function start(ev) {
   );
 }
 
+function gotoGroup() {
+  router.push('/my/groups');
+}
+
 async function startUser() {
   os.selectUser().then((user) => {
     // @ts-ignore
@@ -207,6 +216,13 @@ definePageMetadata({
 
 <style lang="scss" scoped>
 .yweeujhr {
+  > .buttons {
+    display: flex;
+    justify-content: center;
+    margin: var(--margin) 0;
+    gap: var(--margin);
+  }
+
   > .start {
     margin: 0 auto var(--margin) auto;
   }
