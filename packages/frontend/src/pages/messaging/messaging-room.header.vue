@@ -19,30 +19,30 @@
           </div>
         </div>
       </template>
+
+      <template v-if="props.groupUsers?.length">
+        <div :class="$style.buttonsRight">
+          <button
+            ref="buttonEl"
+            class="_button"
+            :class="$style.button"
+            @click.stop="actionHandler"
+            @touchstart="preventDrag"
+          >
+            <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
+              <template #n>
+                <b>{{ props.onlineUserCount }}</b>
+              </template>
+            </I18n>
+          </button>
+        </div>
+      </template>
     </div>
   </div>
-
-  <template v-if="props.groupUsers?.length">
-    <div :class="$style.buttonsRight">
-      <button
-        ref="buttonEl"
-        class="_button"
-        :class="$style.button"
-        @click.stop="actionHandler"
-        @touchstart="preventDrag"
-      >
-        <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
-          <template #n>
-            <b>{{ props.onlineUserCount }}</b>
-          </template>
-        </I18n>
-      </button>
-    </div>
-  </template>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, inject, shallowRef, defineAsyncComponent } from 'vue';
+import { onMounted, onUnmounted, ref, inject, shallowRef, defineAsyncComponent, onActivated, onDeactivated } from 'vue';
 import tinycolor from 'tinycolor2';
 import { scrollToTop } from '@/scripts/scroll';
 import { globalEvents } from '@/events';
@@ -143,6 +143,10 @@ onMounted(() => {
 onUnmounted(() => {
   globalEvents.off('themeChanged', calcBg);
   if (ro) ro.disconnect();
+});
+
+onDeactivated(async () => {
+  if (popupModal) (await popupModal).dispose();
 });
 </script>
 
