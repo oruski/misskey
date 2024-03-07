@@ -37,9 +37,9 @@
         <div v-if="typers.length > 0" :class="$style['typers']">
           <I18n :src="i18n.ts.typingUsers" text-tag="span">
             <template #users>
-              <b v-for="typer in typers" :key="typer.id" :class="$style['user']"
-                ><MkUserName class="name" :user="typer"
-              /></b>
+              <b v-for="typer in typers" :key="typer.id" :class="$style['user']">
+                <MkUserName class="name" :user="typer" />
+              </b>
             </template>
           </I18n>
           <MkEllipsis />
@@ -446,10 +446,11 @@ definePageMetadata(
         ? {
             userName: user,
             avatar: user,
+            icon: 'ti ti-user',
           }
         : {
             title: group?.name,
-            icon: 'ti ti-users',
+            icon: 'ti ti-messages',
           }
       : null,
   ),
@@ -474,12 +475,15 @@ definePageMetadata(
   color: #fff;
   background: rgba(#000, 0.3);
   border-radius: 12px;
+
   &:hover {
     background: rgba(#000, 0.4);
   }
+
   &:active {
     background: rgba(#000, 0.5);
   }
+
   > i {
     margin-right: 4px;
   }

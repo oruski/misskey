@@ -4,30 +4,41 @@
       <template v-if="metadata">
         <div :class="$style.titleContainer" @click="top">
           <div :class="$style.title">
-            <div v-if="metadata.title">{{ metadata.title }}</div>
+            <i v-if="metadata.icon" :class="[$style.titleIcon, metadata.icon]"></i>
+            <template v-if="metadata.userName">
+              <div :class="$style.nameContainer">
+                <MkAvatar v-if="metadata.avatar" :user="metadata.avatar" :class="$style.avatar" />
+                <MkUserName :user="metadata.userName" />
+              </div>
+            </template>
+            <template v-else-if="metadata.title">
+              <div>
+                {{ metadata.title }}
+              </div>
+            </template>
           </div>
-        </div>
-      </template>
-
-      <template v-if="props.groupUsers?.length">
-        <div :class="$style.buttonsRight">
-          <button
-            ref="buttonEl"
-            class="_button"
-            :class="$style.button"
-            @click.stop="actionHandler"
-            @touchstart="preventDrag"
-          >
-            <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
-              <template #n>
-                <b>{{ props.onlineUserCount }}</b>
-              </template>
-            </I18n>
-          </button>
         </div>
       </template>
     </div>
   </div>
+
+  <template v-if="props.groupUsers?.length">
+    <div :class="$style.buttonsRight">
+      <button
+        ref="buttonEl"
+        class="_button"
+        :class="$style.button"
+        @click.stop="actionHandler"
+        @touchstart="preventDrag"
+      >
+        <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
+          <template #n>
+            <b>{{ props.onlineUserCount }}</b>
+          </template>
+        </I18n>
+      </button>
+    </div>
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -159,10 +170,12 @@ onUnmounted(() => {
   .tabs:first-child {
     margin-left: auto;
   }
+
   .tabs:not(:first-child) {
     padding-left: 16px;
     mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgb(0, 0, 0) 16px, rgb(0, 0, 0) 100%);
   }
+
   .tabs {
     margin-right: auto;
   }
@@ -174,6 +187,7 @@ onUnmounted(() => {
     .tabs:first-child {
       margin-left: 0;
     }
+
     > .titleContainer {
       margin: 0 auto;
       max-width: 100%;
@@ -192,6 +206,7 @@ onUnmounted(() => {
   align-items: center;
   min-width: var(--height);
   height: var(--height);
+
   &:empty {
     width: var(--height);
   }
@@ -211,13 +226,18 @@ onUnmounted(() => {
   right: 16px;
 }
 
+.nameContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
 .avatar {
-  $size: 32px;
+  $size: 20px;
   display: inline-block;
   width: $size;
   height: $size;
   vertical-align: bottom;
-  margin: 0 8px;
 }
 
 .button {
@@ -272,6 +292,8 @@ onUnmounted(() => {
 }
 
 .title {
+  display: flex;
+  align-items: center;
   min-width: 0;
   white-space: nowrap;
   line-height: 1.1;

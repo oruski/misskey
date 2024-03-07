@@ -46,14 +46,7 @@ module.exports = {
     'vue/order-in-components': 'error',
     'vue/html-indent': 0,
     indent: 0,
-    'vue/html-closing-bracket-spacing': [
-      'warn',
-      {
-        startTag: 'never',
-        endTag: 'never',
-        selfClosingTag: 'never',
-      },
-    ],
+    'vue/html-closing-bracket-spacing': 0,
     'vue/multi-word-component-names': 'warn',
     'vue/require-v-for-key': 'warn',
     'vue/no-unused-components': 'warn',
