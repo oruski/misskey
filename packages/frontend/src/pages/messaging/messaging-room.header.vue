@@ -248,8 +248,6 @@ onUnmounted(() => {
 .titleContainer {
   display: flex;
   align-items: center;
-  max-width: min(30vw, 400px);
-  overflow: auto;
   white-space: nowrap;
   text-align: left;
   font-weight: bold;
@@ -275,8 +273,6 @@ onUnmounted(() => {
 
 .title {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.1;
 }
@@ -286,8 +282,6 @@ onUnmounted(() => {
   font-size: 0.8em;
   font-weight: normal;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 
   &.activeTab {
     text-align: center;
