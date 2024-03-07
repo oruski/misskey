@@ -76,7 +76,6 @@ import { i18n } from '@/i18n';
 import { $i } from '@/account';
 import { defaultStore } from '@/store';
 import { definePageMetadata } from '@/scripts/page-metadata';
-import { useRouter } from '@/router';
 
 const props = defineProps<{
   userAcct?: string;
