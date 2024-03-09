@@ -261,6 +261,8 @@ defineExpose({
   min-width: 100%;
   max-width: 100%;
   min-height: 80px;
+  height: 80px;
+  max-height: 80px;
   margin: 0;
   padding: 16px 16px 0 16px;
   resize: none;
@@ -272,6 +274,7 @@ defineExpose({
   box-shadow: none;
   box-sizing: border-box;
   color: var(--fg);
+  overflow-x: hidden !important;
 }
 
 .footer {

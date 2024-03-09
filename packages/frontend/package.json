@@ -2,7 +2,7 @@
 	"name": "frontend",
 	"private": true,
 	"scripts": {
-    "dev": "npm run watch",
+		"dev": "npm run watch",
 		"watch": "vite build --watch",
 		"build": "vite build",
 		"lint": "vue-tsc --noEmit && eslint --quiet \"src/**/*.{ts,vue}\"",
@@ -13,12 +13,12 @@
 		"lodash": "^4.17.21"
 	},
 	"dependencies": {
-    "lodash": "4.17.21",
 		"@discordapp/twemoji": "15.0.2",
 		"@fortawesome/fontawesome-free": "6.5.1",
 		"@rollup/plugin-alias": "5.1.0",
 		"@rollup/plugin-json": "6.1.0",
 		"@syuilo/aiscript": "0.17.0",
+		"@tabler/icons-webfont": "2.2.0",
 		"@vitejs/plugin-vue": "5.0.4",
 		"@vue/compiler-sfc": "3.4.21",
 		"autobind-decorator": "2.4.0",
@@ -43,6 +43,7 @@
 		"is-file-animated": "1.0.2",
 		"json5": "2.2.3",
 		"katex": "0.16.9",
+		"lodash": "4.17.21",
 		"matter-js": "0.19.0",
 		"mfm-js": "0.24.0",
 		"misskey-js": "2024.2.0",
@@ -63,6 +64,7 @@
 		"three": "0.162.0",
 		"throttle-debounce": "5.0.0",
 		"tinycolor2": "1.6.0",
+		"ts-retry-promise": "0.8.0",
 		"tsc-alias": "1.8.8",
 		"tsconfig-paths": "4.2.0",
 		"twemoji-parser": "14.0.0",
@@ -71,13 +73,12 @@
 		"uuid": "9.0.1",
 		"vanilla-tilt": "1.8.1",
 		"vite": "5.1.4",
+		"vite-plugin-build-metadata": "0.4.0",
 		"vue": "3.4.21",
 		"vue-plyr": "7.0.0",
 		"vue-prism-editor": "2.0.0-alpha.2",
-		"vuedraggable": "4.1.0",
-    "@tabler/icons-webfont": "2.2.0",
-    "vite-plugin-build-metadata": "0.4.0"
-  },
+		"vuedraggable": "4.1.0"
+	},
 	"devDependencies": {
 		"@types/escape-regexp": "0.0.3",
 		"@types/glob": "8.1.0",

@@ -288,7 +288,11 @@ function onDrop(ev: DragEvent): void {
 function onMessage(message) {
   sound.play('chat');
 
-  const _isBottom = document.body.scrollHeight - window.innerHeight - window.scrollY <= 16;
+  console.debug(
+    'document.body.scrollHeight - window.innerHeight - window.scrollY =',
+    document.body.scrollHeight - window.innerHeight - window.scrollY,
+  );
+  const _isBottom = document.body.scrollHeight - window.innerHeight - window.scrollY <= 40;
   console.debug('[chat] _isBottom =', _isBottom);
 
   // @ts-ignore
