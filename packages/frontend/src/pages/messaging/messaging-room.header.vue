@@ -2,7 +2,7 @@
   <div v-if="show" ref="el" :class="[$style.root]" :style="{ background: bg }">
     <div :class="$style.upper">
       <template v-if="metadata">
-        <div :class="$style.titleContainer" @click="top">
+        <div :class="$style.titleContainer" @click="scrollToBottom">
           <div :class="$style.title">
             <i v-if="metadata.icon" :class="[$style.titleIcon, metadata.icon]"></i>
             <template v-if="metadata.userName">
@@ -42,9 +42,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, inject, shallowRef, defineAsyncComponent, onActivated, onDeactivated } from 'vue';
+import { onMounted, onUnmounted, ref, inject, shallowRef, defineAsyncComponent, onDeactivated } from 'vue';
 import tinycolor from 'tinycolor2';
-import { scrollToTop } from '@/scripts/scroll';
+import { scrollToBottomForWindow } from '@/scripts/scroll';
 import { globalEvents } from '@/events';
 import { injectPageMetadata } from '@/scripts/page-metadata';
 import { i18n } from '@/i18n';
@@ -65,6 +65,7 @@ const props = withDefaults(
   }>(),
   {
     onlineUserCount: 0,
+    // @ts-ignore
     groupUsers: [] as unknown as string[],
   },
 );
@@ -86,21 +87,19 @@ let buttonEl = shallowRef<HTMLElement | undefined>(undefined);
 let showing = $ref(false);
 let popupModal = $ref(undefined);
 
-let isAdmin = $computed(() => {
-  return true;
-});
-
 const actionHandler: (ev: MouseEvent) => void = async () => {
   showing = !showing;
 
   if (!showing) {
     if (popupModal) {
+      // @ts-ignore
       (await popupModal).dispose();
       popupModal = undefined;
     }
     return;
   }
 
+  // @ts-ignore
   popupModal = os.popup(
     defineAsyncComponent(() => import('./messaging-room.member-details.vue')),
     {
@@ -119,9 +118,9 @@ const preventDrag = (ev: TouchEvent) => {
   ev.stopPropagation();
 };
 
-const top = () => {
+const scrollToBottom = () => {
   if (el) {
-    scrollToTop(el as HTMLElement, { behavior: 'smooth' });
+    scrollToBottomForWindow({ behavior: 'smooth' });
   }
 };
 const calcBg = () => {
@@ -146,6 +145,7 @@ onUnmounted(() => {
 });
 
 onDeactivated(async () => {
+  // @ts-ignore
   if (popupModal) (await popupModal).dispose();
 });
 </script>
