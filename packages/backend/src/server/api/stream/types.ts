@@ -14,7 +14,7 @@ import type { Page } from '@/models/entities/Page.js';
 import type { Packed } from '@/misc/schema.js';
 import type { Webhook } from '@/models/entities/Webhook.js';
 import type { Meta } from '@/models/entities/Meta.js';
-import { Following, Role, RoleAssignment } from '@/models';
+import { Role, RoleAssignment } from '@/models';
 import type Emitter from 'strict-event-emitter-types';
 import type { EventEmitter } from 'events';
 
@@ -44,10 +44,10 @@ export interface InternalStreamTypes {
 
 export interface BroadcastTypes {
 	emojiAdded: {
-		emoji: Packed<'Emoji'>;
+		emoji: Packed<'EmojiDetailed'>;
 	};
 	emojiUpdated: {
-		emojis: Packed<'Emoji'>[];
+		emojis: Packed<'EmojiDetailed'>[];
 	};
 	emojiDeleted: {
 		emojis: {

@@ -145,7 +145,6 @@ export class ApiCallService implements OnApplicationShutdown {
 	}
 
 	@bindThis
-	// @ts-ignore
 	private send(reply: FastifyReply, x?: unknown, y?: ApiError) {
 		if (x == null) {
 			reply.code(204);
@@ -193,7 +192,7 @@ export class ApiCallService implements OnApplicationShutdown {
 
 	@bindThis
 	private async call(
-		ep: IEndpoint & { exec: any },
+		ep: IEndpoint & { exec: unknown },
 		user: LocalUser | null | undefined,
 		token: AccessToken | null | undefined,
 		data: unknown,
@@ -221,11 +220,8 @@ export class ApiCallService implements OnApplicationShutdown {
 			const limit = Object.assign({}, ep.meta.limit);
 
 			if (limit.key == null) {
-				(limit as any).key = ep.name;
-			if (!limit.key) {
 				// @ts-ignore
-				// noinspection JSConstantReassignment
-				limit.key = ep.name;
+				(limit as unknown).key = ep.name;
 			}
 
 			// TODO: 毎リクエスト計算するのもあれだしキャッシュしたい
@@ -244,7 +240,6 @@ export class ApiCallService implements OnApplicationShutdown {
 			}
 		}
 
-		// @ts-ignore
 		if (ep.meta.requireCredential || ep.meta.requireModerator || ep.meta.requireAdmin) {
 			if (user == null) {
 				throw new ApiError({
@@ -283,7 +278,6 @@ export class ApiCallService implements OnApplicationShutdown {
 
 		if (ep.meta.requireRolePolicy != null && !user!.isRoot) {
 			const policies = await this.roleService.getUserPolicies(user!.id);
-			// @ts-ignore
 			if (!policies[ep.meta.requireRolePolicy]) {
 				throw new ApiError({
 					message: 'You are not assigned to a required role.',

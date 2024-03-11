@@ -12,13 +12,7 @@ module.exports = {
 		'plugin:import/typescript'
 	],
 	rules: {
-		'indent': ['warn', 'tab', {
-			'SwitchCase': 1,
-			'MemberExpression': 1,
-			'flatTernaryExpressions': true,
-			'ArrayExpression': 'first',
-			'ObjectExpression': 'first',
-		}],
+		'indent': 0,
 		'eol-last': ['error', 'always'],
 		'semi': ['error', 'always'],
 		'semi-spacing': ['error', { 'before': false, 'after': true }],

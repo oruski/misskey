@@ -79,6 +79,7 @@ export class ActivityPubServerService {
 	 * @param note Note
 	 */
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private async packActivity(note: Note): Promise<any> {
 		if (note.renoteId && note.text == null && !note.hasPoll && (note.fileIds == null || note.fileIds.length === 0)) {
 			const renote = await this.notesRepository.findOneByOrFail({ id: note.renoteId });
@@ -205,22 +206,22 @@ export class ActivityPubServerService {
 			reply.code(400);
 			return;
 		}
-	
+
 		const page = request.query.page === 'true';
-	
+
 		const user = await this.usersRepository.findOneBy({
 			id: userId,
 			host: IsNull(),
 		});
-	
+
 		if (user == null) {
 			reply.code(404);
 			return;
 		}
-	
+
 		//#region Check ff visibility
 		const profile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
-	
+
 		if (profile.ffVisibility === 'private') {
 			reply.code(403);
 			reply.header('Cache-Control', 'public, max-age=30');
@@ -231,31 +232,31 @@ export class ActivityPubServerService {
 			return;
 		}
 		//#endregion
-	
+
 		const limit = 10;
 		const partOf = `${this.config.url}/users/${userId}/following`;
-	
+
 		if (page) {
 			const query = {
 				followerId: user.id,
 			} as FindOptionsWhere<Following>;
-	
+
 			// カーソルが指定されている場合
 			if (cursor) {
 				query.id = LessThan(cursor);
 			}
-	
+
 			// Get followings
 			const followings = await this.followingsRepository.find({
 				where: query,
 				take: limit + 1,
 				order: { id: -1 },
 			});
-	
+
 			// 「次のページ」があるかどうか
 			const inStock = followings.length === limit + 1;
 			if (inStock) followings.pop();
-	
+
 			const renderedFollowees = await Promise.all(followings.map(following => this.apRendererService.renderFollowUser(following.followeeId)));
 			const rendered = this.apRendererService.renderOrderedCollectionPage(
 				`${partOf}?${url.query({
@@ -269,7 +270,7 @@ export class ActivityPubServerService {
 					cursor: followings[followings.length - 1].id,
 				})}` : undefined,
 			);
-	
+
 			this.setResponseType(request, reply);
 			return (this.apRendererService.addContext(rendered));
 		} else {
@@ -330,33 +331,33 @@ export class ActivityPubServerService {
 			reply.code(400);
 			return;
 		}
-	
+
 		const untilId = request.query.until_id;
 		if (untilId != null && typeof untilId !== 'string') {
 			reply.code(400);
 			return;
 		}
-	
+
 		const page = request.query.page === 'true';
-	
+
 		if (countIf(x => x != null, [sinceId, untilId]) > 1) {
 			reply.code(400);
 			return;
 		}
-	
+
 		const user = await this.usersRepository.findOneBy({
 			id: userId,
 			host: IsNull(),
 		});
-	
+
 		if (user == null) {
 			reply.code(404);
 			return;
 		}
-	
+
 		const limit = 20;
 		const partOf = `${this.config.url}/users/${userId}/outbox`;
-	
+
 		if (page) {
 			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), sinceId, untilId)
 				.andWhere('note.userId = :userId', { userId: user.id })
@@ -365,11 +366,11 @@ export class ActivityPubServerService {
 					.orWhere('note.visibility = \'home\'');
 				}))
 				.andWhere('note.localOnly = FALSE');
-	
+
 			const notes = await query.take(limit).getMany();
-	
+
 			if (sinceId) notes.reverse();
-	
+
 			const activities = await Promise.all(notes.map(note => this.packActivity(note)));
 			const rendered = this.apRendererService.renderOrderedCollectionPage(
 				`${partOf}?${url.query({
@@ -387,7 +388,7 @@ export class ActivityPubServerService {
 					until_id: notes[notes.length - 1].id,
 				})}` : undefined,
 			);
-	
+
 			this.setResponseType(request, reply);
 			return (this.apRendererService.addContext(rendered));
 		} else {
@@ -411,20 +412,24 @@ export class ActivityPubServerService {
 
 		reply.header('Cache-Control', 'public, max-age=180');
 		this.setResponseType(request, reply);
-		return (this.apRendererService.addContext(await this.apRendererService.renderPerson(user as LocalUser)));
+		// @ts-ignore
+    return (this.apRendererService.addContext(await this.apRendererService.renderPerson(user as LocalUser)));
 	}
 
 	@bindThis
 	public createServer(fastify: FastifyInstance, options: FastifyPluginOptions, done: (err?: Error) => void) {
 		// addConstraintStrategy の型定義がおかしいため
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(fastify.addConstraintStrategy as any)({
 			name: 'apOrHtml',
 			storage() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const store = {} as any;
 				return {
 					get(key: string) {
 						return store[key] ?? null;
 					},
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
 					set(key: string, value: any) {
 						store[key] = value;
 					},
@@ -457,7 +462,7 @@ export class ActivityPubServerService {
 		// note
 		fastify.get<{ Params: { note: string; } }>('/notes/:note', { constraints: { apOrHtml: 'ap' } }, async (request, reply) => {
 			vary(reply.raw, 'Accept');
-	
+
 			const note = await this.notesRepository.findOneBy({
 				id: request.params.note,
 				visibility: In(['public', 'home']),
@@ -545,7 +550,9 @@ export class ActivityPubServerService {
 			if (this.userEntityService.isLocalUser(user)) {
 				reply.header('Cache-Control', 'public, max-age=180');
 				this.setResponseType(request, reply);
-				return (this.apRendererService.addContext(this.apRendererService.renderKey(user, keypair)));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+				// @ts-ignore
+        return (this.apRendererService.addContext(this.apRendererService.renderKey(user, keypair)));
 			} else {
 				reply.code(400);
 				return;

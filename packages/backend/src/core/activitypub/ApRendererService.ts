@@ -616,6 +616,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public addContext<T extends IObject>(x: T): T & { '@context': any; id: string; } {
 		if (typeof x === 'object' && x.id == null) {
 			x.id = `${this.config.url}/${uuid()}`;
