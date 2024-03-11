@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import summaly from 'summaly';
+import { summaly } from 'summaly';
 import { DI } from '@/di-symbols.js';
 import type { UsersRepository } from '@/models/index.js';
 import type { Config } from '@/config.js';
@@ -30,7 +30,7 @@ export class UrlPreviewService {
 	}
 
 	@bindThis
-	private wrap(url?: string): string | null {
+	private wrap(url?: string | null): string | null {
 		return url != null
 			? url.match(/^https?:\/\//)
 				? `${this.config.mediaProxy}/preview.webp?${query({
@@ -51,26 +51,33 @@ export class UrlPreviewService {
 			reply.code(400);
 			return;
 		}
-
+	
 		const lang = request.query.lang;
 		if (Array.isArray(lang)) {
 			reply.code(400);
 			return;
 		}
-
+	
 		const meta = await this.metaService.fetch();
-
+	
 		this.logger.info(meta.summalyProxy
 			? `(Proxy) Getting preview of ${url}@${lang} ...`
 			: `Getting preview of ${url}@${lang} ...`);
 		try {
-			const summary = meta.summalyProxy ? await this.httpRequestService.getJson<ReturnType<typeof summaly>>(`${meta.summalyProxy}?${query({
-				url: url,
-				lang: lang ?? 'ja-JP',
-			})}`) : await summaly(url, {
-				followRedirects: false,
-				lang: lang ?? 'ja-JP',
-			});
+			const summary = meta.summalyProxy ?
+				await this.httpRequestService.getJson<ReturnType<typeof summaly>>(`${meta.summalyProxy}?${query({
+					url: url,
+					lang: lang ?? 'ja-JP',
+				})}`)
+				:
+				await summaly(url, {
+					followRedirects: false,
+					lang: lang ?? 'ja-JP',
+					agent: {
+						http: this.httpRequestService.httpAgent,
+						https: this.httpRequestService.httpsAgent,
+					},
+				});
 
 			this.logger.succ(`Got preview of ${url}: ${summary.title}`);
 
@@ -78,18 +85,16 @@ export class UrlPreviewService {
 				throw new Error('unsupported schema included');
 			}
 
-			if (summary.player.url && !(summary.player.url.startsWith('http://') || summary.player.url.startsWith('https://'))) {
+			if (summary.player?.url && !(summary.player.url.startsWith('http://') || summary.player.url.startsWith('https://'))) {
 				throw new Error('unsupported schema included');
 			}
-
-			// @ts-ignore
+	
 			summary.icon = this.wrap(summary.icon);
-			// @ts-ignore
 			summary.thumbnail = this.wrap(summary.thumbnail);
-
+	
 			// Cache 7days
 			reply.header('Cache-Control', 'max-age=604800, immutable');
-
+	
 			return summary;
 		} catch (err) {
 			this.logger.warn(`Failed to get preview of ${url}: ${err}`);

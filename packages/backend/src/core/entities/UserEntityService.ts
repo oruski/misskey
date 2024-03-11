@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { In, Not } from 'typeorm';
 import Ajv from 'ajv';
 import { ModuleRef } from '@nestjs/core';
@@ -32,13 +32,13 @@ type IsMeAndIsUserDetailed<ExpectsMe extends boolean | null, Detailed extends bo
 
 const ajv = new Ajv();
 
-function isLocalUser(user: User): user is ILocalUser;
+function isLocalUser(user: User): user is LocalUser;
 function isLocalUser<T extends { host: User['host'] }>(user: T): user is T & { host: null; };
 function isLocalUser(user: User | { host: User['host'] }): boolean {
 	return user.host == null;
 }
 
-function isRemoteUser(user: User): user is IRemoteUser;
+function isRemoteUser(user: User): user is RemoteUser;
 function isRemoteUser<T extends { host: User['host'] }>(user: T): user is T & { host: string; };
 function isRemoteUser(user: User | { host: User['host'] }): boolean {
 	return !isLocalUser(user);

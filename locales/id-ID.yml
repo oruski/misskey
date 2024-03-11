@@ -1128,6 +1128,7 @@ _aboutMisskey:
   source: "Sumber kode"
   translation: "Terjemahkan Misskey"
   donate: "Donasi ke Misskey"
+  donateToOranski: "Donasi ke Oranski"
   morePatrons: "Kami sangat mengapresiasi dukungan dari banyak penolong lain yang tidak tercantum disini. Terima kasih! 🥰"
   patrons: "Pendukung"
 _nsfw:

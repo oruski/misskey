@@ -39,11 +39,10 @@ export async function openChat(body: any, loginId: string) {
 		return openClient('push', `/my/messaging/group/${body.groupId}`, loginId, { body });
 	}
 }
-
 // post-formのオプションから投稿フォームを開く
 export async function openPost(options: any, loginId: string) {
 	// クエリを作成しておく
-	let url = `/share?`;
+	let url = '/share?';
 	if (options.initialText) url += `text=${options.initialText}&`;
 	if (options.reply) url += `replyId=${options.reply.id}&`;
 	if (options.renote) url += `renoteId=${options.renote.id}&`;
@@ -59,12 +58,12 @@ export async function openClient(order: swMessageOrderType, url: string, loginId
 		return client;
 	}
 
-	return self.clients.openWindow(getUrlWithLoginId(url, loginId));
+	return globalThis.clients.openWindow(getUrlWithLoginId(url, loginId));
 }
 
 export async function findClient() {
-	const clients = await self.clients.matchAll({
-		type: 'window'
+	const clients = await globalThis.clients.matchAll({
+		type: 'window',
 	});
 	for (const c of clients) {
 		if (c.url.indexOf('?zen') < 0) return c;

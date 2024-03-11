@@ -1333,6 +1333,7 @@ _aboutMisskey:
   source: "Source code"
   translation: "Translate Misskey"
   donate: "Donate to Misskey"
+  donateToOranski: "Donate to Oranski"
   morePatrons: "We also appreciate the support of many other helpers not listed here. Thank you! 🥰"
   patrons: "Patrons"
 _nsfw:

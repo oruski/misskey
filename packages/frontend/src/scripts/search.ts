@@ -34,10 +34,8 @@ export async function search() {
 
 		// TODO
 		//v.$root.$emit('warp', date);
-		// noinspection TypeScriptValidateTypes
 		os.alert({
-			// @ts-ignore
-			icon: 'fas fa-history',
+			icon: 'ti ti-history',
 			iconOnly: true, autoClose: true,
 		});
 		return;

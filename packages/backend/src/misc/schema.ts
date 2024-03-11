@@ -60,7 +60,9 @@ export const refs = {
 	Clip: packedClipSchema,
 	FederationInstance: packedFederationInstanceSchema,
 	GalleryPost: packedGalleryPostSchema,
-	Emoji: packedEmojiSchema,
+	EmojiSimple: packedEmojiSimpleSchema,
+	EmojiDetailed: packedEmojiDetailedSchema,
+	Flash: packedFlashSchema,
 };
 
 export type Packed<x extends keyof typeof refs> = SchemaType<typeof refs[x]>;

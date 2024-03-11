@@ -26,7 +26,6 @@ class ChannelChannel extends Channel {
 	) {
 		super(id, connection);
 		//this.onNote = this.onNote.bind(this);
-		//this.emitTypers = this.emitTypers.bind(this);
 	}
 
 	@bindThis

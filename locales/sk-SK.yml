@@ -1006,6 +1006,7 @@ _aboutMisskey:
   source: "Zdrojový kód"
   translation: "Preložiť Misskey"
   donate: "Podporiť Misskey"
+  donateToOranski: "Podporiť Oranski"
   morePatrons: "Takisto oceňujeme podporu mnoých ďalších, ktorí tu nie sú uvedení. Ďakujeme! 🥰"
   patrons: "Prispievatelia"
 _nsfw:
