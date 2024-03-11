@@ -22,7 +22,7 @@ export class StickySidebar {
 
   public calc(scrollTop: number) {
     const url = new URL(window.location.href);
-    const isChat = url.pathname.includes('/my/messaging/group/');
+    const isChat = url.pathname.includes('/my/messaging/');
 
     if (scrollTop > this.lastScrollTop) {
       // downscroll

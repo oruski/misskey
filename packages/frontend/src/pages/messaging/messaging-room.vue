@@ -1,7 +1,7 @@
 <template>
   <MkStickyContainer>
     <template #header>
-      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" />
+      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" :group-owner-id="groupOwnerId" />
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
@@ -37,9 +37,9 @@
         <div v-if="typers.length > 0" :class="$style['typers']">
           <I18n :src="i18n.ts.typingUsers" text-tag="span">
             <template #users>
-              <b v-for="typer in typers" :key="typer.id" :class="$style['user']"
-                ><MkUserName class="name" :user="typer"
-              /></b>
+              <b v-for="typer in typers" :key="typer.id" :class="$style['user']">
+                <MkUserName class="name" :user="typer" />
+              </b>
             </template>
           </I18n>
           <MkEllipsis />
@@ -76,7 +76,6 @@ import { i18n } from '@/i18n';
 import { $i } from '@/account';
 import { defaultStore } from '@/store';
 import { definePageMetadata } from '@/scripts/page-metadata';
-import { useRouter } from '@/router';
 
 const props = defineProps<{
   userAcct?: string;
@@ -108,12 +107,12 @@ let typers: Misskey.entities.User[] = $ref([]);
 let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null = $ref(null);
 // @ts-ignore
 let showIndicator = $ref(false);
-let currentScrollOffset = $ref(document.body.scrollHeight - window.innerHeight - window.scrollY);
 
 let onlineUserCount = $ref(0);
 let groupUsers = $ref([]);
-
-console.debug('group =', group);
+let groupOwnerId = $computed(() => {
+  return group?.ownerId;
+});
 
 watch(
   () => group,
@@ -129,16 +128,12 @@ watch(
         });
       }),
     );
+    // @ts-ignore
     groupUsers = users;
-    onlineUserCount = users.filter((user) => user.onlineStatus === 'online').length;
+    onlineUserCount = users.filter((_user) => _user.onlineStatus === 'online').length;
     return 0;
   },
 );
-
-function updateCurrentScrollOffset() {
-  console.debug('updateCurrentScrollOffset');
-  currentScrollOffset = document.body.scrollHeight - window.innerHeight - window.scrollY;
-}
 
 const { animation } = defaultStore.reactiveState;
 
@@ -154,7 +149,6 @@ async function fetch() {
   console.log('fetch');
 
   fetching = true;
-  updateCurrentScrollOffset();
 
   if (props.userAcct) {
     const acct = Acct.parse(props.userAcct);
@@ -221,8 +215,9 @@ async function fetch() {
       url.pathname === `/my/messaging/${user?.username}` ||
       url.pathname === `/my/messaging/${user?.username}@${user?.host}`
     ) {
+      // @ts-ignore
       pagingComponent.inited.then(() => {
-        thisScrollToBottom();
+        thisScrollToBottom({ behavior: 'smooth' });
       });
     }
 
@@ -266,6 +261,7 @@ function onDrop(ev: DragEvent): void {
 
   // ファイルだったら
   if (ev.dataTransfer.files.length === 1) {
+    // @ts-ignore
     formEl.upload(ev.dataTransfer.files[0]);
     return;
   } else if (ev.dataTransfer.files.length > 1) {
@@ -280,6 +276,7 @@ function onDrop(ev: DragEvent): void {
   const driveFile = ev.dataTransfer.getData(_DATA_TRANSFER_DRIVE_FILE_);
   if (driveFile != null && driveFile !== '') {
     const file = JSON.parse(driveFile);
+    // @ts-ignore
     formEl.file = file;
   }
   //#endregion
@@ -291,11 +288,14 @@ function onDrop(ev: DragEvent): void {
 function onMessage(message) {
   sound.play('chat');
 
-  updateCurrentScrollOffset();
-
-  const _isBottom = currentScrollOffset <= 16;
+  console.debug(
+    'document.body.scrollHeight - window.innerHeight - window.scrollY =',
+    document.body.scrollHeight - window.innerHeight - window.scrollY,
+  );
+  const _isBottom = document.body.scrollHeight - window.innerHeight - window.scrollY <= 40;
   console.debug('[chat] _isBottom =', _isBottom);
 
+  // @ts-ignore
   pagingComponent.prepend(message);
   if (message.userId !== $i?.id && !document.hidden) {
     connection?.send('read', {
@@ -317,7 +317,7 @@ function onMessage(message) {
   if (_isBottom && isCurrentPage) {
     // Scroll to bottom
     nextTick(() => {
-      thisScrollToBottom();
+      thisScrollToBottom({ behavior: 'smooth' });
     });
   } else if (message.userId !== $i?.id) {
     // Notify
@@ -331,9 +331,13 @@ function onRead(x) {
   if (user) {
     if (!Array.isArray(x)) x = [x];
     for (const id of x) {
+      // @ts-ignore
       if (pagingComponent.items.some((y) => y.id === id)) {
+        // @ts-ignore
         const exist = pagingComponent.items.map((y) => y.id).indexOf(id);
+        // @ts-ignore
         pagingComponent.items[exist] = {
+          // @ts-ignore
           ...pagingComponent.items[exist],
           isRead: true,
         };
@@ -341,10 +345,15 @@ function onRead(x) {
     }
   } else if (group) {
     for (const id of x.ids) {
+      // @ts-ignore
       if (pagingComponent.items.some((y) => y.id === id)) {
+        // @ts-ignore
         const exist = pagingComponent.items.map((y) => y.id).indexOf(id);
+        // @ts-ignore
         pagingComponent.items[exist] = {
+          // @ts-ignore
           ...pagingComponent.items[exist],
+          // @ts-ignore
           reads: [...pagingComponent.items[exist].reads, x.userId],
         };
       }
@@ -352,31 +361,29 @@ function onRead(x) {
   }
 }
 
+/**
+ * メッセージの削除
+ */
 function onDeleted(id) {
-  updateCurrentScrollOffset();
-
+  // @ts-ignore
   const msg = pagingComponent.items.find((m) => m.id === id);
   if (msg) {
+    // @ts-ignore
     pagingComponent.items = pagingComponent.items.filter((m) => m.id !== msg.id);
   }
 }
 
-function thisScrollToBottom(option: { behavior: 'smooth' | 'auto' } = { behavior: 'smooth' }) {
-  // 一番したまでスクロールしている
-  const isScrollBelow = currentScrollOffset <= 16;
-  console.debug('isScrollBelow =', isScrollBelow);
-  console.debug('isFirstFetch =', isFirstFetch);
-  if (!isScrollBelow && !isFirstFetch) return;
+function thisScrollToBottom(option: ScrollToOptions = { behavior: 'smooth' }) {
   console.debug('scrollToBottomForWindow');
   scrollToBottomForWindow({
     ...option,
-    behavior: isFirstFetch ? 'instant' : option.behavior,
+    behavior: option.behavior,
   });
 }
 
 function onIndicatorClick() {
   showIndicator = false;
-  thisScrollToBottom();
+  thisScrollToBottom({ behavior: 'smooth' });
 }
 
 let scrollRemove: (() => void) | null = $ref(null);
@@ -385,6 +392,7 @@ function notifyNewMessage() {
   console.debug('[chat] notifyNewMessage');
   showIndicator = true;
 
+  // @ts-ignore
   scrollRemove = onScrollBottom(rootEl, () => {
     console.debug('[chat] onScrollBottom');
 
@@ -402,6 +410,7 @@ function notifyNewMessage() {
 
 function onVisibilitychange() {
   if (document.hidden) return;
+  // @ts-ignore
   for (const message of pagingComponent.items) {
     if (message.userId !== $i?.id && !message.isRead) {
       connection?.send('read', {
@@ -445,10 +454,11 @@ definePageMetadata(
         ? {
             userName: user,
             avatar: user,
+            icon: 'ti ti-user',
           }
         : {
             title: group?.name,
-            icon: 'ti ti-users',
+            icon: 'ti ti-messages',
           }
       : null,
   ),
@@ -473,12 +483,15 @@ definePageMetadata(
   color: #fff;
   background: rgba(#000, 0.3);
   border-radius: 12px;
+
   &:hover {
     background: rgba(#000, 0.4);
   }
+
   &:active {
     background: rgba(#000, 0.5);
   }
+
   > i {
     margin-right: 4px;
   }

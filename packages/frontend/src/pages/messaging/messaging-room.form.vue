@@ -35,9 +35,9 @@
 <script lang="ts" setup>
 import { onMounted, watch } from 'vue';
 import * as Misskey from 'misskey-js';
-import autosize from 'autosize';
 //import insertTextAtCursor from 'insert-text-at-cursor';
 import { throttle } from 'throttle-debounce';
+import { retry } from 'ts-retry-promise';
 import { formatTimeString } from '@/scripts/format-time-string';
 import { selectFile } from '@/scripts/select-file';
 import * as os from '@/os';
@@ -176,31 +176,50 @@ function upload(fileToUpload: File, name?: string) {
   });
 }
 
+/**
+ * メッセージ送信
+ */
 function send() {
   sending = true;
-  os.api('messaging/messages/create', {
-    userId: props.user ? props.user.id : undefined,
-    groupId: props.group ? props.group.id : undefined,
-    text: text ? text : undefined,
-    fileId: file ? file.id : undefined,
-  })
-    .then((message) => {
-      clear();
-    })
-    .catch((err) => {
-      console.error(err);
-    })
-    .then(() => {
-      sending = false;
-    });
+  retry(
+    () =>
+      os
+        .api('messaging/messages/create', {
+          userId: props.user ? props.user.id : undefined,
+          groupId: props.group ? props.group.id : undefined,
+          text: text ? text : undefined,
+          fileId: file ? file.id : undefined,
+        })
+        .then(() => {
+          clear();
+        })
+        .catch((err) => {
+          console.error(err);
+          throw err;
+        })
+        .then(() => {
+          sending = false;
+        }),
+    {
+      retries: 3,
+      backoff: 'LINEAR',
+      delay: 300,
+    },
+  );
 }
 
+/**
+ * 中身のクリア
+ */
 function clear() {
   text = '';
   file = null;
   deleteDraft();
 }
 
+/**
+ * 下書き保存
+ */
 function saveDraft() {
   const drafts = JSON.parse(miLocalStorage.getItem('message_drafts') || '{}');
 
@@ -216,6 +235,9 @@ function saveDraft() {
   miLocalStorage.setItem('message_drafts', JSON.stringify(drafts));
 }
 
+/**
+ * 下書き削除
+ */
 function deleteDraft() {
   const drafts = JSON.parse(miLocalStorage.getItem('message_drafts') || '{}');
 
@@ -225,12 +247,11 @@ function deleteDraft() {
 }
 
 async function insertEmoji(ev: MouseEvent) {
+  // @ts-ignore
   os.openEmojiPicker(ev.currentTarget ?? ev.target, {}, textEl);
 }
 
 onMounted(() => {
-  autosize(textEl);
-
   // TODO: detach when unmount
   // TODO
   //new Autocomplete(textEl, this, { model: 'text' });
@@ -261,6 +282,8 @@ defineExpose({
   min-width: 100%;
   max-width: 100%;
   min-height: 80px;
+  height: 80px;
+  max-height: 80px;
   margin: 0;
   padding: 16px 16px 0 16px;
   resize: none;
@@ -272,6 +295,7 @@ defineExpose({
   box-shadow: none;
   box-sizing: border-box;
   color: var(--fg);
+  overflow-x: hidden !important;
 }
 
 .footer {

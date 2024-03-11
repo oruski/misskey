@@ -2,36 +2,49 @@
   <div v-if="show" ref="el" :class="[$style.root]" :style="{ background: bg }">
     <div :class="$style.upper">
       <template v-if="metadata">
-        <div :class="$style.titleContainer" @click="top">
+        <div :class="$style.titleContainer" @click="scrollToBottom">
           <div :class="$style.title">
-            <div v-if="metadata.title">{{ metadata.title }}</div>
+            <i v-if="metadata.icon" :class="[$style.titleIcon, metadata.icon]"></i>
+            <template v-if="metadata.userName">
+              <div :class="$style.nameContainer">
+                <MkAvatar v-if="metadata.avatar" :user="metadata.avatar" :class="$style.avatar" indicator />
+                <MkUserName :user="metadata.userName" />
+              </div>
+            </template>
+            <template v-else-if="metadata.title">
+              <div>
+                {{ metadata.title }}
+              </div>
+            </template>
           </div>
         </div>
       </template>
 
-      <div :class="$style.buttonsRight">
-        <button
-          ref="buttonEl"
-          class="_button"
-          :class="$style.button"
-          @click.stop="actionHandler"
-          @touchstart="preventDrag"
-        >
-          <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
-            <template #n>
-              <b>{{ props.onlineUserCount }}</b>
-            </template>
-          </I18n>
-        </button>
-      </div>
+      <template v-if="props.groupUsers?.length">
+        <div :class="$style.buttonsRight">
+          <button
+            ref="buttonEl"
+            class="_button"
+            :class="$style.button"
+            @click.stop="actionHandler"
+            @touchstart="preventDrag"
+          >
+            <I18n :src="i18n.ts.onlineUsersCount" text-tag="span" class="text">
+              <template #n>
+                <b>{{ props.onlineUserCount }}</b>
+              </template>
+            </I18n>
+          </button>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, inject, shallowRef, defineAsyncComponent } from 'vue';
+import { onMounted, onUnmounted, ref, inject, shallowRef, defineAsyncComponent, onDeactivated } from 'vue';
 import tinycolor from 'tinycolor2';
-import { scrollToTop } from '@/scripts/scroll';
+import { scrollToBottomForWindow } from '@/scripts/scroll';
 import { globalEvents } from '@/events';
 import { injectPageMetadata } from '@/scripts/page-metadata';
 import { i18n } from '@/i18n';
@@ -41,6 +54,7 @@ const props = withDefaults(
   defineProps<{
     onlineUserCount?: number;
     groupUsers?: string[];
+    groupOwnerId?: string;
     actions?: {
       text: string;
       icon: string;
@@ -51,6 +65,7 @@ const props = withDefaults(
   }>(),
   {
     onlineUserCount: 0,
+    // @ts-ignore
     groupUsers: [] as unknown as string[],
   },
 );
@@ -77,18 +92,21 @@ const actionHandler: (ev: MouseEvent) => void = async () => {
 
   if (!showing) {
     if (popupModal) {
+      // @ts-ignore
       (await popupModal).dispose();
       popupModal = undefined;
     }
     return;
   }
 
+  // @ts-ignore
   popupModal = os.popup(
     defineAsyncComponent(() => import('./messaging-room.member-details.vue')),
     {
       showing,
       users: props.groupUsers,
       count: props.onlineUserCount,
+      groupOwnerId: props.groupOwnerId,
       targetElement: buttonEl.value as HTMLElement,
     },
     {},
@@ -100,9 +118,9 @@ const preventDrag = (ev: TouchEvent) => {
   ev.stopPropagation();
 };
 
-const top = () => {
+const scrollToBottom = () => {
   if (el) {
-    scrollToTop(el as HTMLElement, { behavior: 'smooth' });
+    scrollToBottomForWindow({ behavior: 'smooth' });
   }
 };
 const calcBg = () => {
@@ -124,6 +142,11 @@ onMounted(() => {
 onUnmounted(() => {
   globalEvents.off('themeChanged', calcBg);
   if (ro) ro.disconnect();
+});
+
+onDeactivated(async () => {
+  // @ts-ignore
+  if (popupModal) (await popupModal).dispose();
 });
 </script>
 
@@ -151,10 +174,12 @@ onUnmounted(() => {
   .tabs:first-child {
     margin-left: auto;
   }
+
   .tabs:not(:first-child) {
     padding-left: 16px;
     mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgb(0, 0, 0) 16px, rgb(0, 0, 0) 100%);
   }
+
   .tabs {
     margin-right: auto;
   }
@@ -166,6 +191,7 @@ onUnmounted(() => {
     .tabs:first-child {
       margin-left: 0;
     }
+
     > .titleContainer {
       margin: 0 auto;
       max-width: 100%;
@@ -184,6 +210,7 @@ onUnmounted(() => {
   align-items: center;
   min-width: var(--height);
   height: var(--height);
+
   &:empty {
     width: var(--height);
   }
@@ -203,13 +230,18 @@ onUnmounted(() => {
   right: 16px;
 }
 
+.nameContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
 .avatar {
-  $size: 32px;
+  $size: 20px;
   display: inline-block;
   width: $size;
   height: $size;
   vertical-align: bottom;
-  margin: 0 8px;
 }
 
 .button {
@@ -240,8 +272,6 @@ onUnmounted(() => {
 .titleContainer {
   display: flex;
   align-items: center;
-  max-width: min(30vw, 400px);
-  overflow: auto;
   white-space: nowrap;
   text-align: left;
   font-weight: bold;
@@ -266,9 +296,9 @@ onUnmounted(() => {
 }
 
 .title {
+  display: flex;
+  align-items: center;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.1;
 }
@@ -278,8 +308,6 @@ onUnmounted(() => {
   font-size: 0.8em;
   font-weight: normal;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 
   &.activeTab {
     text-align: center;

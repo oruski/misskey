@@ -3,7 +3,12 @@
     <div :class="$style.root">
       <div :class="$style.users">
         <div v-for="u in users" :key="u.id" :class="$style.user">
-          <MkAvatar :class="$style.avatar" :user="u" :indicator="u.onlineStatus === 'online'" />
+          <template v-if="groupOwnerId === u.id">
+            <div :class="$style['crown-container']">
+              <MkEmoji :normal="true" :no-style="true" emoji="👑" :class="$style.crown" />
+            </div>
+          </template>
+          <MkAvatar :class="$style.avatar" :user="u" indicator />
           <MkUserName :user="u" :nowrap="true" />
         </div>
       </div>
@@ -15,10 +20,12 @@
 import {} from 'vue';
 import MkTooltip from '@/components/MkTooltip.vue';
 
-defineProps<{
+const props = defineProps<{
   showing: boolean;
   reaction: string;
-  users: any[]; // TODO
+  // @ts-ignore
+  users: any[];
+  groupOwnerId?: string;
   count: number;
   targetElement: HTMLElement;
 }>();
@@ -63,12 +70,23 @@ const emit = defineEmits<{
 .user {
   line-height: 24px;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
 
   &:not(:last-child) {
     margin-bottom: 3px;
   }
+}
+
+.crown-container {
+  width: 0;
+  height: 0;
+}
+
+.crown {
+  margin-left: -1.6em;
+  width: 1em;
+  height: 1em;
 }
 
 .avatar {
