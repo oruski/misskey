@@ -34,7 +34,7 @@
           <i v-else-if="note.visibility === 'followers'" class="ti ti-lock"></i>
           <i v-else-if="note.visibility === 'specified'" ref="specified" class="ti ti-mail"></i>
         </span>
-        <span v-if="note.localOnly" style="margin-left: 0.5em" :title="i18n.ts._visibility['localOnly']"
+        <span v-if="note.localOnly" style="margin-left: 0.5em" :title="i18n.ts._visibility['disableFederation']"
           ><i class="ti ti-world-off"></i
         ></span>
       </div>
@@ -58,7 +58,10 @@
                 <i v-else-if="appearNote.visibility === 'followers'" class="ti ti-lock"></i>
                 <i v-else-if="appearNote.visibility === 'specified'" ref="specified" class="ti ti-mail"></i>
               </span>
-              <span v-if="appearNote.localOnly" style="margin-left: 0.5em" :title="i18n.ts._visibility['localOnly']"
+              <span
+                v-if="appearNote.localOnly"
+                style="margin-left: 0.5em"
+                :title="i18n.ts._visibility['disableFederation']"
                 ><i class="ti ti-world-off"></i
               ></span>
             </div>
@@ -344,9 +347,7 @@ function reply(viaKeyboard = false): void {
 function react(viaKeyboard = false): void {
   pleaseLogin();
   blur();
-
   reactionPicker.show(
-    // @ts-ignore
     reactButton.value,
     (reaction) => {
       if (hasPrincess(reaction)) claimAchievement('princess');
