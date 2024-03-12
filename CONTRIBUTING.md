@@ -44,7 +44,7 @@ Thank you for your PR! Before creating a PR, please check the following:
 - Check if there are any documents that need to be created or updated due to this change.
 - If you have added a feature or fixed a bug, please add a test case if possible.
 - Please make sure that tests and Lint are passed in advance.
-  - You can run it with `npm run test` and `npm run lint`. [See more info](#testing)
+  - You can run it with `pnpm test` and `pnpm lint`. [See more info](#testing)
 - If this PR includes UI changes, please attach a screenshot in the text.
 
 Thanks for your cooperation 🤗
@@ -77,15 +77,13 @@ An actual domain will be assigned so you can test the federation.
 
 ## Release
 ### Release Instructions
-1. Commit version changes in the `develop` branch ([package.json](https://github.
-   com/nacika-ins/misskey/blob/develop/package.
-   json))
+1. Commit version changes in the `develop` branch ([package.json](https://github.com/nacika-ins/misskey/blob/develop/package.json))
 2. Create a release PR.
 	- Into `master` from `develop` branch.
 	- The title must be in the format `Release: x.y.z`.
 		- `x.y.z` is the new version you are trying to release.
 3. Deploy and perform a simple QA check. Also verify that the tests passed.
-4. Merge it.
+4. Merge it. (Do not squash commit)
 5. Create a [release of GitHub](https://github.com/nacika-ins/misskey/releases)
 	- The target branch must be `master`
 	- The tag name must be the version
@@ -104,7 +102,7 @@ If your language is not listed in Crowdin, please open an issue.
 During development, it is useful to use the 
 
 ```
-npm run dev
+pnpm dev
 ```
 
 command.
@@ -114,22 +112,23 @@ command.
 - Service Worker is watched by esbuild.
 
 ### Dev Container
-Instead of running `npm` locally, you can use Dev Container to set up your development environment.
-To use Dev Container, open the project directory on VSCode with Dev Containers installed.
+Instead of running `pnpm` locally, you can use Dev Container to set up your development environment.
+To use Dev Container, open the project directory on VSCode with Dev Containers installed.  
+**Note:** If you are using Windows, please clone the repository with WSL. Using Git for Windows will result in broken files due to the difference in how newlines are handled.
 
 It will run the following command automatically inside the container.
 ``` bash
 git submodule update --init
-npm ci
+pnpm install --frozen-lockfile
 cp .devcontainer/devcontainer.yml .config/default.yml
-npm run build
-npm run migrate
+pnpm build
+pnpm migrate
 ```
 
-After finishing the migration, run the `npm run dev` command to start the development server.
+After finishing the migration, run the `pnpm dev` command to start the development server.
 
 ``` bash
-npm run dev
+pnpm dev
 ```
 
 ## Testing
@@ -148,12 +147,12 @@ Alternatively, prepare an empty (data can be erased) DB and edit `.config/test.y
 
 Run all test.
 ```
-npm run test
+pnpm test
 ```
 
 #### Run specify test
 ```
-npm run jest -- foo.ts
+pnpm jest -- foo.ts
 ```
 
 ### e2e tests
@@ -198,9 +197,9 @@ vue-routerとの最大の違いは、niraxは複数のルーターが存在す�
 これにより、アプリ内ウィンドウでブラウザとは個別にルーティングすることなどが可能になります。
 
 ## Notes
-### How to resolve conflictions occurred at yarn.lock?
+### How to resolve conflictions occurred at pnpm-lock.yaml?
 
-Just execute `yarn` to fix it.
+Just execute `pnpm` to fix it.
 
 ### INSERTするときにはsaveではなくinsertを使用する
 #6441
@@ -279,14 +278,15 @@ SQLでは配列のインデックスは**1始まり**。
 ### null IN
 nullが含まれる可能性のあるカラムにINするときは、そのままだとおかしくなるのでORなどでnullのハンドリングをしよう。
 
-### `undefined`にご用心
-MongoDBの時とは違い、findOneでレコードを取得する時に対象レコードが存在しない場合 **`undefined`** が返ってくるので注意。
-MongoDBは`null`で返してきてたので、その感覚で`if (x === null)`とか書くとバグる。代わりに`if (x == null)`と書いてください
+### enumの削除は気をつける
+enumの列挙の内容の削除は、その値をもつレコードを全て削除しないといけない
+
+削除が重たかったり不可能だったりする場合は、削除しないでおく
 
 ### Migration作成方法
 packages/backendで:
 ```sh
-npm run dlx typeorm migration:generate -d ormconfig.js -o <migration name>
+pnpm dlx typeorm migration:generate -d ormconfig.js -o <migration name>
 ```
 
 - 生成後、ファイルをmigration下に移してください
