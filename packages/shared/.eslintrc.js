@@ -12,13 +12,7 @@ module.exports = {
 		'plugin:import/typescript'
 	],
 	rules: {
-		'indent': ['warn', 'tab', {
-			'SwitchCase': 1,
-			'MemberExpression': 1,
-			'flatTernaryExpressions': true,
-			'ArrayExpression': 'first',
-			'ObjectExpression': 'first',
-		}],
+		'indent': 0,
 		'eol-last': ['error', 'always'],
 		'semi': ['error', 'always'],
 		'semi-spacing': ['error', { 'before': false, 'after': true }],
@@ -74,6 +68,20 @@ module.exports = {
 			'checksVoidReturn': false,
 		}],
 		'@typescript-eslint/consistent-type-imports': 'off',
+		'@typescript-eslint/prefer-nullish-coalescing': [
+			'error',
+		],
+		'@typescript-eslint/naming-convention': [
+			'error',
+			{
+				"selector": "typeLike",
+				"format": ["PascalCase"]
+			},
+			{
+				"selector": "typeParameter",
+				"format": []
+			}
+		],
 		'@typescript-eslint/prefer-nullish-coalescing': 0,
 		'import/no-unresolved': ['off'],
 		'import/no-default-export': 0,

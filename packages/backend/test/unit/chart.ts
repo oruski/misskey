@@ -20,7 +20,7 @@ import { NoLogger } from '@/no-logger.js';
 describe('Chart', () => {
 	const config = loadConfig();
 	const appLockService = {
-		getChartInsertLock: jest.fn().mockImplementation(() => Promise.resolve(() => {})),
+		getChartInsertLock: () => () => Promise.resolve(() => {}),
 	} as unknown as jest.Mocked<AppLockService>;
 
 	let db: DataSource | undefined;

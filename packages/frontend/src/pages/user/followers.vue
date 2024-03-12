@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, computed, inject, onMounted, onUnmounted, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { acct as Acct } from 'misskey-js';
 import * as misskey from 'misskey-js';
 import XFollowList from './follow-list.vue';

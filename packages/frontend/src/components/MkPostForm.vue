@@ -84,10 +84,10 @@
           </button>
         </div>
       </div>
-      <MkInfo v-if="hasNotSpecifiedMentions" warn :class="$style.hasNotSpecifiedMentions">
-        {{ i18n.ts.notSpecifiedMentionWarning }} -
-        <button class="_textButton" @click="addMissingMention()">{{ i18n.ts.add }}</button>
-      </MkInfo>
+      <MkInfo v-if="hasNotSpecifiedMentions" warn :class="$style.hasNotSpecifiedMentions"
+        >{{ i18n.ts.notSpecifiedMentionWarning }} -
+        <button class="_textButton" @click="addMissingMention()">{{ i18n.ts.add }}</button></MkInfo
+      >
       <input
         v-show="useCw"
         ref="cwInputEl"
@@ -181,10 +181,9 @@ import { inject, watch, nextTick, onMounted, defineAsyncComponent } from 'vue';
 import * as mfm from 'mfm-js';
 import * as misskey from 'misskey-js';
 import insertTextAtCursor from 'insert-text-at-cursor';
-import { length } from 'stringz';
 import { toASCII } from 'punycode/';
 import { acct as Acct } from 'misskey-js';
-import { throttle } from 'throttle-debounce';
+
 import MkNoteSimple from '@/components/MkNoteSimple.vue';
 import XNotePreview from '@/components/MkNotePreview.vue';
 import XPostFormAttaches from '@/components/MkPostFormAttaches.vue';
@@ -195,7 +194,6 @@ import { extractMentions } from '@/scripts/extract-mentions';
 import { formatTimeString } from '@/scripts/format-time-string';
 import { Autocomplete } from '@/scripts/autocomplete';
 import * as os from '@/os';
-import { stream } from '@/stream';
 import { selectFiles } from '@/scripts/select-file';
 import { defaultStore, notePostInterruptors, postFormActions } from '@/store';
 import MkInfo from '@/components/MkInfo.vue';
@@ -277,14 +275,8 @@ let autocomplete = $ref(null);
 let draghover = $ref(false);
 let quoteId = $ref(null);
 let hasNotSpecifiedMentions = $ref(false);
-let recentHashtags = $ref(JSON.parse(miLocalStorage.getItem('hashtags') || '[]'));
+let recentHashtags = $ref(JSON.parse(miLocalStorage.getItem('hashtags') ?? '[]'));
 let imeText = $ref('');
-
-const typing = throttle(3000, () => {
-  if (props.channel) {
-    stream.send('typingOnChannel', { channel: props.channel.id });
-  }
-});
 
 const draftKey = $computed((): string => {
   let key = props.channel ? `channel:${props.channel.id}` : '';
@@ -325,7 +317,7 @@ const submitText = $computed((): string => {
 });
 
 const textLength = $computed((): number => {
-  return length((text + imeText).trim());
+  return (text + imeText).trim().length;
 });
 
 const maxTextLength = $computed((): number => {
@@ -345,9 +337,13 @@ const canPost = $computed((): boolean => {
 const withHashtags = $computed(defaultStore.makeGetterSetter('postFormWithHashtags'));
 const hashtags = $computed(defaultStore.makeGetterSetter('postFormHashtags'));
 
-watch($$(text), () => {
-  checkMissingMention();
-});
+watch(
+  $$(text),
+  () => {
+    checkMissingMention();
+  },
+  { immediate: true },
+);
 
 watch(
   $$(visibleUsers),
@@ -580,12 +576,10 @@ function clear() {
 function onKeydown(ev: KeyboardEvent) {
   if ((ev.which === 10 || ev.which === 13) && (ev.ctrlKey || ev.metaKey) && canPost) post();
   if (ev.which === 27) emit('esc');
-  typing();
 }
 
 function onCompositionUpdate(ev: CompositionEvent) {
   imeText = ev.data;
-  typing();
 }
 
 function onCompositionEnd(ev: CompositionEvent) {
@@ -680,7 +674,7 @@ function onDrop(ev): void {
 }
 
 function saveDraft() {
-  const draftData = JSON.parse(miLocalStorage.getItem('drafts') || '{}');
+  const draftData = JSON.parse(miLocalStorage.getItem('drafts') ?? '{}');
 
   draftData[draftKey] = {
     updatedAt: new Date(),
@@ -801,7 +795,7 @@ async function post(ev?: MouseEvent) {
             .parse(postData.text)
             .filter((x) => x.type === 'hashtag')
             .map((x) => x.props.hashtag);
-          const history = JSON.parse(miLocalStorage.getItem('hashtags') || '[]') as string[];
+          const history = JSON.parse(miLocalStorage.getItem('hashtags') ?? '[]') as string[];
           miLocalStorage.setItem('hashtags', JSON.stringify(unique(hashtags_.concat(history))));
         }
         posting = false;
@@ -917,7 +911,7 @@ onMounted(() => {
   nextTick(() => {
     // 書きかけの投稿を復元
     if (!props.instant && !props.mention && !props.specified) {
-      const draft = JSON.parse(miLocalStorage.getItem('drafts') || '{}')[draftKey];
+      const draft = JSON.parse(miLocalStorage.getItem('drafts') ?? '{}')[draftKey];
       if (draft) {
         text = draft.data.text;
         useCw = draft.data.useCw;

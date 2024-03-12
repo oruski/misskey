@@ -5,7 +5,7 @@ import type { Config } from '@/config.js';
 import type { DriveFile } from '@/models/entities/DriveFile.js';
 import type { MessagingMessage } from '@/models/entities/MessagingMessage.js';
 import type { Note } from '@/models/entities/Note.js';
-import type { User, CacheableUser, IRemoteUser } from '@/models/entities/User.js';
+import type { User, RemoteUser } from '@/models/entities/User.js';
 import type { UserGroup } from '@/models/entities/UserGroup.js';
 import { QueueService } from '@/core/QueueService.js';
 import { toArray } from '@/misc/prelude/array.js';
@@ -48,7 +48,7 @@ export class MessagingService {
 	}
 
 	@bindThis
-	public async createMessage(user: { id: User['id']; host: User['host']; }, recipientUser: CacheableUser | undefined, recipientGroup: UserGroup | undefined, text: string | null | undefined, file: DriveFile | null, uri?: string) {
+	public async createMessage(user: { id: User['id']; host: User['host']; }, recipientUser: User | undefined, recipientGroup: UserGroup | undefined, text: string | null | undefined, file: DriveFile | null, uri?: string) {
 		const message = {
 			id: this.idService.genId(),
 			createdAt: new Date(),
@@ -58,6 +58,7 @@ export class MessagingService {
 			text: text ? text.trim() : null,
 			userId: user.id,
 			isRead: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
 			reads: [] as any[],
 			uri,
 		} as MessagingMessage;
@@ -135,7 +136,7 @@ export class MessagingService {
 				}))),
 			} as Note;
 
-			const activity = this.apRendererService.renderActivity(this.apRendererService.renderCreate(await this.apRendererService.renderNote(note, false, true), note));
+			const activity = this.apRendererService.addContext(this.apRendererService.renderCreate(await this.apRendererService.renderNote(note, false, true), note));
 
 			this.queueService.deliver(user, activity, recipientUser.inbox);
 		}
@@ -158,7 +159,8 @@ export class MessagingService {
 			if (this.userEntityService.isLocalUser(recipient)) this.globalEventService.publishMessagingStream(message.recipientId, message.userId, 'deleted', message.id);
 
 			if (this.userEntityService.isLocalUser(user) && this.userEntityService.isRemoteUser(recipient)) {
-				const activity = this.apRendererService.renderActivity(this.apRendererService.renderDelete(this.apRendererService.renderTombstone(`${this.config.url}/notes/${message.id}`), user));
+        // @ts-ignore
+				const activity = this.apRendererService.addContext(this.apRendererService.renderDelete(this.apRendererService.renderTombstone(`${this.config.url}/notes/${message.id}`), user));
 				this.queueService.deliver(user, activity, recipient.inbox);
 			}
 		} else if (message.groupId) {
@@ -256,6 +258,7 @@ export class MessagingService {
 			// Update document
 			await this.messagingMessagesRepository.createQueryBuilder().update()
 				.set({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
 					reads: (() => `array_append("reads", '${joining.userId}')`) as any,
 				})
 				.where('id = :id', { id: message.id })
@@ -291,17 +294,18 @@ export class MessagingService {
 	}
 
 	@bindThis
-	public async deliverReadActivity(user: { id: User['id']; host: null; }, recipient: IRemoteUser, messages: MessagingMessage | MessagingMessage[]) {
+	public async deliverReadActivity(user: { id: User['id']; host: null; }, recipient: RemoteUser, messages: MessagingMessage | MessagingMessage[]) {
 		messages = toArray(messages).filter(x => x.uri);
 		const contents = messages.map(x => this.apRendererService.renderRead(user, x));
 
 		if (contents.length > 1) {
 			// @ts-ignore
 			const collection = this.apRendererService.renderOrderedCollection(null, contents.length, undefined, undefined, contents);
-			this.queueService.deliver(user, this.apRendererService.renderActivity(collection), recipient.inbox);
+			this.queueService.deliver(user, this.apRendererService.addContext(collection), recipient.inbox);
 		} else {
 			for (const content of contents) {
-				this.queueService.deliver(user, this.apRendererService.renderActivity(content), recipient.inbox);
+        // @ts-ignore
+				this.queueService.deliver(user, this.apRendererService.addContext(content), recipient.inbox);
 			}
 		}
 	}

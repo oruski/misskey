@@ -22,6 +22,7 @@ RUN apt-get update
 RUN apt-get install -y build-essential
 RUN git submodule update --init
 RUN npm ci
+RUN npm run ci:all
 RUN npm run build
 RUN rm -rf .git
 

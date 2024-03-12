@@ -145,7 +145,7 @@ const widgetsShowing = $ref(false);
 const router = useRouter();
 let currentPage = $computed(() => router.currentRef.value);
 let isMessagingRoom = $computed(
-  () => currentPage?.route?.name === 'messaging-group' || currentPage?.route?.name === 'messaging-user',
+  () => currentPage.route.name === 'messaging-group' || currentPage.route.name === 'messaging-user',
 );
 
 provide('router', mainRouter);

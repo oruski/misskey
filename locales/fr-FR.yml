@@ -1004,6 +1004,7 @@ _aboutMisskey:
   source: "Code source"
   translation: "Traduire Misskey"
   donate: "Soutenir Misskey"
+  donateToOranski: "Soutenir Oranski"
   morePatrons: "Nous apprécions vraiment le soutien de nombreuses autres personnes non mentionnées ici. Merci à toutes et à tous ! 🥰"
   patrons: "Contributeurs"
 _nsfw:

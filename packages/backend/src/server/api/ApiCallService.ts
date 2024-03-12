@@ -1,11 +1,10 @@
-import { performance } from 'perf_hooks';
 import { pipeline } from 'node:stream';
 import * as fs from 'node:fs';
 import { promisify } from 'node:util';
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
 import { getIpHash } from '@/misc/get-ip-hash.js';
-import type { CacheableLocalUser, ILocalUser, User } from '@/models/entities/User.js';
+import type { LocalUser, User } from '@/models/entities/User.js';
 import type { AccessToken } from '@/models/entities/AccessToken.js';
 import type Logger from '@/logger.js';
 import type { UserIpsRepository } from '@/models/index.js';
@@ -109,10 +108,9 @@ export class ApiCallService implements OnApplicationShutdown {
 		const [path] = await createTemp();
 		await pump(multipartData.file, fs.createWriteStream(path));
 
-		const fields = {} as Record<string, string | undefined>;
+		const fields = {} as Record<string, unknown>;
 		for (const [k, v] of Object.entries(multipartData.fields)) {
-			// @ts-ignore
-			fields[k] = v.value;
+			fields[k] = typeof v === 'object' && 'value' in v ? v.value : undefined;
 		}
 
 		const token = fields['i'];
@@ -147,7 +145,6 @@ export class ApiCallService implements OnApplicationShutdown {
 	}
 
 	@bindThis
-	// @ts-ignore
 	private send(reply: FastifyReply, x?: unknown, y?: ApiError) {
 		if (x == null) {
 			reply.code(204);
@@ -170,7 +167,7 @@ export class ApiCallService implements OnApplicationShutdown {
 	}
 
 	@bindThis
-	private async logIp(request: FastifyRequest, user: ILocalUser) {
+	private async logIp(request: FastifyRequest, user: LocalUser) {
 		const meta = await this.metaService.fetch();
 		if (!meta.enableIpLogging) return;
 		const ip = request.ip;
@@ -196,7 +193,7 @@ export class ApiCallService implements OnApplicationShutdown {
 	@bindThis
 	private async call(
 		ep: IEndpoint & { exec: unknown },
-		user: CacheableLocalUser | null | undefined,
+		user: LocalUser | null | undefined,
 		token: AccessToken | null | undefined,
 		data: unknown,
 		file: {
@@ -222,10 +219,9 @@ export class ApiCallService implements OnApplicationShutdown {
 
 			const limit = Object.assign({}, ep.meta.limit);
 
-			if (!limit.key) {
+			if (limit.key == null) {
 				// @ts-ignore
-				// noinspection JSConstantReassignment
-				limit.key = ep.name;
+				(limit as unknown).key = ep.name;
 			}
 
 			// TODO: 毎リクエスト計算するのもあれだしキャッシュしたい
@@ -244,7 +240,6 @@ export class ApiCallService implements OnApplicationShutdown {
 			}
 		}
 
-		// @ts-ignore
 		if (ep.meta.requireCredential || ep.meta.requireModerator || ep.meta.requireAdmin) {
 			if (user == null) {
 				throw new ApiError({
@@ -283,7 +278,6 @@ export class ApiCallService implements OnApplicationShutdown {
 
 		if (ep.meta.requireRolePolicy != null && !user!.isRoot) {
 			const policies = await this.roleService.getUserPolicies(user!.id);
-			// @ts-ignore
 			if (!policies[ep.meta.requireRolePolicy]) {
 				throw new ApiError({
 					message: 'You are not assigned to a required role.',

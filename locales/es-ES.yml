@@ -1325,6 +1325,7 @@ _aboutMisskey:
   source: "Código fuente"
   translation: "Traducir Misskey"
   donate: "Donar a Misskey"
+  donateToOranski: "Donar a Oranski"
   morePatrons: "Muchas más personas nos apoyan. Muchas gracias🥰"
   patrons: "Patrocinadores"
 _nsfw:

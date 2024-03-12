@@ -1,6 +1,6 @@
 {
 	"name": "misskey",
-	"version": "13.6.1",
+	"version": "13.7.0",
 	"codename": "nasubi",
 	"repository": {
 		"type": "git",
@@ -9,7 +9,7 @@
 	"private": true,
 	"scripts": {
     "dev": "gulp watch",
-    "postinstall": "node --experimental-default-type=module  ./scripts/install-packages.js",
+    "ci:all": "node --experimental-default-type=module  ./scripts/install-packages.js",
     "build": "node --experimental-default-type=module ./scripts/build.js",
     "build-pre": "node ./scripts/build-pre.js",
     "start": "cd packages/backend && node --experimental-json-modules ./built/boot/index.js",

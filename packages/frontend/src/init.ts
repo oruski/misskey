@@ -55,10 +55,8 @@ if (_DEV_) {
 
   console.info(`vue ${vueVersion}`);
 
-  // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).$i = $i;
-  // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).$store = defaultStore;
 
@@ -226,7 +224,6 @@ components(app);
 const splash = document.getElementById('splash');
 // 念のためnullチェック(HTMLが古い場合があるため(そのうち消す))
 if (splash)
-  // @ts-ignore
   splash.addEventListener('transitionend', () => {
     splash.remove();
   });
@@ -329,8 +326,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addListener((mql) => {
 fetchInstanceMetaPromise.then(() => {
   if (defaultStore.state.themeInitial) {
     if (instance.defaultLightTheme != null)
-      // @ts-ignore
-      // eslint-disable-next-line nonblock-statement-body-position
       ColdDeviceStorage.set('lightTheme', JSON5.parse(instance.defaultLightTheme));
     if (instance.defaultDarkTheme != null) ColdDeviceStorage.set('darkTheme', JSON5.parse(instance.defaultDarkTheme));
     defaultStore.set('themeInitial', false);

@@ -141,7 +141,7 @@ const empty = computed(() => items.value.length === 0);
 const error = ref(false);
 const { enableInfiniteScroll } = defaultStore.reactiveState;
 
-const contentEl = $computed(() => props.pagination.pageEl || rootEl);
+const contentEl = $computed(() => props.pagination.pageEl ?? rootEl);
 const scrollableElement = $computed(() => getScrollContainer(contentEl));
 
 // 先頭が表示されているかどうかを検出

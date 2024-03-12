@@ -28,7 +28,8 @@ import { packedClipSchema } from '@/models/schema/clip.js';
 import { packedFederationInstanceSchema } from '@/models/schema/federation-instance.js';
 import { packedQueueCountSchema } from '@/models/schema/queue.js';
 import { packedGalleryPostSchema } from '@/models/schema/gallery-post.js';
-import { packedEmojiSchema } from '@/models/schema/emoji.js';
+import { packedEmojiDetailedSchema, packedEmojiSimpleSchema } from '@/models/schema/emoji.js';
+import { packedFlashSchema } from '@/models/schema/flash.js';
 
 export const refs = {
 	UserLite: packedUserLiteSchema,
@@ -60,7 +61,9 @@ export const refs = {
 	Clip: packedClipSchema,
 	FederationInstance: packedFederationInstanceSchema,
 	GalleryPost: packedGalleryPostSchema,
-	Emoji: packedEmojiSchema,
+	EmojiSimple: packedEmojiSimpleSchema,
+	EmojiDetailed: packedEmojiDetailedSchema,
+	Flash: packedFlashSchema,
 };
 
 export type Packed<x extends keyof typeof refs> = SchemaType<typeof refs[x]>;
@@ -72,8 +75,11 @@ type StringDefToType<T extends TypeStringef> =
 	T extends 'integer' ? number :
 	T extends 'number' ? number :
 	T extends 'string' ? string | Date :
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends 'array' ? ReadonlyArray<any> :
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends 'object' ? Record<string, any> :
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	any;
 
 // https://swagger.io/specification/?sbsearch=optional#schema-object
@@ -91,10 +97,12 @@ export interface Schema extends OfSchema {
 	readonly properties?: Obj;
 	readonly required?: ReadonlyArray<Extract<keyof NonNullable<this['properties']>, string>>;
 	readonly description?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly example?: any;
 	readonly format?: string;
 	readonly ref?: keyof typeof refs;
 	readonly enum?: ReadonlyArray<string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly default?: (this['type'] extends TypeStringef ? StringDefToType<this['type']> : any) | null;
 	readonly maxLength?: number;
 	readonly minLength?: number;
@@ -130,14 +138,18 @@ type NullOrUndefined<p extends Schema, T> =
 	| T;
 
 // https://stackoverflow.com/questions/54938141/typescript-convert-union-to-intersection
-// Get intersection from union 
+// Get intersection from union
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 type PartialIntersection<T> = Partial<UnionToIntersection<T>>;
 
 // https://github.com/misskey-dev/misskey/pull/8144#discussion_r785287552
 // To get union, we use `Foo extends any ? Hoge<Foo> : never`
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type UnionSchemaType<a extends readonly any[], X extends Schema = a[number]> = X extends any ? SchemaType<X> : never;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type UnionObjectSchemaType<a extends readonly any[], X extends Schema = a[number]> = X extends any ? ObjectSchemaType<X> : never;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ArrayUnion<T> = T extends any ? Array<T> : never;
 
 type ObjectSchemaTypeDef<p extends Schema> =
@@ -150,6 +162,7 @@ type ObjectSchemaTypeDef<p extends Schema> =
 	:
 	p['anyOf'] extends ReadonlyArray<Schema> ? UnionObjectSchemaType<p['anyOf']> & PartialIntersection<UnionObjectSchemaType<p['anyOf']>> :
 	p['allOf'] extends ReadonlyArray<Schema> ? UnionToIntersection<UnionSchemaType<p['allOf']>> :
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	any
 
 type ObjectSchemaType<p extends Schema> = NullOrUndefined<p, ObjectSchemaTypeDef<p>>;
@@ -174,10 +187,12 @@ export type SchemaTypeDef<p extends Schema> =
 			never
 		) :
 		p['items'] extends NonNullable<Schema> ? SchemaTypeDef<p['items']>[] :
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
 		any[]
 	) :
 	p['anyOf'] extends ReadonlyArray<Schema> ? UnionSchemaType<p['anyOf']> & PartialIntersection<UnionSchemaType<p['anyOf']>> :
 	p['oneOf'] extends ReadonlyArray<Schema> ? UnionSchemaType<p['oneOf']> :
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	any;
 
 export type SchemaType<p extends Schema> = NullOrUndefined<p, SchemaTypeDef<p>>;

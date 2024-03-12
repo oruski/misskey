@@ -4,7 +4,7 @@ import { $i, iAmModerator } from '@/account';
 import MkLoading from '@/pages/_loading_.vue';
 import MkError from '@/pages/_error_.vue';
 
-const page = (loader: AsyncComponentLoader) =>
+const page = (loader: AsyncComponentLoader<any>) =>
   defineAsyncComponent({
     loader: loader,
     loadingComponent: MkLoading,
@@ -250,8 +250,12 @@ export const routes = [
     loginRequired: true,
   },
   {
-    path: '/explore/tags/:tag',
-    component: page(() => import('./pages/explore.vue')),
+    path: '/roles/:role',
+    component: page(() => import('./pages/role.vue')),
+  },
+  {
+    path: '/user-tags/:tag',
+    component: page(() => import('./pages/user-tag.vue')),
   },
   {
     path: '/explore',
@@ -638,7 +642,6 @@ export const routes = [
   },
 ];
 
-// @ts-ignore
 export const mainRouter = new Router(routes, location.pathname + location.search + location.hash);
 
 window.history.replaceState({ key: mainRouter.getCurrentKey() }, '', location.href);

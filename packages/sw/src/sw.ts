@@ -5,23 +5,23 @@ import { pushNotificationDataMap } from '@/types';
 import * as swos from '@/scripts/operations';
 import { acct as getAcct } from '@/filters/user';
 
-self.addEventListener('install', ev => {
-	ev.waitUntil(self.skipWaiting());
+globalThis.addEventListener('install', ev => {
+	//ev.waitUntil(globalThis.skipWaiting());
 });
 
-self.addEventListener('activate', ev => {
+globalThis.addEventListener('activate', ev => {
 	ev.waitUntil(
 		caches.keys()
 			.then(cacheNames => Promise.all(
 				cacheNames
 					.filter((v) => v !== swLang.cacheName)
-					.map(name => caches.delete(name))
+					.map(name => caches.delete(name)),
 			))
-			.then(() => self.clients.claim())
+			.then(() => globalThis.clients.claim()),
 	);
 });
 
-self.addEventListener('fetch', ev => {
+globalThis.addEventListener('fetch', ev => {
 	let isHTMLRequest = false;
 	if (ev.request.headers.get('sec-fetch-dest') === 'document') {
 		isHTMLRequest = true;
@@ -34,17 +34,17 @@ self.addEventListener('fetch', ev => {
 	if (!isHTMLRequest) return;
 	ev.respondWith(
 		fetch(ev.request)
-		.catch(() => new Response(`Offline. Service Worker @${_VERSION_}`, { status: 200 }))
+			.catch(() => new Response(`Offline. Service Worker @${_VERSION_}`, { status: 200 })),
 	);
 });
 
-self.addEventListener('push', ev => {
+globalThis.addEventListener('push', ev => {
 	// クライアント取得
-	ev.waitUntil(self.clients.matchAll({
+	ev.waitUntil(globalThis.clients.matchAll({
 		includeUncontrolled: true,
-		type: 'window'
-	}).then(async <K extends keyof pushNotificationDataMap>(clients: readonly WindowClient[]) => {
-		const data: pushNotificationDataMap[K] = ev.data?.json();
+		type: 'window',
+	}).then(async (clients: readonly WindowClient[]) => {
+		const data: pushNotificationDataMap[keyof pushNotificationDataMap] = ev.data?.json();
 
 		switch (data.type) {
 			// case 'driveFileCreated':
@@ -54,12 +54,9 @@ self.addEventListener('push', ev => {
 				// 1日以上経過している場合は無視
 				if ((new Date()).getTime() - data.dateTime > 1000 * 60 * 60 * 24) break;
 
-				// クライアントがあったらストリームに接続しているということなので通知しない
-				if (clients.length !== 0) break;
-
 				return createNotification(data);
 			case 'readAllNotifications':
-				for (const n of await self.registration.getNotifications()) {
+				for (const n of await globalThis.registration.getNotifications()) {
 					if (n?.data?.type === 'notification') n.close();
 				}
 				break;
@@ -69,13 +66,13 @@ self.addEventListener('push', ev => {
 				}
 				break;
 			case 'readAllAntennas':
-				for (const n of await self.registration.getNotifications()) {
+				for (const n of await globalThis.registration.getNotifications()) {
 					if (n?.data?.type === 'unreadAntennaNote') n.close();
 				}
 				break;
 			case 'readNotifications':
-				for (const n of await self.registration.getNotifications()) {
-					if (data.body?.notificationIds?.includes(n.data.body.id)) {
+				for (const n of await globalThis.registration.getNotifications()) {
+					if (data.body.notificationIds.includes(n.data.body.id)) {
 						n.close();
 					}
 				}
@@ -92,29 +89,30 @@ self.addEventListener('push', ev => {
 				}
 				break;
 			case 'readAntenna':
-				for (const n of await self.registration.getNotifications()) {
-					if (n?.data?.type === 'unreadAntennaNote' && data.body?.antennaId === n.data.body.antenna.id) {
+				for (const n of await globalThis.registration.getNotifications()) {
+					if (n?.data?.type === 'unreadAntennaNote' && data.body.antennaId === n.data.body.antenna.id) {
 						n.close();
 					}
 				}
 				break;
 		}
 
-		return createEmptyNotification();
+		await createEmptyNotification();
+		return;
 	}));
 });
 
-self.addEventListener('notificationclick', <K extends keyof pushNotificationDataMap>(ev: ServiceWorkerGlobalScopeEventMap['notificationclick']) => {
+globalThis.addEventListener('notificationclick', (ev: ServiceWorkerGlobalScopeEventMap['notificationclick']) => {
 	ev.waitUntil((async () => {
 		if (_DEV_) {
 			console.log('notificationclick', ev.action, ev.notification.data);
 		}
-	
+
 		const { action, notification } = ev;
-		const data: pushNotificationDataMap[K] = notification.data;
+		const data: pushNotificationDataMap[keyof pushNotificationDataMap] = notification.data;
 		const { userId: loginId } = data;
 		let client: WindowClient | null = null;
-	
+
 		switch (data.type) {
 			case 'notification':
 				switch (action) {
@@ -180,42 +178,42 @@ self.addEventListener('notificationclick', <K extends keyof pushNotificationData
 			case 'unreadAntennaNote':
 				client = await swos.openAntenna(data.body.antenna.id, loginId);
 		}
-	
+
 		if (client) {
 			client.focus();
 		}
 		if (data.type === 'notification') {
 			swNotificationRead.then(that => that.read(data));
 		}
-	
+
 		notification.close();
 	})());
 });
 
-self.addEventListener('notificationclose', <K extends keyof pushNotificationDataMap>(ev: ServiceWorkerGlobalScopeEventMap['notificationclose']) => {
-	const data: pushNotificationDataMap[K] = ev.notification.data;
+globalThis.addEventListener('notificationclose', (ev: ServiceWorkerGlobalScopeEventMap['notificationclose']) => {
+	const data: pushNotificationDataMap[keyof pushNotificationDataMap] = ev.notification.data;
 
 	if (data.type === 'notification') {
 		swNotificationRead.then(that => that.read(data));
 	}
 });
 
-self.addEventListener('message', (ev: ServiceWorkerGlobalScopeEventMap['message']) => {
+globalThis.addEventListener('message', (ev: ServiceWorkerGlobalScopeEventMap['message']) => {
 	ev.waitUntil((async () => {
 		switch (ev.data) {
 			case 'clear':
 				// Cache Storage全削除
 				await caches.keys()
 					.then(cacheNames => Promise.all(
-						cacheNames.map(name => caches.delete(name))
+						cacheNames.map(name => caches.delete(name)),
 					));
 				return; // TODO
 		}
-	
+
 		if (typeof ev.data === 'object') {
 			// E.g. '[object Array]' → 'array'
 			const otype = Object.prototype.toString.call(ev.data).slice(8, -1).toLowerCase();
-	
+
 			if (otype === 'object') {
 				if (ev.data.msg === 'initialize') {
 					swLang.setLang(ev.data.lang);
