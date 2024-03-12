@@ -8,49 +8,32 @@ on:
   pull_request:
 
 jobs:
-  pnpm_install:
+  backend:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3.3.0
+    - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
         submodules: true
-    - uses: pnpm/action-setup@v2
+    - uses: actions/setup-node@v3
       with:
-        version: 7
-        run_install: false
-    - uses: actions/setup-node@v3.6.0
-      with:
-        node-version: 18.x
-        cache: 'pnpm'
-    - run: corepack enable
-    - run: pnpm i --frozen-lockfile
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: |
+          packages/backend/package-lock.json
+    - run: npm install
+    - run: npm --cwd ./packages/backend lint
 
-  lint:
-    needs: [pnpm_install]
+  client:
     runs-on: ubuntu-latest
-    continue-on-error: true
-    strategy:
-      matrix:
-        workspace:
-        - backend
-        - frontend
-        - sw
-        lint:
-        - eslint
     steps:
-    - uses: actions/checkout@v3.3.0
+    - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
         submodules: true
-    - uses: pnpm/action-setup@v2
+    - uses: actions/setup-node@v3
       with:
-        version: 7
-        run_install: false
-    - uses: actions/setup-node@v3.6.0
-      with:
-        node-version: 18.x
-        cache: 'pnpm'
-    - run: corepack enable
-    - run: pnpm i --frozen-lockfile
-    - run: pnpm --filter ${{ matrix.workspace }} run ${{ matrix.lint }}
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: |
+          packages/client/package-lock.json
+    - run: npm install
+    - run: npm --cwd ./packages/client lint

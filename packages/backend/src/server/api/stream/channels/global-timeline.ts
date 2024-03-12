@@ -25,7 +25,6 @@ class GlobalTimelineChannel extends Channel {
 		super(id, connection);
 		//this.onNote = this.onNote.bind(this);
 	}
-
 	@bindThis
 	public async init(params: any) {
 		const policies = await this.roleService.getUserPolicies(this.user ? this.user.id : null);
