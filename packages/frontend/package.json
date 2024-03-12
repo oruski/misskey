@@ -76,7 +76,7 @@
 		"vue": "3.4.21",
 		"vue-plyr": "7.0.0",
 		"vue-prism-editor": "2.0.0-alpha.2",
-		"vuedraggable": "4.1.0"
+		"vuedraggable": "next"
 	},
 	"devDependencies": {
 		"@types/escape-regexp": "0.0.3",

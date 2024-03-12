@@ -33,7 +33,7 @@
 		"lib": [
 			"esnext"
 		],
-		"types": ["jest"]
+		"types": ["jest", "node"]
 	},
 	"compileOnSave": false,
 	"include": [
@@ -41,6 +41,9 @@
 	],
 	"exclude": [
 		"../node_modules",
-		"../built"
+		"../built",
+		"./**/*.ts",
+		"../src/**/*.test.ts",
+		"../src/@types/**/*.ts",
 	]
 }
