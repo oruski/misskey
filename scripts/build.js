@@ -55,5 +55,7 @@ const __dirname = new URL('.', import.meta.url).pathname;
     os.exit(1);
     return;
   }
+
+  console.debug('Succesfully built all packages.');
 })();
 

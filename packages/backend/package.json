@@ -11,7 +11,7 @@
 		"clean": "rm -rf built",
 		"migrate": "typeorm migration:run -d ormconfig.js",
 		"build:swc": "swc src --out-dir built --source-maps && rsync -av --exclude='server/api' --exclude='models'  built/src/ built/ && rm -rf built/src",
-		"build": "tsc -p tsconfig.json || echo done. && tsc-alias -p tsconfig.json",
+		"build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
 		"watch": "node watch.mjs",
 		"type-check": "tsc --noEmit",
 		"type-check:watch": "tsc --noEmit --watch",
