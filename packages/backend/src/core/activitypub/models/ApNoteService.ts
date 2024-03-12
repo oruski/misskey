@@ -146,7 +146,8 @@ export class ApNoteService {
 		this.logger.info(`Creating the Note: ${note.id}`);
 
 		// 投稿者をフェッチ
-		const actor = await this.apPersonService.resolvePerson(getOneApId(note.attributedTo), resolver) as CacheableRemoteUser;
+    // @ts-ignore
+		const actor = await this.apPersonService.resolvePerson(getOneApId(note.attributedTo), resolver) as RemoteUser;
 
 		// 投稿者が凍結されていたらスキップ
 		if (actor.isSuspended) {

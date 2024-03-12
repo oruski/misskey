@@ -53,7 +53,9 @@ export class UserCacheService implements OnApplicationShutdown {
 						}
 					}
 					if (this.userEntityService.isLocalUser(user)) {
+            // @ts-ignore
 						this.localUserByNativeTokenCache.set(user.token, user);
+            // @ts-ignore
 						this.localUserByIdCache.set(user.id, user);
 					}
 					break;

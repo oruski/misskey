@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-// @ts-ignore
-import { summaly } from 'summaly';
+import { summaly } from '@misskey-dev/summaly';
 import { DI } from '@/di-symbols.js';
 import type { UsersRepository } from '@/models/index.js';
 import type { Config } from '@/config.js';

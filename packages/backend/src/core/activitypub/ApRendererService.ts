@@ -61,6 +61,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderAccept(object: any, user: { id: User['id']; host: null }): IAccept {
 		return {
 			type: 'Accept',
@@ -70,6 +71,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderAdd(user: LocalUser, target: any, object: any): IAdd {
 		return {
 			type: 'Add',
@@ -80,6 +82,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderAnnounce(object: any, note: Note): IAnnounce {
 		const attributedTo = `${this.config.url}/users/${note.userId}`;
 
@@ -206,6 +209,7 @@ export class ApRendererService {
 	@bindThis
 	public async renderFollowUser(id: User['id']) {
 		const user = await this.usersRepository.findOneByOrFail({ id: id });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return this.userEntityService.isLocalUser(user) ? `${this.config.url}/users/${user.id}` : user.uri;
 	}
 
@@ -292,7 +296,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
-	public async renderNote(note: Note, dive = true): Promise<IPost> {
+	public async renderNote(note: Note, dive = true, isTalk = false): Promise<IPost> {
 		const getPromisedFiles = async (ids: string[]) => {
 			if (!ids || ids.length === 0) return [];
 			const items = await this.driveFilesRepository.findBy({ id: In(ids) });
@@ -405,11 +409,11 @@ export class ApRendererService {
 					totalItems: poll!.votes[i],
 				},
 			})),
-		} : {};
+		} as const : {};
 
-		const asTalk = isTalk ? {
-			_misskey_talk: true,
-		} : {};
+    const asTalk = isTalk ? {
+      _misskey_talk: true,
+    } : {};
 
 		return {
 			id: `${this.config.url}/notes/${note.id}`,
@@ -418,6 +422,7 @@ export class ApRendererService {
 			summary: summary ?? undefined,
 			// @ts-ignore
 			content: content ?? undefined,
+      // @ts-ignore
 			_misskey_content: text,
 			source: {
 				content: text,
@@ -439,7 +444,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
-	public async renderPerson(user: ILocalUser) {
+	public async renderPerson(user: LocalUser) {
 		const id = `${this.config.url}/users/${user.id}`;
 		const isSystem = !!user.username.match(/\./);
 
@@ -502,7 +507,8 @@ export class ApRendererService {
 			publicKey: this.renderKey(user, keypair, '#main-key'),
 			isCat: user.isCat,
 			attachment: attachment.length ? attachment : undefined,
-		} as unknown;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} as any;
 
 		if (profile.birthday) {
 			// @ts-ignore
@@ -545,6 +551,7 @@ export class ApRendererService {
   }
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderReject(object: any, user: { id: User['id'] }): IReject {
 		return {
 			type: 'Reject',
@@ -554,6 +561,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderRemove(user: { id: User['id'] }, target: any, object: any): IRemove {
 		return {
 			type: 'Remove',
@@ -572,6 +580,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderUndo(object: any, user: { id: User['id'] }): IUndo {
 		const id = typeof object.id === 'string' && object.id.startsWith(this.config.url) ? `${object.id}/undo` : undefined;
 
@@ -586,11 +595,12 @@ export class ApRendererService {
 
 	@bindThis
 	public renderUpdate(object: unknown, user: { id: User['id'] }): IUpdate {
-		return {
+    return {
 			id: `${this.config.url}/users/${user.id}#updates/${new Date().getTime()}`,
 			actor: `${this.config.url}/users/${user.id}`,
 			type: 'Update',
 			to: ['https://www.w3.org/ns/activitystreams#Public'],
+      // @ts-ignore
 			object,
 			published: new Date().toISOString(),
 		};
@@ -657,6 +667,7 @@ export class ApRendererService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async attachLdSignature(activity: any, user: { id: User['id']; host: null; }): Promise<IActivity> {
 		const keypair = await this.userKeypairStoreService.getUserKeypair(user.id);
 
@@ -677,6 +688,7 @@ export class ApRendererService {
 	 * @param next URL of next page (optional)
 	 */
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderOrderedCollectionPage(id: string, totalItems: any, orderedItems: any, partOf: string, prev?: string, next?: string) {
 		const page = {
 			id,
@@ -684,6 +696,7 @@ export class ApRendererService {
 			type: 'OrderedCollectionPage',
 			totalItems,
 			orderedItems,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} as any;
 
 		if (prev) page.prev = prev;
@@ -701,7 +714,9 @@ export class ApRendererService {
 	 * @param orderedItems attached objects (optional)
 	 */
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public renderOrderedCollection(id: string | null, totalItems: any, first?: string, last?: string, orderedItems?: IObject[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const page: any = {
 			id,
 			type: 'OrderedCollection',

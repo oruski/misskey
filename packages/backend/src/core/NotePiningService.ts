@@ -115,9 +115,12 @@ export class NotePiningService {
 
 		const target = `${this.config.url}/users/${user.id}/collections/featured`;
 		const item = `${this.config.url}/notes/${noteId}`;
+    // @ts-ignore
 		const content = this.apRendererService.addContext(isAddition ? this.apRendererService.renderAdd(user, target, item) : this.apRendererService.renderRemove(user, target, item));
 
+    // @ts-ignore
 		this.apDeliverManagerService.deliverToFollowers(user, content);
+    // @ts-ignore
 		this.relayService.deliverToRelays(user, content);
 	}
 }

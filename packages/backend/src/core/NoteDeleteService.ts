@@ -43,7 +43,7 @@ export class NoteDeleteService {
 		private perUserNotesChart: PerUserNotesChart,
 		private instanceChart: InstanceChart,
 	) {}
-	
+
 	/**
 	 * 投稿を削除します。
 	 * @param user 投稿者
@@ -90,7 +90,9 @@ export class NoteDeleteService {
 			for (const cascadingNote of cascadingNotes) {
 				if (!cascadingNote.user) continue;
 				if (!this.userEntityService.isLocalUser(cascadingNote.user)) continue;
+        // @ts-ignore
 				const content = this.apRendererService.addContext(this.apRendererService.renderDelete(this.apRendererService.renderTombstone(`${this.config.url}/notes/${cascadingNote.id}`), cascadingNote.user));
+        // @ts-ignore
 				this.deliverToConcerned(cascadingNote.user, cascadingNote, content);
 			}
 			//#endregion
@@ -138,6 +140,7 @@ export class NoteDeleteService {
 
 	@bindThis
 	private async getMentionedRemoteUsers(note: Note) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const where = [] as any[];
 
 		// mention / reply / dm
@@ -163,6 +166,7 @@ export class NoteDeleteService {
 	}
 
 	@bindThis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private async deliverToConcerned(user: { id: LocalUser['id']; host: null; }, note: Note, content: any) {
 		this.apDeliverManagerService.deliverToFollowers(user, content);
 		this.relayService.deliverToRelays(user, content);
