@@ -44,14 +44,12 @@
     ]
   },
   "compileOnSave": false,
-  "include": [
-    "./src/**/*.ts",
-    "./src/**/*.json"
-  ],
+
   "exclude": [
     "node_module",
     "./node_modules",
     "./node_modules/**",
-    "./built"
+    "./built",
+    "./test"
   ]
 }
