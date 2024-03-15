@@ -92,6 +92,7 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 
 let isFirstFetch = $ref(true);
 let finishFirstFetch = debounce(() => {
+  thisScrollToBottom({ behavior: 'instant' });
   console.debug('初回ローディング完了');
   isFirstFetch = false;
 }, 300);
@@ -217,7 +218,7 @@ async function fetch() {
     ) {
       // @ts-ignore
       pagingComponent.inited.then(() => {
-        thisScrollToBottom({ behavior: 'smooth' });
+        thisScrollToBottom({ behavior: isFirstFetch ? 'instant' : 'smooth' });
       });
     }
 
@@ -472,7 +473,7 @@ definePageMetadata(
 }
 
 .body {
-  min-height: 80%;
+  min-height: calc(100vh - 131px - 51px);
 }
 
 .more {
