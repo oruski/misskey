@@ -13,7 +13,7 @@
     <div v-else-if="empty" key="_empty_" class="empty">
       <slot name="empty">
         <div class="_fullinfo">
-          <img src="https://xn--931a.moe/assets/info.jpg" class="_ghost" />
+          <img src="/assets/error.png" class="_ghost" />
           <div>{{ i18n.ts.nothing }}</div>
         </div>
       </slot>
@@ -368,26 +368,27 @@ const fetchMoreAhead = async (): Promise<void> => {
     );
 };
 
-const isTop = (): boolean => isBackTop.value || (props.pagination.reversed ? isBottomVisible : isTopVisible)(contentEl, TOLERANCE);
+const isTop = (): boolean =>
+  isBackTop.value || (props.pagination.reversed ? isBottomVisible : isTopVisible)(contentEl, TOLERANCE);
 
 watch(visibility, () => {
-	if (visibility.value === 'hidden') {
-		timerForSetPause = window.setTimeout(() => {
-			isPausingUpdate = true;
-			timerForSetPause = null;
-		},
-		BACKGROUND_PAUSE_WAIT_SEC * 1000);
-	} else { // 'visible'
-		if (timerForSetPause) {
-			clearTimeout(timerForSetPause);
-			timerForSetPause = null;
-		} else {
-			isPausingUpdate = false;
-			if (isTop()) {
-				executeQueue();
-			}
-		}
-	}
+  if (visibility.value === 'hidden') {
+    timerForSetPause = window.setTimeout(() => {
+      isPausingUpdate = true;
+      timerForSetPause = null;
+    }, BACKGROUND_PAUSE_WAIT_SEC * 1000);
+  } else {
+    // 'visible'
+    if (timerForSetPause) {
+      clearTimeout(timerForSetPause);
+      timerForSetPause = null;
+    } else {
+      isPausingUpdate = false;
+      if (isTop()) {
+        executeQueue();
+      }
+    }
+  }
 });
 
 const prepend = (item: MisskeyEntity): void => {
@@ -397,7 +398,7 @@ const prepend = (item: MisskeyEntity): void => {
     return;
   }
 
-	if (isTop() && !isPausingUpdate) unshiftItems([item]);
+  if (isTop() && !isPausingUpdate) unshiftItems([item]);
   else prependQueue(item);
 };
 
@@ -468,10 +469,10 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-	if (timerForSetPause) {
-		clearTimeout(timerForSetPause);
-		timerForSetPause = null;
-	}
+  if (timerForSetPause) {
+    clearTimeout(timerForSetPause);
+    timerForSetPause = null;
+  }
   scrollObserver.disconnect();
 });
 

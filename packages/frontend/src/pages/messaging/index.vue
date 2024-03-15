@@ -50,7 +50,7 @@
           </MkA>
         </div>
         <div v-if="!fetching && messages.length == 0" class="_fullinfo">
-          <img src="https://xn--931a.moe/assets/info.jpg" class="_ghost" />
+          <img src="/assets/error.png" class="_ghost" />
           <div>{{ $ts.noHistory }}</div>
         </div>
         <MkLoading v-if="fetching" />

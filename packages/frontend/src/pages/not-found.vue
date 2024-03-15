@@ -1,10 +1,10 @@
 <template>
-<div class="ipledcug">
-	<div class="_fullinfo">
-		<img src="https://xn--931a.moe/assets/not-found.jpg" class="_ghost"/>
-		<div>{{ i18n.ts.notFoundDescription }}</div>
-	</div>
-</div>
+  <div class="ipledcug">
+    <div class="_fullinfo">
+      <img src="/assets/error.png" class="_ghost" />
+      <div>{{ i18n.ts.notFoundDescription }}</div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -16,7 +16,7 @@ const headerActions = $computed(() => []);
 const headerTabs = $computed(() => []);
 
 definePageMetadata({
-	title: i18n.ts.notFound,
-	icon: 'ti ti-alert-triangle',
+  title: i18n.ts.notFound,
+  icon: 'ti ti-alert-triangle',
 });
 </script>
