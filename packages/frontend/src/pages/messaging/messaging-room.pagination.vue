@@ -68,7 +68,14 @@ import {
 } from 'vue';
 import * as misskey from 'misskey-js';
 import * as os from '@/os';
-import { onScrollTop, isTopVisible, onScrollBottom, isBottomVisible, scrollToBottomForWindow } from '@/scripts/scroll';
+import {
+  onScrollTop,
+  isTopVisible,
+  onScrollBottom,
+  isBottomVisible,
+  scrollToBottomForWindow,
+  getBodyScrollHeight,
+} from '@/scripts/scroll';
 import { defaultStore } from '@/store';
 import { MisskeyEntity } from '@/types/date-separated-list';
 import { i18n } from '@/i18n';
@@ -252,6 +259,9 @@ const reload = (): Promise<void> => {
   return init();
 };
 
+/**
+ * さらに読み込む
+ */
 const fetchMore = async (): Promise<void> => {
   if (!more.value || fetching.value || moreFetching.value || items.value.length === 0 || props.isFirstFetch) return;
 
@@ -287,12 +297,25 @@ const fetchMore = async (): Promise<void> => {
         }
 
         const reverseConcat = (_res) => {
+          // 画面のスクロール位置を保持
           const oldScroll = window.scrollY;
+          console.debug('oldScroll =', oldScroll);
 
+          // 画面サイズを保持
+          const oldHeight = getBodyScrollHeight();
+
+          // 逆順に追加
           items.value = items.value.concat(_res);
 
           return nextTick(() => {
-            window.scroll({ top: oldScroll + 100, behavior: 'instant' });
+            // 現在の画面サイズを取得
+            const newHeight = getBodyScrollHeight();
+
+            // 画面サイズの差分を取得
+            const diff = newHeight - oldHeight;
+
+            // 前回のスクロール位置から差分を追加する
+            window.scroll({ top: oldScroll + diff, behavior: 'instant' });
             return nextTick();
           });
         };
