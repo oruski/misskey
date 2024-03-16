@@ -247,11 +247,15 @@ async function init(): Promise<void> {
         }
         offset.value = res.length;
         error.value = false;
-        fetching.value = false;
+        setTimeout(() => {
+          fetching.value = false;
+        }, 300);
       },
       (err) => {
         error.value = true;
-        fetching.value = false;
+        setTimeout(() => {
+          fetching.value = false;
+        }, 300);
       },
     )
     .finally(() => {
