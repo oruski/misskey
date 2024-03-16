@@ -325,7 +325,7 @@ const fetchMore = async (): Promise<void> => {
             const diff = newHeight - oldHeight;
 
             // 前回のスクロール位置から差分を追加する
-            window.scroll({ top: oldScroll + diff, behavior: 'instant' });
+            window.scroll({ top: oldScroll + diff + 50, behavior: 'instant' });
             return nextTick();
           });
         };
