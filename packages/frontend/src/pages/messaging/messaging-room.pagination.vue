@@ -111,6 +111,7 @@ const props = withDefaults(
     disableAutoLoad?: boolean;
     displayLimit?: number;
     isFirstFetch?: boolean;
+    onFirstFetch?: () => void;
   }>(),
   {
     displayLimit: 20,
@@ -247,22 +248,21 @@ async function init(): Promise<void> {
         }
         offset.value = res.length;
         error.value = false;
-        setTimeout(() => {
-          fetching.value = false;
-        }, 300);
+        fetching.value = false;
       },
       (err) => {
         error.value = true;
-        setTimeout(() => {
-          fetching.value = false;
-        }, 300);
+        fetching.value = false;
       },
     )
     .finally(() => {
       if (props.isFirstFetch) {
+        console.debug('scrollToBottomForWindow SCROLL011');
+        scrollToBottomForWindow({ behavior: 'instant' });
         setTimeout(() => {
           console.debug('scrollToBottomForWindow SCROLL001');
           scrollToBottomForWindow({ behavior: 'instant' });
+          props.onFirstFetch?.();
         }, 500);
       }
     });

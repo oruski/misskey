@@ -12,6 +12,7 @@
           :pagination="pagination"
           :is-first-fetch="isFirstFetch"
           :display-limit="1000"
+          :on-first-fetch="onFirstFetch"
         >
           <template #empty>
             <div class="_fullinfo">
@@ -208,6 +209,13 @@ async function fetch() {
   });
 
   document.addEventListener('visibilitychange', onVisibilitychange);
+}
+
+/**
+ * 初回読み込み完了
+ */
+const onFirstFetch = () => {
+  console.debug('onFirstFetch');
 
   nextTick(() => {
     const url = new URL(location.href);
@@ -224,12 +232,10 @@ async function fetch() {
       });
     }
 
-    window.setTimeout(() => {
-      fetching = false;
-      if (isFirstFetch) finishFirstFetch();
-    }, 301);
+    fetching = false;
+    if (isFirstFetch) finishFirstFetch();
   });
-}
+};
 
 function onDragover(ev: DragEvent) {
   if (!ev.dataTransfer) return;
