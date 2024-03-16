@@ -24,7 +24,11 @@
             <MkDateSeparatedList
               v-if="messages.length > 0"
               v-slot="{ item: message }"
-              :class="{ [$style['messages']]: true, 'deny-move-transition': pFetching }"
+              :class="{
+                [$style['messages']]: true,
+                [$style['opacity-0']]: isFirstFetch,
+                'deny-move-transition': pFetching,
+              }"
               :items="messages"
               direction="up"
               reversed
@@ -519,6 +523,10 @@ definePageMetadata(
   > * {
     margin-bottom: 16px;
   }
+}
+
+.opacity-0 {
+  opacity: 0;
 }
 
 .footer {

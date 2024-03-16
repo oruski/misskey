@@ -30,7 +30,7 @@
           primary
           @click="fetchMore"
         >
-          {{ i18n.ts.loadMore }}
+          &emsp;
         </MkButton>
         <MkLoading v-else class="loading" />
       </div>
@@ -45,7 +45,7 @@
           primary
           @click="fetchMore"
         >
-          {{ i18n.ts.loadMore }}
+          &emsp;
         </MkButton>
         <MkLoading v-else class="loading" />
       </div>
