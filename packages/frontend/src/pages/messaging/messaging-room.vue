@@ -92,6 +92,7 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 
 let isFirstFetch = $ref(true);
 let finishFirstFetch = debounce(() => {
+  console.debug('thisScrollToBottom SCROLL008');
   thisScrollToBottom({ behavior: 'instant' });
   console.debug('初回ローディング完了');
   isFirstFetch = false;
@@ -218,6 +219,7 @@ async function fetch() {
     ) {
       // @ts-ignore
       pagingComponent.inited.then(() => {
+        console.debug('thisScrollToBottom SCROLL009');
         thisScrollToBottom({ behavior: isFirstFetch ? 'instant' : 'smooth' });
       });
     }
@@ -225,7 +227,7 @@ async function fetch() {
     window.setTimeout(() => {
       fetching = false;
       if (isFirstFetch) finishFirstFetch();
-    }, 300);
+    }, 301);
   });
 }
 
@@ -318,6 +320,7 @@ function onMessage(message) {
   if (_isBottom && isCurrentPage) {
     // Scroll to bottom
     nextTick(() => {
+      console.debug('thisScrollToBottom SCROLL010');
       thisScrollToBottom({ behavior: 'smooth' });
     });
   } else if (message.userId !== $i?.id) {
@@ -375,7 +378,7 @@ function onDeleted(id) {
 }
 
 function thisScrollToBottom(option: ScrollToOptions = { behavior: 'smooth' }) {
-  console.debug('scrollToBottomForWindow');
+  console.debug('scrollToBottomForWindow SCROLL003');
   scrollToBottomForWindow({
     ...option,
     behavior: option.behavior,
@@ -384,6 +387,7 @@ function thisScrollToBottom(option: ScrollToOptions = { behavior: 'smooth' }) {
 
 function onIndicatorClick() {
   showIndicator = false;
+  console.debug('thisScrollToBottom SCROLL012');
   thisScrollToBottom({ behavior: 'smooth' });
 }
 

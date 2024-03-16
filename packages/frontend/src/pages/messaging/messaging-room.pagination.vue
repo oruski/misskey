@@ -138,6 +138,7 @@ const more = ref(false);
 const isBackTop = ref(false);
 const empty = computed(() => items.value.length === 0);
 const error = ref(false);
+const isFirstFetch = $computed(() => props.isFirstFetch);
 const { enableInfiniteScroll } = defaultStore.reactiveState;
 
 const contentEl = $computed(() => props.pagination.pageEl || rootEl);
@@ -165,9 +166,9 @@ watch(
 );
 
 watch($$(rootEl), () => {
-  scrollObserver.disconnect();
+  scrollObserver?.disconnect();
   nextTick(() => {
-    if (rootEl) scrollObserver.observe(rootEl);
+    if (rootEl) scrollObserver?.observe(rootEl);
   });
 });
 
@@ -197,19 +198,21 @@ watch(
 
 watch(fetching, () => {
   if (props.isFirstFetch) {
-    console.debug('[初回ローディング] Pagination scrollToBottomForWindow');
+    console.debug('[初回ローディング] Pagination scrollToBottomForWindow SCROLL004');
     scrollToBottomForWindow({ behavior: 'instant' });
     setTimeout(() => {
+      console.debug('[初回ローディング] Pagination scrollToBottomForWindow SCROLL005');
       scrollToBottomForWindow({ behavior: 'instant' });
     }, 300);
     setTimeout(() => {
+      console.debug('[初回ローディング] Pagination scrollToBottomForWindow SCROLL006');
       scrollToBottomForWindow({ behavior: 'instant' });
     }, 600);
   }
 });
 
-let isFirstFetch = $ref(props.isFirstFetch);
 watch(isFirstFetch, () => {
+  console.debug('scrollToBottomForWindow SCROLL007');
   scrollToBottomForWindow({ behavior: 'instant' });
 });
 
@@ -236,7 +239,6 @@ async function init(): Promise<void> {
         }
         if (!props.pagination.noPaging && res.length > (props.pagination.limit || 10)) {
           res.pop();
-          // if (props.pagination.reversed) moreFetching.value = true;
           items.value = res;
           more.value = true;
         } else {
@@ -251,7 +253,15 @@ async function init(): Promise<void> {
         error.value = true;
         fetching.value = false;
       },
-    );
+    )
+    .finally(() => {
+      if (props.isFirstFetch) {
+        setTimeout(() => {
+          console.debug('scrollToBottomForWindow SCROLL001');
+          scrollToBottomForWindow({ behavior: 'instant' });
+        }, 500);
+      }
+    });
 }
 
 const reload = (): Promise<void> => {
@@ -326,34 +336,44 @@ const fetchMore = async (): Promise<void> => {
           if (props.pagination.reversed) {
             reverseConcat(res).then(() => {
               more.value = true;
-              moreFetching.value = false;
+              setTimeout(() => {
+                moreFetching.value = false;
+              }, 300);
             });
           } else {
             items.value = items.value.concat(res);
             more.value = true;
-            moreFetching.value = false;
+            setTimeout(() => {
+              moreFetching.value = false;
+            }, 300);
           }
         } else {
           if (props.pagination.reversed) {
             reverseConcat(res).then(() => {
               more.value = false;
-              moreFetching.value = false;
+              setTimeout(() => {
+                moreFetching.value = false;
+              }, 300);
             });
           } else {
             items.value = items.value.concat(res);
             more.value = false;
-            moreFetching.value = false;
+            setTimeout(() => {
+              moreFetching.value = false;
+            }, 300);
           }
         }
         offset.value += res.length;
 
         if (props.isFirstFetch) {
-          console.debug('scrollToBottomForWindow');
+          console.debug('scrollToBottomForWindow SCROLL002');
           scrollToBottomForWindow({ behavior: 'instant' });
         }
       },
       () => {
-        moreFetching.value = false;
+        setTimeout(() => {
+          moreFetching.value = false;
+        }, 300);
       },
     );
 };
@@ -416,28 +436,10 @@ onDeactivated(() => {
     : window.scrollY === 0;
 });
 
-function toBottom() {
-  scrollToBottomForWindow({ behavior: 'instant' });
-}
-
-onMounted(() => {
-  inited.then(() => {
-    if (props.pagination.reversed) {
-      nextTick(() => {
-        setTimeout(toBottom, 800);
-
-        // scrollToBottomでmoreFetchingボタンが画面外まで出るまで
-        // more = trueを遅らせる
-        setTimeout(() => {
-          moreFetching.value = false;
-        }, 2000);
-      });
-    }
-  });
-});
+onMounted(() => {});
 
 onBeforeUnmount(() => {
-  scrollObserver.disconnect();
+  scrollObserver?.disconnect();
 });
 
 defineExpose({
