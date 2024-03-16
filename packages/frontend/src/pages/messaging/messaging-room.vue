@@ -477,7 +477,7 @@ definePageMetadata(
 }
 
 .body {
-  min-height: calc(100vh - 131px - 51px);
+  min-height: calc(100vh - 275px);
 }
 
 .more {
