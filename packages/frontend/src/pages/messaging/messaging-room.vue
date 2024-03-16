@@ -478,8 +478,7 @@ definePageMetadata(
 
 //noinspection CssOverwrittenProperties
 .body {
-  min-height: calc(100vh - 275px);
-  min-height: calc(100dvh - 275px);
+  min-height: calc(100lvh - 275px);
 }
 
 .more {
