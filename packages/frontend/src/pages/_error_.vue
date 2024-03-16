@@ -89,7 +89,6 @@ definePageMetadata({
     vertical-align: bottom;
     height: 128px;
     margin-bottom: 24px;
-    border-radius: 16px;
   }
 
   > .error {

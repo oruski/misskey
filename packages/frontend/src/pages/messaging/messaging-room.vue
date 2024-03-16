@@ -95,7 +95,7 @@ let finishFirstFetch = debounce(() => {
   thisScrollToBottom({ behavior: 'instant' });
   console.debug('初回ローディング完了');
   isFirstFetch = false;
-}, 300);
+}, 500);
 
 let fetching = $ref(true);
 // @ts-ignore
