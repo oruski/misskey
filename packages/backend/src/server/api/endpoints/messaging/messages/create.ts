@@ -117,13 +117,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 			let recipientUser: User | null;
 			let recipientGroup: UserGroup | null;
 
+      // @ts-ignore
 			if (ps.userId != null) {
 				// Myself
+        // @ts-ignore
 				if (ps.userId === me.id) {
 					throw new ApiError(meta.errors.recipientIsYourself);
 				}
 
 				// Fetch recipient (user)
+        // @ts-ignore
 				recipientUser = await this.getterService.getUser(ps.userId).catch(err => {
 					if (err.id === '15348ddd-432d-49c2-8a5a-8069753becff') throw new ApiError(meta.errors.noSuchUser);
 					throw err;
@@ -137,8 +140,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				if (block) {
 					throw new ApiError(meta.errors.youHaveBeenBlocked);
 				}
+        // @ts-ignore
 			} else if (ps.groupId != null) {
 				// Fetch recipient (group)
+        // @ts-ignore
 				recipientGroup = await this.userGroupsRepository.findOneBy({ id: ps.groupId! });
 
 				if (recipientGroup == null) {
@@ -157,8 +162,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 			}
 
 			let file = null;
+      // @ts-ignore
 			if (ps.fileId != null) {
 				file = await this.driveFilesRepository.findOneBy({
+          // @ts-ignore
 					id: ps.fileId,
 					userId: me.id,
 				});
@@ -169,6 +176,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 			}
 
 			// テキストが無いかつ添付ファイルも無かったらエラー
+      // @ts-ignore
 			if (ps.text == null && file == null) {
 				throw new ApiError(meta.errors.contentRequired);
 			}
