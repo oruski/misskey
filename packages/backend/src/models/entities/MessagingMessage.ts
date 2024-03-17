@@ -86,4 +86,10 @@ export class MessagingMessage {
 	})
 	@JoinColumn()
 	public file: DriveFile | null;
+
+  @Index()
+  @Column('boolean', {
+    default: false,
+  })
+  public isPinned: boolean;
 }

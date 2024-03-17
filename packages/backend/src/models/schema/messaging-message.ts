@@ -60,6 +60,10 @@ export const packedMessagingMessageSchema = {
 			type: 'boolean',
 			optional: true, nullable: false,
 		},
+    isPinned: {
+      type: 'boolean',
+      optional: true, nullable: false,
+    },
 		reads: {
 			type: 'array',
 			optional: true, nullable: false,
