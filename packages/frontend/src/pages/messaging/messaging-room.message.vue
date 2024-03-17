@@ -31,9 +31,7 @@
           <div class="context">
             <div>
               <template v-if="isGroup">
-                <span v-if="message.reads.length > 0" class="read"
-                  >{{ $ts.messageRead }} {{ message.reads.length }}</span
-                >
+                <span v-if="message.reads.length > 0" class="read">{{ $ts.messageRead }} {{ message.reads.length }}</span>
               </template>
               <template v-else>
                 <span v-if="isMe && message.isRead" class="read">{{ $ts.messageRead }}</span>

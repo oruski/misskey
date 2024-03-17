@@ -62,7 +62,7 @@ export function getMessageMenu({
             icon: 'ti ti-trash',
             text: i18n.ts.delete,
             danger: true,
-            action: deleteMessage,
+            action: () => deleteMessage(message.id),
           },
         ]
       : []),
