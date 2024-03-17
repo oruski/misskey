@@ -271,6 +271,8 @@ export class MessagingService {
     }, {
       isPinned: state,
     });
+    const messageObj = await this.messagingMessageEntityService.pack({ ...message, isPinned: state });
+    this.globalEventService.publishGroupMessagingStream(groupId, 'updated', messageObj);
   }
 
   /**
@@ -304,6 +306,9 @@ export class MessagingService {
     }, {
       isPinned: state,
     });
+    const messageObj = await this.messagingMessageEntityService.pack({ ...message, isPinned: state });
+    if (message.recipientId) this.globalEventService.publishMessagingStream(userId, message.recipientId, 'updated', messageObj);
+    if (message.recipientId) this.globalEventService.publishMessagingStream(message.recipientId, userId, 'updated', messageObj);
   }
 
   /**

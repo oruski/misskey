@@ -171,6 +171,7 @@ export interface MessagingStreamTypes {
 	typing: User['id'];
 	message: Packed<'MessagingMessage'>;
 	deleted: MessagingMessage['id'];
+  updated: Packed<'MessagingMessage'>;
 }
 
 export interface GroupMessagingStreamTypes {
@@ -181,6 +182,7 @@ export interface GroupMessagingStreamTypes {
 	typing: User['id'];
 	message: Packed<'MessagingMessage'>;
 	deleted: MessagingMessage['id'];
+  updated: Packed<'MessagingMessage'>;
 }
 
 export interface MessagingIndexStreamTypes {

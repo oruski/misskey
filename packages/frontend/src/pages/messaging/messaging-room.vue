@@ -209,6 +209,7 @@ async function fetch() {
     });
   }
   connection.on('message', onMessage);
+  connection.on('updated', onUpdated);
   connection.on('read', onRead);
   connection.on('deleted', onDeleted);
   connection.on('typers', (_typers) => {
@@ -341,6 +342,29 @@ function onMessage(message) {
     notifyNewMessage();
   } else {
     console.debug('[chat] Not notify');
+  }
+}
+
+/**
+ * メッセージを更新
+ */
+function onUpdated(message) {
+  if (!message) return;
+  const id = message.id;
+
+  console.debug('message =', message);
+
+  // @ts-ignore
+  if (pagingComponent.items.some((y) => y.id === id)) {
+    // @ts-ignore
+    const exist = pagingComponent.items.map((y) => y.id).indexOf(id);
+    // @ts-ignore
+    pagingComponent.items[exist] = {
+      // @ts-ignore
+      ...pagingComponent.items[exist],
+      // @ts-ignore
+      isPinned: message.isPinned,
+    };
   }
 }
 
