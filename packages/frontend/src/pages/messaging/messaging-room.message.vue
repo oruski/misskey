@@ -143,8 +143,10 @@ function onContextmenu(ev: MouseEvent): void {
   }
 
   > .content {
-    // 選択禁止
-    user-select: none;
+    // スマホの場合のみ選択禁止
+    @media (max-width: 500px) {
+      user-select: none;
+    }
 
     min-width: 0;
 
