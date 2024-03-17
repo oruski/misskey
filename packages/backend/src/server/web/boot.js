@@ -11,7 +11,7 @@
 
 'use strict';
 
-const LANGS = [
+const _LA = [
   'ar-SA',
   'bn-BD',
   'ca-ES',
@@ -70,7 +70,7 @@ const LANGS = [
 
 	//#region Detect language & fetch translations
 	if (!localStorage.hasOwnProperty('locale')) {
-		const supportedLangs = LANGS;
+		const supportedLangs = typeof LANGS ? LANGS : _LA;
 		let lang = localStorage.getItem('lang');
 		if (lang == null || !supportedLangs.includes(lang)) {
 			if (supportedLangs.includes(navigator.language)) {
