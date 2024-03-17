@@ -20,7 +20,7 @@
         </div>
       </template>
 
-      <div :class="$style.buttonsRight">
+      <div :class="{ [$style.buttonsRight]: true, [$style.buttonsRightUser]: !groupOwnerId }">
         <button
           :title="i18n.ts.pin"
           :class="{ [$style.pinButton]: true, [$style.pinButtonOn]: isPinned }"
@@ -261,6 +261,10 @@ onDeactivated(async () => {
   &:hover {
     background: rgba(0, 0, 0, 0.05);
   }
+}
+
+.buttonsRightUser {
+  right: -8px;
 }
 
 .pinButtonOn {

@@ -165,9 +165,12 @@ watch([() => props.userAcct, () => props.groupId], () => {
 watch(
   () => isPinned,
   async () => {
-    if (connection) connection.dispose();
-    await fetch();
-    pagingComponent?.reload();
+    isFirstFetch = true;
+    nextTick(async () => {
+      if (connection) connection.dispose();
+      await fetch();
+      pagingComponent?.reload();
+    });
   },
 );
 

@@ -269,6 +269,9 @@ async function init(): Promise<void> {
 }
 
 const reload = (): Promise<void> => {
+  fetching.value = true;
+  moreFetching.value = false;
+  more.value = false;
   items.value = [];
   return init();
 };
@@ -329,7 +332,7 @@ const fetchMore = async (): Promise<void> => {
             const diff = newHeight - oldHeight;
 
             // 前回のスクロール位置から差分を追加する
-            window.scroll({ top: oldScroll + diff - 50, behavior: 'instant' });
+            window.scroll({ top: oldScroll + diff, behavior: 'instant' });
             return nextTick();
           });
         };
@@ -342,14 +345,14 @@ const fetchMore = async (): Promise<void> => {
               more.value = true;
               setTimeout(() => {
                 moreFetching.value = false;
-              }, 300);
+              }, 500);
             });
           } else {
             items.value = items.value.concat(res);
             more.value = true;
             setTimeout(() => {
               moreFetching.value = false;
-            }, 300);
+            }, 500);
           }
         } else {
           if (props.pagination.reversed) {
@@ -357,14 +360,14 @@ const fetchMore = async (): Promise<void> => {
               more.value = false;
               setTimeout(() => {
                 moreFetching.value = false;
-              }, 300);
+              }, 500);
             });
           } else {
             items.value = items.value.concat(res);
             more.value = false;
             setTimeout(() => {
               moreFetching.value = false;
-            }, 300);
+            }, 500);
           }
         }
         offset.value += res.length;
@@ -377,7 +380,7 @@ const fetchMore = async (): Promise<void> => {
       () => {
         setTimeout(() => {
           moreFetching.value = false;
-        }, 300);
+        }, 500);
       },
     );
 };
