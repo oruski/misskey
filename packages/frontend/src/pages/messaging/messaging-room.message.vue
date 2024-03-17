@@ -1,12 +1,7 @@
 <template>
   <div class="thvuemwp" :class="{ isMe }">
     <MkAvatar class="avatar" :user="message.user" indicator link preview />
-    <div
-      class="content"
-      @contextmenu.stop="onContextmenu"
-      @pointerdown.passive="onPointerdown"
-      @pointerup.passive="onPointerup"
-    >
+    <div class="content" @contextmenu.stop="onContextmenu">
       <div class="inner">
         <template v-if="!isMe">
           <div class="name">
@@ -15,7 +10,12 @@
         </template>
         <div class="inner2">
           <div class="balloon" :class="{ noText: message.text == null }">
-            <div v-if="!message.isDeleted" class="content">
+            <div
+              v-if="!message.isDeleted"
+              class="content"
+              @pointerdown.passive="onPointerdown"
+              @pointerup.passive="onPointerup"
+            >
               <Mfm v-if="message.text" ref="text" class="text" :text="message.text" :i="$i" />
               <div v-if="message.file" class="file">
                 <a :href="message.file.url" rel="noopener" target="_blank" :title="message.file.name">
@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts" setup>
-import {} from 'vue';
+import { nextTick } from 'vue';
 import * as mfm from 'mfm-js';
 import * as Misskey from 'misskey-js';
 import { extractUrlFromMfm } from '@/scripts/extract-url-from-mfm';
@@ -77,16 +77,21 @@ const props = defineProps<{
   message: Misskey.entities.MessagingMessage;
   isGroup?: boolean;
   isAdmin?: boolean;
+  contextDisposes?: Array<() => void>;
+  onSetContextDisposes?: (resolves: unknown[]) => void;
 }>();
 
 const isMe = $computed(() => props.message.userId === $i?.id);
 const urls = $computed(() => (props.message.text ? extractUrlFromMfm(mfm.parse(props.message.text)) : []));
+
+// @ts-ignore
+// eslint-disable-next-line no-undef
 let holdTouchTimer: NodeJS.Timeout | null = $ref(null);
 
 /**
  * コンテキストメニュー
  */
-function onContextmenu(ev: MouseEvent): void {
+async function onContextmenu(ev: MouseEvent): Promise<void> {
   const isLink = (el: HTMLElement) => {
     if (el.tagName === 'A') return true;
     if (el.parentElement) {
@@ -102,32 +107,62 @@ function onContextmenu(ev: MouseEvent): void {
   if (defaultStore.state.useReactionPickerForContextMenu) {
     ev.preventDefault();
   } else {
-    os.contextMenu(getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }), ev).then(focus);
+    const response = await os.contextMenuWithoutPromise(
+      getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }),
+      ev,
+    );
+    props.onSetContextDisposes?.([...(props.contextDisposes ?? []), response.dispose]);
   }
 }
 
 /**
  * 長押し制御
  */
-function onPointerdown(ev: PointerEvent): void {
+async function onPointerdown(ev: PointerEvent): Promise<void> {
   console.debug('onPointerdown');
-  if (holdTouchTimer) return;
-  holdTouchTimer = setTimeout(() => {
-    console.debug('メニュー表示');
-    os.contextMenu(getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }), ev).then(focus);
-  }, 500);
-  console.debug('holdTouchTimer =', holdTouchTimer);
+  console.debug('props.contextDisposes =', props.contextDisposes);
+  console.debug('props.onSetContextDisposes =', props.onSetContextDisposes);
+  if (holdTouchTimer) {
+    clearTimeout(holdTouchTimer);
+  }
+  props.contextDisposes?.forEach((dispose) => {
+    console.debug('dispose =', dispose);
+    return dispose();
+  });
+
+  props.onSetContextDisposes?.([]);
+  nextTick(async () => {
+    holdTouchTimer = setTimeout(async () => {
+      console.debug('メニュー表示');
+      const response = await os.contextMenuWithoutPromise(
+        getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }),
+        ev,
+      );
+      console.debug('response =', response);
+      props.onSetContextDisposes?.([...(props.contextDisposes ?? []), response.dispose]);
+      return nextTick();
+    }, 1000);
+    console.debug('holdTouchTimer =', holdTouchTimer);
+  });
 }
 
 /**
  * 長押し解除
  */
-function onPointerup(ev: PointerEvent): void {
+async function onPointerup(ev: PointerEvent): Promise<void> {
   console.debug('onPointerup');
+  console.debug('props.contextDisposes =', JSON.stringify(props.contextDisposes));
   if (holdTouchTimer) {
     clearTimeout(holdTouchTimer);
     holdTouchTimer = null;
   }
+  // props.contextDisposes?.forEach((dispose) => {
+  //   console.debug('dispose =', dispose);
+  //   return dispose();
+  // });
+  // nextTick(() => {
+  //   props.onSetContextDisposes?.([]);
+  // });
 }
 </script>
 
@@ -207,6 +242,7 @@ function onPointerup(ev: PointerEvent): void {
             > .delete-button {
               display: block;
             }
+
             > .pin-button {
               display: block;
             }

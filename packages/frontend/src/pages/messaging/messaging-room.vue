@@ -39,7 +39,14 @@
               direction="up"
               reversed
             >
-              <XMessage :key="message.id" :message="message" :is-group="group != null" :is-admin="isAdmin" />
+              <XMessage
+                :key="message.id"
+                :message="message"
+                :is-group="group != null"
+                :is-admin="isAdmin"
+                :context-disposes="contextDisposes"
+                :on-set-context-disposes="onSetContextDisposes"
+              />
             </MkDateSeparatedList>
           </template>
         </XPagination>
@@ -123,6 +130,8 @@ let typers: Misskey.entities.User[] = $ref([]);
 let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null = $ref(null);
 // @ts-ignore
 let showIndicator = $ref(false);
+
+let contextDisposes = $ref<Promise<() => void>[]>([]);
 
 let isPinned = $ref(false);
 let onlineUserCount = $ref(0);
@@ -483,6 +492,10 @@ function onVisibilitychange() {
 
 function onSetPinned(_isPinned: boolean) {
   isPinned = _isPinned;
+}
+
+function onSetContextDisposes(disposes: Promise<() => void>[]) {
+  contextDisposes = disposes;
 }
 
 onMounted(async () => {
