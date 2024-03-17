@@ -10,7 +10,13 @@ import type { UserGroup } from '@/models/entities/UserGroup.js';
 import { QueueService } from '@/core/QueueService.js';
 import { toArray } from '@/misc/prelude/array.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
-import type { MessagingMessagesRepository, MutingsRepository, UserGroupJoiningsRepository, UsersRepository } from '@/models/index.js';
+import type {
+  MessagingMessagesRepository,
+  MutingsRepository,
+  UserGroupJoiningsRepository,
+  UserGroupsRepository,
+  UsersRepository,
+} from '@/models/index.js';
 import { IdService } from '@/core/IdService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
@@ -33,6 +39,9 @@ export class MessagingService {
 
 		@Inject(DI.userGroupJoiningsRepository)
 		private userGroupJoiningsRepository: UserGroupJoiningsRepository,
+
+    @Inject(DI.userGroupsRepository)
+    private userGroupsRepository: UserGroupsRepository,
 
 		@Inject(DI.mutingsRepository)
 		private mutingsRepository: MutingsRepository,
@@ -224,7 +233,80 @@ export class MessagingService {
 		}
 	}
 
-	/**
+  /**
+   * グループに対するピン留め
+   */
+  @bindThis
+  public async pinGroupMessagingMessage(
+    { userId, groupId, messageId, state }: {
+      userId: User['id'],
+      groupId: UserGroup['id'],
+      messageId: MessagingMessage['id'],
+      state: boolean,
+    },
+  ) {
+    // グループ所有者かどうか
+    const group = await this.userGroupsRepository.findOneBy({
+      id: groupId,
+      userId: userId,
+    });
+
+    if (group == null) {
+      throw new IdentifiableError('e140a4bf-49ce-4fb6-b67c-b78dadf6b52f', 'Access denied (group).');
+    }
+
+    // メッセージが存在するか
+    const message = await this.messagingMessagesRepository.findOneBy({
+      id: messageId,
+      groupId: groupId,
+    });
+
+    if (message == null) {
+      throw new IdentifiableError('86d56a2f-a9c3-4afb-b13c-3e9bfef9aa14', 'No such message.');
+    }
+
+    // ピン留め
+    await this.messagingMessagesRepository.update({
+      id: messageId,
+    }, {
+      isPinned: state,
+    });
+  }
+
+  /**
+   * ユーザーに対するピン留め
+   */
+  @bindThis
+  public async pinUserMessagingMessage(
+    { userId, messageId, state }: {
+      userId: User['id'],
+      messageId: MessagingMessage['id'],
+      state: boolean,
+    },
+  ) {
+    // メッセージが存在するか
+    const message = await this.messagingMessagesRepository.findOneBy({
+      id: messageId,
+    });
+
+    if (message == null) {
+      throw new IdentifiableError('86d56a2f-a9c3-4afb-b13c-3e9bfef9aa14', 'No such message.');
+    }
+
+    // 送信者でも受信者でもない
+    if (message.recipientId !== userId && message.userId !== userId) {
+      throw new IdentifiableError('e140a4bf-49ce-4fb6-b67c-b78dadf6b52f', 'Access denied (user).');
+    }
+
+    // ピン留め
+    await this.messagingMessagesRepository.update({
+      id: messageId,
+    }, {
+      isPinned: state,
+    });
+  }
+
+  /**
 	 * Mark messages as read
 	 */
 	@bindThis

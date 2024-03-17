@@ -55,6 +55,7 @@ export const paramDef = {
 		sinceId: { type: 'string', format: 'misskey:id' },
 		untilId: { type: 'string', format: 'misskey:id' },
 		markAsRead: { type: 'boolean', default: true },
+    isPinned: { type: 'boolean', default: false },
 	},
 	anyOf: [
 		{

@@ -225,6 +225,8 @@ import * as ep___messaging_messages from './endpoints/messaging/messages.js';
 import * as ep___messaging_messages_create from './endpoints/messaging/messages/create.js';
 import * as ep___messaging_messages_delete from './endpoints/messaging/messages/delete.js';
 import * as ep___messaging_messages_read from './endpoints/messaging/messages/read.js';
+import * as ep___messaging_messages_pin from './endpoints/messaging/messages/pin.js';
+import * as ep___messaging_messages_unpin from './endpoints/messaging/messages/unpin.js';
 import * as ep___meta from './endpoints/meta.js';
 import * as ep___emojis from './endpoints/emojis.js';
 import * as ep___miauth_genToken from './endpoints/miauth/gen-token.js';
@@ -563,6 +565,8 @@ const eps = [
 	['messaging/messages/create', ep___messaging_messages_create],
 	['messaging/messages/delete', ep___messaging_messages_delete],
 	['messaging/messages/read', ep___messaging_messages_read],
+  ['messaging/messages/pin', ep___messaging_messages_pin],
+  ['messaging/messages/unpin', ep___messaging_messages_unpin],
 	['meta', ep___meta],
 	['emojis', ep___emojis],
 	['miauth/gen-token', ep___miauth_genToken],
