@@ -104,7 +104,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				});
 
         // @ts-ignore
-				const query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
+				let query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
 					.andWhere(new Brackets(qb => { qb
 						.where(new Brackets(qb => { qb
 							.where('message.userId = :meId')
@@ -117,6 +117,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 					}))
 					.setParameter('meId', me.id)
 					.setParameter('recipientId', recipient.id);
+
+        // @ts-ignore
+        if (ps.isPinned) {
+            query = query.andWhere('message.isPinned = true');
+        }
 
         // @ts-ignore
 				const messages = await query.take(ps.limit).getMany();
@@ -156,8 +161,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				}
 
         // @ts-ignore
-				const query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
+				let query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
 					.andWhere('message.groupId = :groupId', { groupId: recipientGroup.id });
+
+        // @ts-ignore
+        if (ps.isPinned) {
+          query = query.andWhere('message.isPinned = true');
+        }
 
         // @ts-ignore
 				const messages = await query.take(ps.limit).getMany();

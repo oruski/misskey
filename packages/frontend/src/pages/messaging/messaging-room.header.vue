@@ -22,6 +22,7 @@
 
       <div :class="$style.buttonsRight">
         <button
+          :title="i18n.ts.pin"
           :class="{ [$style.pinButton]: true, [$style.pinButtonOn]: isPinned }"
           @click="() => onSetPinned?.(!isPinned)"
         >
@@ -265,7 +266,6 @@ onDeactivated(async () => {
 .pinButtonOn {
   background: var(--accent);
   color: var(--bg);
-  // へこんでいるようにみえる
   transform: translateY(2px);
   &:hover {
     background: var(--accent);

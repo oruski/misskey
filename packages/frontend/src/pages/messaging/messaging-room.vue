@@ -162,6 +162,15 @@ watch([() => props.userAcct, () => props.groupId], () => {
   fetch();
 });
 
+watch(
+  () => isPinned,
+  async () => {
+    if (connection) connection.dispose();
+    await fetch();
+    pagingComponent?.reload();
+  },
+);
+
 async function fetch() {
   console.log('fetch');
 
@@ -179,6 +188,7 @@ async function fetch() {
       params: {
         // @ts-ignore
         userId: user.id,
+        isPinned,
       },
       reversed: true,
       // @ts-ignore
@@ -202,6 +212,7 @@ async function fetch() {
       limit: 40,
       params: {
         groupId: group?.id,
+        isPinned,
       },
       reversed: true,
       // @ts-ignore
