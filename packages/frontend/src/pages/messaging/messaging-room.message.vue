@@ -116,6 +116,35 @@ async function onContextmenu(ev: MouseEvent): Promise<void> {
 }
 
 /**
+ * タイマーリセット
+ */
+function resetTimer(): void {
+  if (holdTouchTimer) {
+    console.debug('resetTimer');
+    clearTimeout(holdTouchTimer);
+    holdTouchTimer = null;
+  }
+}
+
+/**
+ * スクロールイベントの監視
+ */
+function attachTouchmoveEvent(): void {
+  console.debug('attachTouchmoveEvent');
+  window.addEventListener('touchmove', resetTimer, { passive: true });
+  window.addEventListener('touchend', detachTouchmoveEvent, { passive: true });
+}
+
+/**
+ * スクロールイベントの監視解除
+ */
+function detachTouchmoveEvent(): void {
+  console.debug('detachTouchmoveEvent');
+  window.removeEventListener('touchmove', resetTimer);
+  window.removeEventListener('touchend', detachTouchmoveEvent);
+}
+
+/**
  * 長押し制御
  */
 async function onPointerdown(ev: PointerEvent): Promise<void> {
@@ -132,6 +161,7 @@ async function onPointerdown(ev: PointerEvent): Promise<void> {
 
   props.onSetContextDisposes?.([]);
   nextTick(async () => {
+    attachTouchmoveEvent();
     holdTouchTimer = setTimeout(async () => {
       console.debug('メニュー表示');
       const response = await os.contextMenuWithoutPromise(
@@ -156,13 +186,7 @@ async function onPointerup(ev: PointerEvent): Promise<void> {
     clearTimeout(holdTouchTimer);
     holdTouchTimer = null;
   }
-  // props.contextDisposes?.forEach((dispose) => {
-  //   console.debug('dispose =', dispose);
-  //   return dispose();
-  // });
-  // nextTick(() => {
-  //   props.onSetContextDisposes?.([]);
-  // });
+  detachTouchmoveEvent();
 }
 </script>
 
