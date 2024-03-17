@@ -1,7 +1,13 @@
 <template>
   <MkStickyContainer>
     <template #header>
-      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" :group-owner-id="groupOwnerId" />
+      <XPageHeader
+        :online-user-count="onlineUserCount"
+        :group-users="groupUsers"
+        :group-owner-id="groupOwnerId"
+        :is-pinned="isPinned"
+        :on-set-pinned="onSetPinned"
+      />
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
@@ -118,6 +124,7 @@ let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null 
 // @ts-ignore
 let showIndicator = $ref(false);
 
+let isPinned = $ref(false);
 let onlineUserCount = $ref(0);
 let groupUsers = $ref([]);
 let groupOwnerId = $computed(() => {
@@ -352,8 +359,6 @@ function onUpdated(message) {
   if (!message) return;
   const id = message.id;
 
-  console.debug('message =', message);
-
   // @ts-ignore
   if (pagingComponent.items.some((y) => y.id === id)) {
     // @ts-ignore
@@ -460,6 +465,10 @@ function onVisibilitychange() {
       });
     }
   }
+}
+
+function onSetPinned(_isPinned: boolean) {
+  isPinned = _isPinned;
 }
 
 onMounted(async () => {
