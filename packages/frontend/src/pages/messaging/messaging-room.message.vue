@@ -1,7 +1,7 @@
 <template>
   <div class="thvuemwp" :class="{ isMe }">
     <MkAvatar class="avatar" :user="message.user" indicator link preview />
-    <div class="content">
+    <div v-long-click="onContextmenu" class="content" @contextmenu.stop="onContextmenu">
       <div class="inner">
         <template v-if="!isMe">
           <div class="name">
@@ -10,9 +10,6 @@
         </template>
         <div class="inner2">
           <div class="balloon" :class="{ noText: message.text == null }">
-            <button v-if="isMe" class="delete-button" :title="$ts.delete" @click="del">
-              <img src="/client-assets/remove.png" alt="Delete" />
-            </button>
             <div v-if="!message.isDeleted" class="content">
               <Mfm v-if="message.text" ref="text" class="text" :text="message.text" :i="$i" />
               <div v-if="message.file" class="file">
@@ -62,23 +59,69 @@
 import {} from 'vue';
 import * as mfm from 'mfm-js';
 import * as Misskey from 'misskey-js';
+import VueLongpress from 'vue-longpress';
 import { extractUrlFromMfm } from '@/scripts/extract-url-from-mfm';
 import MkUrlPreview from '@/components/MkUrlPreview.vue';
 import * as os from '@/os';
 import { $i } from '@/account';
+import { i18n } from '@/i18n';
+import { defaultStore } from '@/store';
+import { getMessageMenu } from '@/scripts/get-message-menu';
+// @ts-ignore
 
 const props = defineProps<{
+  // @ts-ignore
   message: Misskey.entities.MessagingMessage;
   isGroup?: boolean;
+  isAdmin?: boolean;
 }>();
 
 const isMe = $computed(() => props.message.userId === $i?.id);
 const urls = $computed(() => (props.message.text ? extractUrlFromMfm(mfm.parse(props.message.text)) : []));
 
-function del(): void {
+/**
+ * メッセージの削除
+ */
+async function deleteMessage(): Promise<void> {
+  const { canceled } = await os.confirm({
+    type: 'warning',
+    text: i18n.t('deleteConfirm'),
+  });
+
+  if (canceled) return;
+
   os.api('messaging/messages/delete', {
     messageId: props.message.id,
   });
+}
+
+async function pinMessage(): Promise<void> {
+  os.apiWithDialog('messaging/messages/pin', {
+    messageId: props.message.id,
+  });
+}
+
+/**
+ * コンテキストメニュー
+ */
+function onContextmenu(ev: MouseEvent): void {
+  const isLink = (el: HTMLElement) => {
+    if (el.tagName === 'A') return true;
+    if (el.parentElement) {
+      return isLink(el.parentElement);
+    }
+  };
+
+  // @ts-ignore
+  if (isLink(ev.target)) return;
+  // @ts-ignore
+  if (window.getSelection().toString() !== '') return;
+
+  if (defaultStore.state.useReactionPickerForContextMenu) {
+    ev.preventDefault();
+  } else {
+    os.contextMenu(getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }), ev).then(focus);
+  }
 }
 </script>
 
@@ -100,6 +143,9 @@ function del(): void {
   }
 
   > .content {
+    // 選択禁止
+    user-select: none;
+
     min-width: 0;
 
     > .inner {
@@ -152,6 +198,32 @@ function del(): void {
           &:hover {
             > .delete-button {
               display: block;
+            }
+            > .pin-button {
+              display: block;
+            }
+          }
+
+          > .pin-button {
+            display: none;
+            position: absolute;
+            z-index: 1;
+            top: -4px;
+            right: -40px;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            outline: none;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            background: transparent;
+
+            > img {
+              vertical-align: bottom;
+              width: 16px;
+              height: 16px;
+              cursor: pointer;
             }
           }
 

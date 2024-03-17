@@ -74,6 +74,7 @@
 		"vite": "5.1.6",
 		"vite-plugin-build-metadata": "0.4.0",
 		"vue": "3.4.21",
+		"vue-long-click": "0.1.0",
 		"vue-plyr": "7.0.0",
 		"vue-prism-editor": "2.0.0-alpha.2",
 		"vuedraggable": "next"

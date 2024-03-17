@@ -33,7 +33,7 @@
               direction="up"
               reversed
             >
-              <XMessage :key="message.id" :message="message" :is-group="group != null" />
+              <XMessage :key="message.id" :message="message" :is-group="group != null" :is-admin="isAdmin" />
             </MkDateSeparatedList>
           </template>
         </XPagination>
@@ -108,6 +108,9 @@ let fetching = $ref(true);
 let user: Misskey.entities.UserDetailed | null = $ref(null);
 // @ts-ignore
 let group: Misskey.entities.UserGroup | null = $ref(null);
+let isAdmin = $computed(() => {
+  return group?.ownerId === $i?.id;
+});
 // @ts-ignore
 let typers: Misskey.entities.User[] = $ref([]);
 // @ts-ignore
