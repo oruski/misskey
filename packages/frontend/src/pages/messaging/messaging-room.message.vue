@@ -1,7 +1,7 @@
 <template>
   <div class="thvuemwp" :class="{ isMe }">
     <MkAvatar class="avatar" :user="message.user" indicator link preview />
-    <div v-long-click="onContextmenu" class="content" @contextmenu.stop="onContextmenu">
+    <div class="content" @contextmenu.stop="onContextmenu" @pointerdown="onPointerdown" @pointerup="onPointerup">
       <div class="inner">
         <template v-if="!isMe">
           <div class="name">
@@ -59,12 +59,10 @@
 import {} from 'vue';
 import * as mfm from 'mfm-js';
 import * as Misskey from 'misskey-js';
-import VueLongpress from 'vue-longpress';
 import { extractUrlFromMfm } from '@/scripts/extract-url-from-mfm';
 import MkUrlPreview from '@/components/MkUrlPreview.vue';
 import * as os from '@/os';
 import { $i } from '@/account';
-import { i18n } from '@/i18n';
 import { defaultStore } from '@/store';
 import { getMessageMenu } from '@/scripts/get-message-menu';
 // @ts-ignore
@@ -78,28 +76,7 @@ const props = defineProps<{
 
 const isMe = $computed(() => props.message.userId === $i?.id);
 const urls = $computed(() => (props.message.text ? extractUrlFromMfm(mfm.parse(props.message.text)) : []));
-
-/**
- * メッセージの削除
- */
-async function deleteMessage(): Promise<void> {
-  const { canceled } = await os.confirm({
-    type: 'warning',
-    text: i18n.t('deleteConfirm'),
-  });
-
-  if (canceled) return;
-
-  os.api('messaging/messages/delete', {
-    messageId: props.message.id,
-  });
-}
-
-async function pinMessage(): Promise<void> {
-  os.apiWithDialog('messaging/messages/pin', {
-    messageId: props.message.id,
-  });
-}
+let holdTouchTimer: NodeJS.Timeout | null = $ref(null);
 
 /**
  * コンテキストメニュー
@@ -121,6 +98,37 @@ function onContextmenu(ev: MouseEvent): void {
     ev.preventDefault();
   } else {
     os.contextMenu(getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }), ev).then(focus);
+  }
+}
+
+/**
+ * 長押し制御
+ */
+function onPointerdown(ev: PointerEvent): void {
+  console.debug('onPointerdown');
+  console.debug('ev.pointerType =', ev.pointerType);
+  if (!holdTouchTimer) return;
+  if (ev.pointerType === 'touch') {
+    ev.preventDefault();
+    ev.stopPropagation();
+    holdTouchTimer = setTimeout(() => {
+      os.contextMenu(getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }), ev).then(focus);
+    }, 500);
+    console.debug('holdTouchTimer =', holdTouchTimer);
+  }
+}
+
+/**
+ * 長押し解除
+ */
+function onPointerup(ev: PointerEvent): void {
+  console.debug('onPointerup');
+  console.debug('ev.pointerType =', ev.pointerType);
+  if (ev.pointerType === 'touch') {
+    if (holdTouchTimer) {
+      clearTimeout(holdTouchTimer);
+      holdTouchTimer = null;
+    }
   }
 }
 </script>

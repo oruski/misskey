@@ -1,6 +1,5 @@
 import { App } from 'vue';
 
-import { longClickDirective } from 'vue-long-click';
 import userPreview from './user-preview';
 import getSize from './get-size';
 import ripple from './ripple';
@@ -12,8 +11,6 @@ import clickAnime from './click-anime';
 import panel from './panel';
 import adaptiveBorder from './adaptive-border';
 import adaptiveBg from './adaptive-bg';
-
-const longClickInstance = longClickDirective({ delay: 500, interval: 100 });
 
 export default function (app: App) {
   app.directive('userPreview', userPreview);
@@ -28,5 +25,4 @@ export default function (app: App) {
   app.directive('panel', panel);
   app.directive('adaptive-border', adaptiveBorder);
   app.directive('adaptive-bg', adaptiveBg);
-  app.directive('long-click', longClickInstance);
 }
