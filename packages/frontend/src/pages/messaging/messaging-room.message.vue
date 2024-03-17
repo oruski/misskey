@@ -1,7 +1,12 @@
 <template>
   <div class="thvuemwp" :class="{ isMe }">
     <MkAvatar class="avatar" :user="message.user" indicator link preview />
-    <div class="content" @contextmenu.stop="onContextmenu" @pointerdown="onPointerdown" @pointerup="onPointerup">
+    <div
+      class="content"
+      @contextmenu.stop="onContextmenu"
+      @pointerdown.passive="onPointerdown"
+      @pointerup.passive="onPointerup"
+    >
       <div class="inner">
         <template v-if="!isMe">
           <div class="name">
@@ -31,7 +36,9 @@
           <div class="context">
             <div>
               <template v-if="isGroup">
-                <span v-if="message.reads.length > 0" class="read">{{ $ts.messageRead }} {{ message.reads.length }}</span>
+                <span v-if="message.reads.length > 0" class="read"
+                  >{{ $ts.messageRead }} {{ message.reads.length }}</span
+                >
               </template>
               <template v-else>
                 <span v-if="isMe && message.isRead" class="read">{{ $ts.messageRead }}</span>
@@ -104,16 +111,12 @@ function onContextmenu(ev: MouseEvent): void {
  */
 function onPointerdown(ev: PointerEvent): void {
   console.debug('onPointerdown');
-  console.debug('ev.pointerType =', ev.pointerType);
-  if (!holdTouchTimer) return;
-  if (ev.pointerType === 'touch') {
-    ev.preventDefault();
-    ev.stopPropagation();
-    holdTouchTimer = setTimeout(() => {
-      os.contextMenu(getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }), ev).then(focus);
-    }, 500);
-    console.debug('holdTouchTimer =', holdTouchTimer);
-  }
+  if (holdTouchTimer) return;
+  holdTouchTimer = setTimeout(() => {
+    console.debug('メニュー表示');
+    os.contextMenu(getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }), ev).then(focus);
+  }, 500);
+  console.debug('holdTouchTimer =', holdTouchTimer);
 }
 
 /**
@@ -121,12 +124,9 @@ function onPointerdown(ev: PointerEvent): void {
  */
 function onPointerup(ev: PointerEvent): void {
   console.debug('onPointerup');
-  console.debug('ev.pointerType =', ev.pointerType);
-  if (ev.pointerType === 'touch') {
-    if (holdTouchTimer) {
-      clearTimeout(holdTouchTimer);
-      holdTouchTimer = null;
-    }
+  if (holdTouchTimer) {
+    clearTimeout(holdTouchTimer);
+    holdTouchTimer = null;
   }
 }
 </script>
