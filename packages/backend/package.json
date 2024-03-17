@@ -24,7 +24,7 @@
 		"test": "npm run jest",
 		"db:migrate": "npx typeorm migration:run -d ormconfig.js",
     "db:revert": "npx typeorm migration:revert -d ormconfig.js",
-		"db:migration:generate": "read NAME; npx typeorm migration:generate -d ormconfig.js migration/$NAME",
+		"db:migration:generate": "read NAME; npm run build && npx typeorm migration:generate -d ormconfig.js migration/$NAME",
 		"upgrade-interactive": "npx npm-check --update",
 		"jest-and-coverage": "cross-env NODE_ENV=test node --experimental-vm-modules --experimental-import-meta-resolve node_modules/jest/bin/jest.js --coverage --forceExit --runInBand --detectOpenHandles",
 		"jest": "cross-env NODE_ENV=test node --experimental-vm-modules --experimental-import-meta-resolve node_modules/jest/bin/jest.js --forceExit --runInBand --detectOpenHandles",
