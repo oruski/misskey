@@ -342,12 +342,15 @@ function onMessage(message) {
   const _isBottom = document.body.scrollHeight - window.innerHeight - window.scrollY <= 40;
   console.debug('[chat] _isBottom =', _isBottom);
 
-  // @ts-ignore
-  pagingComponent.prepend(message);
-  if (message.userId !== $i?.id && !document.hidden) {
-    connection?.send('read', {
-      id: message.id,
-    });
+  // ピン留めモードの時は追加しない
+  if (!isPinned) {
+    // @ts-ignore
+    pagingComponent.prepend(message);
+    if (message.userId !== $i?.id && !document.hidden) {
+      connection?.send('read', {
+        id: message.id,
+      });
+    }
   }
 
   const url = new URL(location.href);
