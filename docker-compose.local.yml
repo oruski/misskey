@@ -3,7 +3,7 @@ version: "3"
 services:
   web:
     build: .
-    restart: always
+    restart: unless-stopped
     links:
       - db
       - redis
@@ -18,7 +18,7 @@ services:
       - ./.config:/misskey/.config:ro
 
   redis:
-    restart: always
+    restart: unless-stopped
     image: redis:4.0-alpine
     networks:
       - internal_network
@@ -29,7 +29,7 @@ services:
       - "6379:6379"
 
   db:
-    restart: always
+    restart: unless-stopped
     image: postgres:12.2-alpine
     networks:
       - internal_network
