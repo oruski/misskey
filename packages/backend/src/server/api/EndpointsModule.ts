@@ -225,6 +225,8 @@ import * as ep___messaging_messages from './endpoints/messaging/messages.js';
 import * as ep___messaging_messages_create from './endpoints/messaging/messages/create.js';
 import * as ep___messaging_messages_delete from './endpoints/messaging/messages/delete.js';
 import * as ep___messaging_messages_read from './endpoints/messaging/messages/read.js';
+import * as ep___messaging_messages_pin from './endpoints/messaging/messages/pin.js';
+import * as ep___messaging_messages_unpin from './endpoints/messaging/messages/unpin.js';
 import * as ep___meta from './endpoints/meta.js';
 import * as ep___emojis from './endpoints/emojis.js';
 import * as ep___miauth_genToken from './endpoints/miauth/gen-token.js';
@@ -565,6 +567,8 @@ const $messaging_messages: Provider = { provide: 'ep:messaging/messages', useCla
 const $messaging_messages_create: Provider = { provide: 'ep:messaging/messages/create', useClass: ep___messaging_messages_create.default };
 const $messaging_messages_delete: Provider = { provide: 'ep:messaging/messages/delete', useClass: ep___messaging_messages_delete.default };
 const $messaging_messages_read: Provider = { provide: 'ep:messaging/messages/read', useClass: ep___messaging_messages_read.default };
+const $messaging_messages_pin: Provider = { provide: 'ep:messaging/messages/pin', useClass: ep___messaging_messages_pin.default };
+const $messaging_messages_unpin: Provider = { provide: 'ep:messaging/messages/unpin', useClass: ep___messaging_messages_unpin.default };
 const $meta: Provider = { provide: 'ep:meta', useClass: ep___meta.default };
 const $emojis: Provider = { provide: 'ep:emojis', useClass: ep___emojis.default };
 const $miauth_genToken: Provider = { provide: 'ep:miauth/gen-token', useClass: ep___miauth_genToken.default };
@@ -909,6 +913,8 @@ const $retention: Provider = { provide: 'ep:retention', useClass: ep___retention
 		$messaging_messages_create,
 		$messaging_messages_delete,
 		$messaging_messages_read,
+    $messaging_messages_pin,
+    $messaging_messages_unpin,
 		$meta,
 		$emojis,
 		$miauth_genToken,
@@ -1247,6 +1253,8 @@ const $retention: Provider = { provide: 'ep:retention', useClass: ep___retention
 		$messaging_messages_create,
 		$messaging_messages_delete,
 		$messaging_messages_read,
+    $messaging_messages_pin,
+    $messaging_messages_unpin,
 		$meta,
 		$emojis,
 		$miauth_genToken,

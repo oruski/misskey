@@ -13,7 +13,7 @@
     <div v-else-if="empty" key="_empty_" class="empty">
       <slot name="empty">
         <div class="_fullinfo">
-          <img src="https://xn--931a.moe/assets/info.jpg" class="_ghost" />
+          <img src="/assets/error.png" class="_ghost" />
           <div>{{ i18n.ts.nothing }}</div>
         </div>
       </slot>
@@ -30,7 +30,7 @@
           primary
           @click="fetchMore"
         >
-          {{ i18n.ts.loadMore }}
+          &emsp;
         </MkButton>
         <MkLoading v-else class="loading" />
       </div>
@@ -45,7 +45,7 @@
           primary
           @click="fetchMore"
         >
-          {{ i18n.ts.loadMore }}
+          &emsp;
         </MkButton>
         <MkLoading v-else class="loading" />
       </div>
@@ -68,7 +68,14 @@ import {
 } from 'vue';
 import * as misskey from 'misskey-js';
 import * as os from '@/os';
-import { onScrollTop, isTopVisible, onScrollBottom, isBottomVisible, scrollToBottomForWindow } from '@/scripts/scroll';
+import {
+  onScrollTop,
+  isTopVisible,
+  onScrollBottom,
+  isBottomVisible,
+  scrollToBottomForWindow,
+  getBodyScrollHeight,
+} from '@/scripts/scroll';
 import { defaultStore } from '@/store';
 import { MisskeyEntity } from '@/types/date-separated-list';
 import { i18n } from '@/i18n';
@@ -104,6 +111,7 @@ const props = withDefaults(
     disableAutoLoad?: boolean;
     displayLimit?: number;
     isFirstFetch?: boolean;
+    onFirstFetch?: () => void;
   }>(),
   {
     displayLimit: 20,
@@ -131,6 +139,7 @@ const more = ref(false);
 const isBackTop = ref(false);
 const empty = computed(() => items.value.length === 0);
 const error = ref(false);
+const isFirstFetch = $computed(() => props.isFirstFetch);
 const { enableInfiniteScroll } = defaultStore.reactiveState;
 
 const contentEl = $computed(() => props.pagination.pageEl || rootEl);
@@ -158,9 +167,9 @@ watch(
 );
 
 watch($$(rootEl), () => {
-  scrollObserver.disconnect();
+  scrollObserver?.disconnect();
   nextTick(() => {
-    if (rootEl) scrollObserver.observe(rootEl);
+    if (rootEl) scrollObserver?.observe(rootEl);
   });
 });
 
@@ -190,19 +199,21 @@ watch(
 
 watch(fetching, () => {
   if (props.isFirstFetch) {
-    console.debug('[初回ローディング] Pagination scrollToBottomForWindow');
+    console.debug('[初回ローディング] Pagination scrollToBottomForWindow SCROLL004');
     scrollToBottomForWindow({ behavior: 'instant' });
     setTimeout(() => {
+      console.debug('[初回ローディング] Pagination scrollToBottomForWindow SCROLL005');
       scrollToBottomForWindow({ behavior: 'instant' });
     }, 300);
     setTimeout(() => {
+      console.debug('[初回ローディング] Pagination scrollToBottomForWindow SCROLL006');
       scrollToBottomForWindow({ behavior: 'instant' });
     }, 600);
   }
 });
 
-let isFirstFetch = $ref(props.isFirstFetch);
 watch(isFirstFetch, () => {
+  console.debug('scrollToBottomForWindow SCROLL007');
   scrollToBottomForWindow({ behavior: 'instant' });
 });
 
@@ -229,7 +240,6 @@ async function init(): Promise<void> {
         }
         if (!props.pagination.noPaging && res.length > (props.pagination.limit || 10)) {
           res.pop();
-          // if (props.pagination.reversed) moreFetching.value = true;
           items.value = res;
           more.value = true;
         } else {
@@ -244,14 +254,31 @@ async function init(): Promise<void> {
         error.value = true;
         fetching.value = false;
       },
-    );
+    )
+    .finally(() => {
+      if (props.isFirstFetch) {
+        console.debug('scrollToBottomForWindow SCROLL011');
+        scrollToBottomForWindow({ behavior: 'instant' });
+        setTimeout(() => {
+          console.debug('scrollToBottomForWindow SCROLL001');
+          scrollToBottomForWindow({ behavior: 'instant' });
+          props.onFirstFetch?.();
+        }, 500);
+      }
+    });
 }
 
 const reload = (): Promise<void> => {
+  fetching.value = true;
+  moreFetching.value = false;
+  more.value = false;
   items.value = [];
   return init();
 };
 
+/**
+ * さらに読み込む
+ */
 const fetchMore = async (): Promise<void> => {
   if (!more.value || fetching.value || moreFetching.value || items.value.length === 0 || props.isFirstFetch) return;
 
@@ -287,12 +314,25 @@ const fetchMore = async (): Promise<void> => {
         }
 
         const reverseConcat = (_res) => {
+          // 画面のスクロール位置を保持
           const oldScroll = window.scrollY;
+          console.debug('oldScroll =', oldScroll);
 
+          // 画面サイズを保持
+          const oldHeight = getBodyScrollHeight();
+
+          // 逆順に追加
           items.value = items.value.concat(_res);
 
           return nextTick(() => {
-            window.scroll({ top: oldScroll + 100, behavior: 'instant' });
+            // 現在の画面サイズを取得
+            const newHeight = getBodyScrollHeight();
+
+            // 画面サイズの差分を取得
+            const diff = newHeight - oldHeight;
+
+            // 前回のスクロール位置から差分を追加する
+            window.scroll({ top: oldScroll + diff, behavior: 'instant' });
             return nextTick();
           });
         };
@@ -303,34 +343,44 @@ const fetchMore = async (): Promise<void> => {
           if (props.pagination.reversed) {
             reverseConcat(res).then(() => {
               more.value = true;
-              moreFetching.value = false;
+              setTimeout(() => {
+                moreFetching.value = false;
+              }, 500);
             });
           } else {
             items.value = items.value.concat(res);
             more.value = true;
-            moreFetching.value = false;
+            setTimeout(() => {
+              moreFetching.value = false;
+            }, 500);
           }
         } else {
           if (props.pagination.reversed) {
             reverseConcat(res).then(() => {
               more.value = false;
-              moreFetching.value = false;
+              setTimeout(() => {
+                moreFetching.value = false;
+              }, 500);
             });
           } else {
             items.value = items.value.concat(res);
             more.value = false;
-            moreFetching.value = false;
+            setTimeout(() => {
+              moreFetching.value = false;
+            }, 500);
           }
         }
         offset.value += res.length;
 
         if (props.isFirstFetch) {
-          console.debug('scrollToBottomForWindow');
+          console.debug('scrollToBottomForWindow SCROLL002');
           scrollToBottomForWindow({ behavior: 'instant' });
         }
       },
       () => {
-        moreFetching.value = false;
+        setTimeout(() => {
+          moreFetching.value = false;
+        }, 500);
       },
     );
 };
@@ -393,28 +443,10 @@ onDeactivated(() => {
     : window.scrollY === 0;
 });
 
-function toBottom() {
-  scrollToBottomForWindow({ behavior: 'instant' });
-}
-
-onMounted(() => {
-  inited.then(() => {
-    if (props.pagination.reversed) {
-      nextTick(() => {
-        setTimeout(toBottom, 800);
-
-        // scrollToBottomでmoreFetchingボタンが画面外まで出るまで
-        // more = trueを遅らせる
-        setTimeout(() => {
-          moreFetching.value = false;
-        }, 2000);
-      });
-    }
-  });
-});
+onMounted(() => {});
 
 onBeforeUnmount(() => {
-  scrollObserver.disconnect();
+  scrollObserver?.disconnect();
 });
 
 defineExpose({

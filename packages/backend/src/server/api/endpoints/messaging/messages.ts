@@ -55,6 +55,7 @@ export const paramDef = {
 		sinceId: { type: 'string', format: 'misskey:id' },
 		untilId: { type: 'string', format: 'misskey:id' },
 		markAsRead: { type: 'boolean', default: true },
+    isPinned: { type: 'boolean', default: false },
 	},
 	anyOf: [
 		{
@@ -93,14 +94,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 	) {
 		// @ts-ignore
 		super(meta, paramDef, async (ps, me) => {
+      // @ts-ignore
 			if (ps.userId != null) {
 				// Fetch recipient (user)
+        // @ts-ignore
 				const recipient = await this.getterService.getUser(ps.userId).catch(err => {
 					if (err.id === '15348ddd-432d-49c2-8a5a-8069753becff') throw new ApiError(meta.errors.noSuchUser);
 					throw err;
 				});
 
-				const query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
+        // @ts-ignore
+				let query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
 					.andWhere(new Brackets(qb => { qb
 						.where(new Brackets(qb => { qb
 							.where('message.userId = :meId')
@@ -114,9 +118,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 					.setParameter('meId', me.id)
 					.setParameter('recipientId', recipient.id);
 
+        // @ts-ignore
+        if (ps.isPinned) {
+            query = query.andWhere('message.isPinned = true');
+        }
+
+        // @ts-ignore
 				const messages = await query.take(ps.limit).getMany();
 
 				// Mark all as read
+        // @ts-ignore
 				if (ps.markAsRead) {
 					this.messagingService.readUserMessagingMessage(me.id, recipient.id, messages.filter(m => m.recipientId === me.id).map(x => x.id));
 
@@ -129,8 +140,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				return await Promise.all(messages.map(message => this.messagingMessageEntityService.pack(message, me, {
 					populateRecipient: false,
 				})));
+        // @ts-ignore
 			} else if (ps.groupId != null) {
 				// Fetch recipient (group)
+        // @ts-ignore
 				const recipientGroup = await this.userGroupRepository.findOneBy({ id: ps.groupId });
 
 				if (recipientGroup == null) {
@@ -147,12 +160,20 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 					throw new ApiError(meta.errors.groupAccessDenied);
 				}
 
-				const query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
+        // @ts-ignore
+				let query = this.queryService.makePaginationQuery(this.messagingMessagesRepository.createQueryBuilder('message'), ps.sinceId, ps.untilId)
 					.andWhere('message.groupId = :groupId', { groupId: recipientGroup.id });
 
+        // @ts-ignore
+        if (ps.isPinned) {
+          query = query.andWhere('message.isPinned = true');
+        }
+
+        // @ts-ignore
 				const messages = await query.take(ps.limit).getMany();
 
 				// Mark all as read
+        // @ts-ignore
 				if (ps.markAsRead) {
 					this.messagingService.readGroupMessagingMessage(me.id, recipientGroup.id, messages.map(x => x.id));
 				}

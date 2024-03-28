@@ -1,7 +1,7 @@
 <template>
   <div class="thvuemwp" :class="{ isMe }">
     <MkAvatar class="avatar" :user="message.user" indicator link preview />
-    <div class="content">
+    <div class="content" @contextmenu.stop="onContextmenu">
       <div class="inner">
         <template v-if="!isMe">
           <div class="name">
@@ -10,10 +10,12 @@
         </template>
         <div class="inner2">
           <div class="balloon" :class="{ noText: message.text == null }">
-            <button v-if="isMe" class="delete-button" :title="$ts.delete" @click="del">
-              <img src="/client-assets/remove.png" alt="Delete" />
-            </button>
-            <div v-if="!message.isDeleted" class="content">
+            <div
+              v-if="!message.isDeleted"
+              class="content"
+              @pointerdown.passive="onPointerdown"
+              @pointerup.passive="onPointerup"
+            >
               <Mfm v-if="message.text" ref="text" class="text" :text="message.text" :i="$i" />
               <div v-if="message.file" class="file">
                 <a :href="message.file.url" rel="noopener" target="_blank" :title="message.file.name">
@@ -59,26 +61,132 @@
 </template>
 
 <script lang="ts" setup>
-import {} from 'vue';
+import { nextTick } from 'vue';
 import * as mfm from 'mfm-js';
 import * as Misskey from 'misskey-js';
 import { extractUrlFromMfm } from '@/scripts/extract-url-from-mfm';
 import MkUrlPreview from '@/components/MkUrlPreview.vue';
 import * as os from '@/os';
 import { $i } from '@/account';
+import { defaultStore } from '@/store';
+import { getMessageMenu } from '@/scripts/get-message-menu';
+// @ts-ignore
 
 const props = defineProps<{
+  // @ts-ignore
   message: Misskey.entities.MessagingMessage;
   isGroup?: boolean;
+  isAdmin?: boolean;
+  contextDisposes?: Array<() => void>;
+  onSetContextDisposes?: (resolves: unknown[]) => void;
 }>();
 
 const isMe = $computed(() => props.message.userId === $i?.id);
 const urls = $computed(() => (props.message.text ? extractUrlFromMfm(mfm.parse(props.message.text)) : []));
 
-function del(): void {
-  os.api('messaging/messages/delete', {
-    messageId: props.message.id,
+// @ts-ignore
+// eslint-disable-next-line no-undef
+let holdTouchTimer: NodeJS.Timeout | null = $ref(null);
+
+/**
+ * コンテキストメニュー
+ */
+async function onContextmenu(ev: MouseEvent): Promise<void> {
+  const isLink = (el: HTMLElement) => {
+    if (el.tagName === 'A') return true;
+    if (el.parentElement) {
+      return isLink(el.parentElement);
+    }
+  };
+
+  // @ts-ignore
+  if (isLink(ev.target)) return;
+  // @ts-ignore
+  if (window.getSelection().toString() !== '') return;
+
+  if (defaultStore.state.useReactionPickerForContextMenu) {
+    ev.preventDefault();
+  } else {
+    const response = await os.contextMenuWithoutPromise(
+      getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }),
+      ev,
+    );
+    props.onSetContextDisposes?.([...(props.contextDisposes ?? []), response.dispose]);
+  }
+}
+
+/**
+ * タイマーリセット
+ */
+function resetTimer(): void {
+  if (holdTouchTimer) {
+    console.debug('resetTimer');
+    clearTimeout(holdTouchTimer);
+    holdTouchTimer = null;
+  }
+}
+
+/**
+ * スクロールイベントの監視
+ */
+function attachTouchmoveEvent(): void {
+  console.debug('attachTouchmoveEvent');
+  window.addEventListener('touchmove', resetTimer, { passive: true });
+  window.addEventListener('touchend', detachTouchmoveEvent, { passive: true });
+}
+
+/**
+ * スクロールイベントの監視解除
+ */
+function detachTouchmoveEvent(): void {
+  console.debug('detachTouchmoveEvent');
+  window.removeEventListener('touchmove', resetTimer);
+  window.removeEventListener('touchend', detachTouchmoveEvent);
+}
+
+/**
+ * 長押し制御
+ */
+async function onPointerdown(ev: PointerEvent): Promise<void> {
+  console.debug('onPointerdown');
+  console.debug('props.contextDisposes =', props.contextDisposes);
+  console.debug('props.onSetContextDisposes =', props.onSetContextDisposes);
+  if (holdTouchTimer) {
+    clearTimeout(holdTouchTimer);
+  }
+  props.contextDisposes?.forEach((dispose) => {
+    console.debug('dispose =', dispose);
+    return dispose();
   });
+
+  props.onSetContextDisposes?.([]);
+  nextTick(async () => {
+    attachTouchmoveEvent();
+    holdTouchTimer = setTimeout(async () => {
+      console.debug('メニュー表示');
+      const response = await os.contextMenuWithoutPromise(
+        getMessageMenu({ message: props.message, isMe, isAdmin: props.isAdmin }),
+        ev,
+      );
+      console.debug('response =', response);
+      props.onSetContextDisposes?.([...(props.contextDisposes ?? []), response.dispose]);
+      return nextTick();
+    }, 1000);
+    console.debug('holdTouchTimer =', holdTouchTimer);
+  });
+}
+
+/**
+ * 長押し解除
+ */
+async function onPointerup(ev: PointerEvent): Promise<void> {
+  console.debug('onPointerup');
+  console.debug('props.contextDisposes =', JSON.stringify(props.contextDisposes));
+  if (holdTouchTimer) {
+    clearTimeout(holdTouchTimer);
+    holdTouchTimer = null;
+  }
+  detachTouchmoveEvent();
 }
 </script>
 
@@ -100,6 +208,11 @@ function del(): void {
   }
 
   > .content {
+    // スマホの場合のみ選択禁止
+    @media (max-width: 500px) {
+      user-select: none;
+    }
+
     min-width: 0;
 
     > .inner {
@@ -152,6 +265,33 @@ function del(): void {
           &:hover {
             > .delete-button {
               display: block;
+            }
+
+            > .pin-button {
+              display: block;
+            }
+          }
+
+          > .pin-button {
+            display: none;
+            position: absolute;
+            z-index: 1;
+            top: -4px;
+            right: -40px;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            outline: none;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            background: transparent;
+
+            > img {
+              vertical-align: bottom;
+              width: 16px;
+              height: 16px;
+              cursor: pointer;
             }
           }
 

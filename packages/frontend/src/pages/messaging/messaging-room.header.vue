@@ -20,8 +20,16 @@
         </div>
       </template>
 
-      <template v-if="props.groupUsers?.length">
-        <div :class="$style.buttonsRight">
+      <div :class="{ [$style.buttonsRight]: true, [$style.buttonsRightUser]: !groupOwnerId }">
+        <button
+          :title="i18n.ts.pin"
+          :class="{ [$style.pinButton]: true, [$style.pinButtonOn]: isPinned }"
+          @click="() => onSetPinned?.(!isPinned)"
+        >
+          <i :class="{ ti: true, 'ti-pin': !isPinned, 'ti-pinned': isPinned }" />
+        </button>
+
+        <template v-if="props.groupUsers?.length">
           <button
             ref="buttonEl"
             class="_button"
@@ -35,8 +43,8 @@
               </template>
             </I18n>
           </button>
-        </div>
-      </template>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -62,6 +70,8 @@ const props = withDefaults(
       handler: (ev: MouseEvent) => void;
     }[];
     displayMyAvatar?: boolean;
+    isPinned?: boolean;
+    onSetPinned?: (pinned: boolean) => void;
   }>(),
   {
     onlineUserCount: 0,
@@ -228,6 +238,42 @@ onDeactivated(async () => {
   width: fit-content;
   position: absolute;
   right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pinButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 32px;
+  box-sizing: border-box;
+  position: relative;
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1.5em;
+  cursor: pointer;
+  transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.buttonsRightUser {
+  right: -8px;
+}
+
+.pinButtonOn {
+  background: var(--accent);
+  color: var(--bg);
+  transform: translateY(2px);
+  &:hover {
+    background: var(--accent);
+  }
 }
 
 .nameContainer {

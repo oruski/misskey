@@ -197,13 +197,13 @@ function send() {
           console.error(err);
           throw err;
         })
-        .then(() => {
+        .finally(() => {
           sending = false;
         }),
     {
       retries: 3,
       backoff: 'LINEAR',
-      delay: 300,
+      delay: 1000,
     },
   );
 }

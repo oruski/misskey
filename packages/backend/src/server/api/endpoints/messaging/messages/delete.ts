@@ -46,16 +46,25 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		private messagingService: MessagingService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const message = await this.messagingMessagesRepository.findOneBy({
-				id: ps.messageId,
-				userId: me.id,
+			const message = await this.messagingMessagesRepository.findOne({
+				where: {
+          id: ps.messageId,
+        },
+        relations: {
+          group: true,
+        },
 			});
 
 			if (message == null) {
 				throw new ApiError(meta.errors.noSuchMessage);
 			}
 
-			await this.messagingService.deleteMessage(message);
+
+      // メッセージ投稿者 または グループオーナーではない
+      if (message.userId !== me.id && message.group?.userId !== me.id) {
+        throw new ApiError(meta.errors.noSuchMessage);
+      }
+      await this.messagingService.deleteMessage(message);
 		});
 	}
 }

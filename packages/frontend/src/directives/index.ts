@@ -12,17 +12,17 @@ import panel from './panel';
 import adaptiveBorder from './adaptive-border';
 import adaptiveBg from './adaptive-bg';
 
-export default function(app: App) {
-	app.directive('userPreview', userPreview);
-	app.directive('user-preview', userPreview);
-	app.directive('get-size', getSize);
-	app.directive('ripple', ripple);
-	app.directive('tooltip', tooltip);
-	app.directive('hotkey', hotkey);
-	app.directive('appear', appear);
-	app.directive('anim', anim);
-	app.directive('click-anime', clickAnime);
-	app.directive('panel', panel);
-	app.directive('adaptive-border', adaptiveBorder);
-	app.directive('adaptive-bg', adaptiveBg);
+export default function (app: App) {
+  app.directive('userPreview', userPreview);
+  app.directive('user-preview', userPreview);
+  app.directive('get-size', getSize);
+  app.directive('ripple', ripple);
+  app.directive('tooltip', tooltip);
+  app.directive('hotkey', hotkey);
+  app.directive('appear', appear);
+  app.directive('anim', anim);
+  app.directive('click-anime', clickAnime);
+  app.directive('panel', panel);
+  app.directive('adaptive-border', adaptiveBorder);
+  app.directive('adaptive-bg', adaptiveBg);
 }

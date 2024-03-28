@@ -383,6 +383,8 @@ _sfx:
   notification: "Notifikationer"
   chat: "Chatt"
   antenna: "Antenner"
+_2fa:
+  renewTOTPCancel: "Nej tack"
 _antennaSources:
   all: "Alla noter"
   homeTimeline: "Noter från följda användare"

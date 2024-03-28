@@ -1,7 +1,13 @@
 <template>
   <MkStickyContainer>
     <template #header>
-      <XPageHeader :online-user-count="onlineUserCount" :group-users="groupUsers" :group-owner-id="groupOwnerId" />
+      <XPageHeader
+        :online-user-count="onlineUserCount"
+        :group-users="groupUsers"
+        :group-owner-id="groupOwnerId"
+        :is-pinned="isPinned"
+        :on-set-pinned="onSetPinned"
+      />
     </template>
     <div ref="rootEl" :class="$style['root']" @dragover.prevent.stop="onDragover" @drop.prevent.stop="onDrop">
       <div :class="$style['body']">
@@ -12,10 +18,11 @@
           :pagination="pagination"
           :is-first-fetch="isFirstFetch"
           :display-limit="1000"
+          :on-first-fetch="onFirstFetch"
         >
           <template #empty>
             <div class="_fullinfo">
-              <img src="https://xn--931a.moe/assets/info.jpg" class="_ghost" />
+              <img src="/assets/error.png" class="_ghost" />
               <div>{{ i18n.ts.noMessagesYet }}</div>
             </div>
           </template>
@@ -23,12 +30,23 @@
             <MkDateSeparatedList
               v-if="messages.length > 0"
               v-slot="{ item: message }"
-              :class="{ [$style['messages']]: true, 'deny-move-transition': pFetching }"
+              :class="{
+                [$style['messages']]: true,
+                [$style['opacity-0']]: isFirstFetch,
+                'deny-move-transition': pFetching,
+              }"
               :items="messages"
               direction="up"
               reversed
             >
-              <XMessage :key="message.id" :message="message" :is-group="group != null" />
+              <XMessage
+                :key="message.id"
+                :message="message"
+                :is-group="group != null"
+                :is-admin="isAdmin"
+                :context-disposes="contextDisposes"
+                :on-set-context-disposes="onSetContextDisposes"
+              />
             </MkDateSeparatedList>
           </template>
         </XPagination>
@@ -92,15 +110,20 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 
 let isFirstFetch = $ref(true);
 let finishFirstFetch = debounce(() => {
+  console.debug('thisScrollToBottom SCROLL008');
+  thisScrollToBottom({ behavior: 'instant' });
   console.debug('初回ローディング完了');
   isFirstFetch = false;
-}, 300);
+}, 500);
 
 let fetching = $ref(true);
 // @ts-ignore
 let user: Misskey.entities.UserDetailed | null = $ref(null);
 // @ts-ignore
 let group: Misskey.entities.UserGroup | null = $ref(null);
+let isAdmin = $computed(() => {
+  return group?.ownerId === $i?.id;
+});
 // @ts-ignore
 let typers: Misskey.entities.User[] = $ref([]);
 // @ts-ignore
@@ -108,6 +131,9 @@ let connection: Misskey.ChannelConnection<Misskey.Channels['messaging']> | null 
 // @ts-ignore
 let showIndicator = $ref(false);
 
+let contextDisposes = $ref<Promise<() => void>[]>([]);
+
+let isPinned = $ref(false);
 let onlineUserCount = $ref(0);
 let groupUsers = $ref([]);
 let groupOwnerId = $computed(() => {
@@ -145,6 +171,18 @@ watch([() => props.userAcct, () => props.groupId], () => {
   fetch();
 });
 
+watch(
+  () => isPinned,
+  async () => {
+    isFirstFetch = true;
+    nextTick(async () => {
+      if (connection) connection.dispose();
+      await fetch();
+      pagingComponent?.reload();
+    });
+  },
+);
+
 async function fetch() {
   console.log('fetch');
 
@@ -162,6 +200,7 @@ async function fetch() {
       params: {
         // @ts-ignore
         userId: user.id,
+        isPinned,
       },
       reversed: true,
       // @ts-ignore
@@ -185,6 +224,7 @@ async function fetch() {
       limit: 40,
       params: {
         groupId: group?.id,
+        isPinned,
       },
       reversed: true,
       // @ts-ignore
@@ -199,6 +239,7 @@ async function fetch() {
     });
   }
   connection.on('message', onMessage);
+  connection.on('updated', onUpdated);
   connection.on('read', onRead);
   connection.on('deleted', onDeleted);
   connection.on('typers', (_typers) => {
@@ -206,6 +247,13 @@ async function fetch() {
   });
 
   document.addEventListener('visibilitychange', onVisibilitychange);
+}
+
+/**
+ * 初回読み込み完了
+ */
+const onFirstFetch = () => {
+  console.debug('onFirstFetch');
 
   nextTick(() => {
     const url = new URL(location.href);
@@ -217,16 +265,15 @@ async function fetch() {
     ) {
       // @ts-ignore
       pagingComponent.inited.then(() => {
-        thisScrollToBottom({ behavior: 'smooth' });
+        console.debug('thisScrollToBottom SCROLL009');
+        thisScrollToBottom({ behavior: isFirstFetch ? 'instant' : 'smooth' });
       });
     }
 
-    window.setTimeout(() => {
-      fetching = false;
-      if (isFirstFetch) finishFirstFetch();
-    }, 300);
+    fetching = false;
+    if (isFirstFetch) finishFirstFetch();
   });
-}
+};
 
 function onDragover(ev: DragEvent) {
   if (!ev.dataTransfer) return;
@@ -295,12 +342,15 @@ function onMessage(message) {
   const _isBottom = document.body.scrollHeight - window.innerHeight - window.scrollY <= 40;
   console.debug('[chat] _isBottom =', _isBottom);
 
-  // @ts-ignore
-  pagingComponent.prepend(message);
-  if (message.userId !== $i?.id && !document.hidden) {
-    connection?.send('read', {
-      id: message.id,
-    });
+  // ピン留めモードの時は追加しない
+  if (!isPinned) {
+    // @ts-ignore
+    pagingComponent.prepend(message);
+    if (message.userId !== $i?.id && !document.hidden) {
+      connection?.send('read', {
+        id: message.id,
+      });
+    }
   }
 
   const url = new URL(location.href);
@@ -317,6 +367,7 @@ function onMessage(message) {
   if (_isBottom && isCurrentPage) {
     // Scroll to bottom
     nextTick(() => {
+      console.debug('thisScrollToBottom SCROLL010');
       thisScrollToBottom({ behavior: 'smooth' });
     });
   } else if (message.userId !== $i?.id) {
@@ -324,6 +375,27 @@ function onMessage(message) {
     notifyNewMessage();
   } else {
     console.debug('[chat] Not notify');
+  }
+}
+
+/**
+ * メッセージを更新
+ */
+function onUpdated(message) {
+  if (!message) return;
+  const id = message.id;
+
+  // @ts-ignore
+  if (pagingComponent.items.some((y) => y.id === id)) {
+    // @ts-ignore
+    const exist = pagingComponent.items.map((y) => y.id).indexOf(id);
+    // @ts-ignore
+    pagingComponent.items[exist] = {
+      // @ts-ignore
+      ...pagingComponent.items[exist],
+      // @ts-ignore
+      isPinned: message.isPinned,
+    };
   }
 }
 
@@ -374,7 +446,7 @@ function onDeleted(id) {
 }
 
 function thisScrollToBottom(option: ScrollToOptions = { behavior: 'smooth' }) {
-  console.debug('scrollToBottomForWindow');
+  console.debug('scrollToBottomForWindow SCROLL003');
   scrollToBottomForWindow({
     ...option,
     behavior: option.behavior,
@@ -383,6 +455,7 @@ function thisScrollToBottom(option: ScrollToOptions = { behavior: 'smooth' }) {
 
 function onIndicatorClick() {
   showIndicator = false;
+  console.debug('thisScrollToBottom SCROLL012');
   thisScrollToBottom({ behavior: 'smooth' });
 }
 
@@ -418,6 +491,14 @@ function onVisibilitychange() {
       });
     }
   }
+}
+
+function onSetPinned(_isPinned: boolean) {
+  isPinned = _isPinned;
+}
+
+function onSetContextDisposes(disposes: Promise<() => void>[]) {
+  contextDisposes = disposes;
 }
 
 onMounted(async () => {
@@ -471,8 +552,9 @@ definePageMetadata(
   display: contents;
 }
 
+//noinspection CssOverwrittenProperties
 .body {
-  min-height: 80%;
+  min-height: calc(100svh - 275px);
 }
 
 .more {
@@ -507,6 +589,10 @@ definePageMetadata(
   > * {
     margin-bottom: 16px;
   }
+}
+
+.opacity-0 {
+  opacity: 0;
 }
 
 .footer {

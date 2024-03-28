@@ -6,10 +6,10 @@ import type { Packed } from '@/misc/schema.js';
 import type { } from '@/models/entities/Blocking.js';
 import type { User } from '@/models/entities/User.js';
 import type { MessagingMessage } from '@/models/entities/MessagingMessage.js';
+import { bindThis } from '@/decorators.js';
 import { UserEntityService } from './UserEntityService.js';
 import { DriveFileEntityService } from './DriveFileEntityService.js';
 import { UserGroupEntityService } from './UserGroupEntityService.js';
-import { bindThis } from '@/decorators.js';
 
 @Injectable()
 export class MessagingMessageEntityService {
@@ -52,6 +52,7 @@ export class MessagingMessageEntityService {
 			fileId: message.fileId,
 			file: message.fileId ? await this.driveFileEntityService.pack(message.fileId) : null,
 			isRead: message.isRead,
+      isPinned: message.isPinned,
 			reads: message.reads,
 		};
 	}

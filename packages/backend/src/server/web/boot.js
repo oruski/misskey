@@ -11,6 +11,47 @@
 
 'use strict';
 
+const _LA = [
+  'ar-SA',
+  'bn-BD',
+  'ca-ES',
+  'cs-CZ',
+  'da-DK',
+  'de-DE',
+  'el-GR',
+  'en-US.unknown',
+  'en-US',
+  'es-ES',
+  'fr-FR',
+  'hr-HR',
+  'ht-HT',
+  'id-ID',
+  'it-IT',
+  'ja-JP',
+  'ja-KS',
+  'jbo-EN',
+  'kab-KAB',
+  'kn-IN',
+  'ko-KR',
+  'lo-LA',
+  'nl-NL',
+  'no-NO',
+  'pl-PL',
+  'pt-PT',
+  'ro-RO',
+  'ru-RU',
+  'si-LK',
+  'sk-SK',
+  'sv-SE',
+  'th-TH',
+  'tr-TR',
+  'ug-CN',
+  'uk-UA',
+  'vi-VN',
+  'zh-CN',
+  'zh-TW'
+];
+
 // ブロックの中に入れないと、定義した変数がブラウザのグローバルスコープに登録されてしまい邪魔なので
 (async () => {
 	window.onerror = (e) => {
@@ -29,7 +70,7 @@
 
 	//#region Detect language & fetch translations
 	if (!localStorage.hasOwnProperty('locale')) {
-		const supportedLangs = LANGS;
+		const supportedLangs = typeof LANGS ? LANGS : _LA;
 		let lang = localStorage.getItem('lang');
 		if (lang == null || !supportedLangs.includes(lang)) {
 			if (supportedLangs.includes(navigator.language)) {

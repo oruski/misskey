@@ -714,6 +714,29 @@ export function contextMenu(items: MenuItem[] | Ref<MenuItem[]>, ev: MouseEvent)
   });
 }
 
+/**
+ * Promiseを使用しないコンテキストメニュー
+ */
+export function contextMenuWithoutPromise(items: MenuItem[] | Ref<MenuItem[]>, ev: MouseEvent) {
+  ev.preventDefault();
+  let dispose;
+  return popup(
+    MkContextMenu,
+    {
+      items,
+      ev,
+    },
+    {
+      closed: () => {
+        dispose();
+      },
+    },
+  ).then((res) => {
+    dispose = res.dispose;
+    return res;
+  });
+}
+
 export function post(props: Record<string, any> = {}) {
   return new Promise((resolve, reject) => {
     // NOTE: MkPostFormDialogをdynamic importするとiOSでテキストエリアに自動フォーカスできない
