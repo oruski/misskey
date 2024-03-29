@@ -117,7 +117,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
                 }));
               }))
               .andWhere('message.groupId IS NULL')
-              .groupBy('message.userId')
+              .groupBy('message.userId, message.recipientId')
               .select('max(message.id) as id')
               .getQuery() + ')');
           }).setParameters({ meId: me.id, mute: muteeIds, block: blockeeIds }).getMany();
