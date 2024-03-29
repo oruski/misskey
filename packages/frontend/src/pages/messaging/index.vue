@@ -220,18 +220,15 @@ function attach() {
   // @ts-ignore
   connection.on('read', onRead);
 
-  os.api('messaging/history', { group: false, limit: 100 }).then((userMessages) => {
-    os.api('messaging/history', { group: true, limit: 100 })
-      .then((groupMessages) => {
-        const _messages = userMessages.concat(groupMessages);
-        _messages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        messages = _messages;
-        fetching = false;
-      })
-      .finally(() => {
-        isFirstLoad = false;
-      });
-  });
+  os.api('messaging/history', { isAll: true, limit: 100 })
+    .then((_messages) => {
+      _messages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      messages = _messages;
+      fetching = false;
+    })
+    .finally(() => {
+      isFirstLoad = false;
+    });
 }
 
 /**
