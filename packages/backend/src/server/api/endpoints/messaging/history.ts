@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Brackets, IsNull } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { MessagingMessage } from '@/models/entities/MessagingMessage.js';
-import type { MutingsRepository, UserGroupJoiningsRepository, MessagingMessagesRepository } from '@/models/index.js';
+import type { MutingsRepository, UserGroupJoiningsRepository, MessagingMessagesRepository, BlockingsRepository } from '@/models/index.js';
 import { MessagingMessageEntityService } from '@/core/entities/MessagingMessageEntityService.js';
 import { DI } from '@/di-symbols.js';
 
@@ -42,6 +42,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
     private messagingMessagesRepository: MessagingMessagesRepository,
     @Inject(DI.mutingsRepository)
     private mutingsRepository: MutingsRepository,
+    @Inject(DI.blockingsRepository)
+    private blockingsRepository: BlockingsRepository,
     @Inject(DI.userGroupJoiningsRepository)
     private userGroupJoiningsRepository: UserGroupJoiningsRepository,
     private messagingMessageEntityService: MessagingMessageEntityService,
@@ -51,6 +53,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
         muterId: me.id,
       });
       const muteeIds = mute.map(m => m.muteeId);
+
+      const block = await this.blockingsRepository.findBy({
+        blockerId: me.id,
+      });
+      const blockeeIds = block.map(m => m.blockeeId);
 
       if (ps.isAll) {
         // 自分が所属しているグループ一覧
@@ -71,8 +78,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
             if (muteeIds.length > 0) {
               qb.andWhere('root.userId NOT IN (:...mute)', { mute: muteeIds });
             }
+            if (blockeeIds.length > 0) {
+              qb.andWhere('root.userId NOT IN (:...block)', { block: blockeeIds });
+            }
           })
-          .setParameters({ groupIds: groupIds, mute: muteeIds }).getMany();
+          .setParameters({ groupIds: groupIds, mute: muteeIds, block: blockeeIds }).getMany();
 
         // ユーザー一覧から最新のメッセージを一つずつ取得
         const userMessages = await this
@@ -89,6 +99,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
                   if (muteeIds.length > 0) {
                     qb.andWhere('message.userId NOT IN (:...mute)', { mute: muteeIds });
                   }
+
+                  if (blockeeIds.length > 0) {
+                    qb.andWhere('message.userId NOT IN (:...block)', { block: blockeeIds });
+                  }
                 })).orWhere(new Brackets(qb => {
                   // 自分が送信したメッセージ
                   qb.where('message.userId = :meId', { meId: me.id });
@@ -96,13 +110,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
                   if (muteeIds.length > 0) {
                     qb.andWhere('message.recipientId NOT IN (:...mute)', { mute: muteeIds });
                   }
+
+                  if (blockeeIds.length > 0) {
+                    qb.andWhere('message.recipientId NOT IN (:...block)', { block: blockeeIds });
+                  }
                 }));
               }))
               .andWhere('message.groupId IS NULL')
               .groupBy('message.userId')
               .select('max(message.id) as id')
               .getQuery() + ')');
-          }).setParameters({ meId: me.id, mute: muteeIds }).getMany();
+          }).setParameters({ meId: me.id, mute: muteeIds, block: blockeeIds }).getMany();
 
         const messages = Array.from(new Map([
           ...groupMessages,
