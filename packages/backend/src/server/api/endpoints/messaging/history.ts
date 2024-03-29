@@ -97,6 +97,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
             qb.where('root.id IN (' + this.messagingMessagesRepository
           .createQueryBuilder('message')
           .where('message.userId IN (:...userIds)', { userIds: userIds })
+          .andWhere('message.recipientId = :meId', { meId: me.id })
           .andWhere('message.groupId IS NULL')
           .groupBy('message.userId')
           .select('max(message.id) as id')
