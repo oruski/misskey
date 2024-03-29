@@ -96,13 +96,21 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
           .where(qb => {
             qb.where('root.id IN (' + this.messagingMessagesRepository
           .createQueryBuilder('message')
-          .where('message.userId IN (:...userIds)', { userIds: userIds })
-          .andWhere('message.recipientId = :meId', { meId: me.id })
+          .where(new Brackets(qb => {
+            qb.where(new Brackets(qb => {
+              // 他人が送信したメッセージ
+              qb.where('message.userId IN (:...userIds)', { userIds: userIds })
+              .andWhere('message.recipientId = :meId', { meId: me.id });
+            })).orWhere(new Brackets(qb => {
+              // 自分が送信したメッセージ
+              qb.where('message.userId = :meId', { meId: me.id });
+            }));
+          }))
           .andWhere('message.groupId IS NULL')
           .groupBy('message.userId')
           .select('max(message.id) as id')
           .getQuery() + ')');
-          }).setParameter('userIds', userIds).getMany();
+          }).setParameters({ userIds, meId: me.id }).getMany();
 
         const messages = Array.from(new Map([
           ...groupMessages,
