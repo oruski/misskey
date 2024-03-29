@@ -58,21 +58,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
           userId: me.id,
         }).then(xs => xs.map(x => x.userGroupId));
 
-        // 自分がやりとりしているユーザー一覧 ( ミュートを除外 ) ( 自分のIDを含める )
-        const userIds = [
-          ...((await this.messagingMessagesRepository
-            .createQueryBuilder('message')
-            .select('message.userId')
-            .where('message.recipientId = :meId', { meId: me.id })
-            .groupBy('message.userId')
-            .getRawMany()
-            .then(xs => xs.map(x => {
-              return x.message_userId;
-            })))
-            .filter(userId => !muteeIds.includes(userId))),
-          me.id,
-        ];
-
         // グループから最新のメッセージを一つずつ取得 (ミュートを除外)
         const groupMessages = await this
           .messagingMessagesRepository
