@@ -102,7 +102,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
               .groupBy('message.userId')
               .select('max(message.id) as id')
               .getQuery() + ')');
-          }).setParameters({ meId: me.id }).getMany();
+          }).setParameters({ meId: me.id, mute: muteeIds }).getMany();
 
         const messages = Array.from(new Map([
           ...groupMessages,
