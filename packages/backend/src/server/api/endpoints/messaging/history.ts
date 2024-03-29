@@ -69,7 +69,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
             .then(xs => xs.map(x => {
               return x.message_userId;
             })))
-            .filter( userId => !muteeIds.includes(userId))),
+            .filter(userId => !muteeIds.includes(userId))),
           me.id,
         ];
 
@@ -95,22 +95,29 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
           .createQueryBuilder('root')
           .where(qb => {
             qb.where('root.id IN (' + this.messagingMessagesRepository
-          .createQueryBuilder('message')
-          .where(new Brackets(qb => {
-            qb.where(new Brackets(qb => {
-              // 他人が送信したメッセージ
-              qb.where('message.userId IN (:...userIds)', { userIds: userIds })
-              .andWhere('message.recipientId = :meId', { meId: me.id });
-            })).orWhere(new Brackets(qb => {
-              // 自分が送信したメッセージ
-              qb.where('message.userId = :meId', { meId: me.id });
-            }));
-          }))
-          .andWhere('message.groupId IS NULL')
-          .groupBy('message.userId')
-          .select('max(message.id) as id')
-          .getQuery() + ')');
-          }).setParameters({ userIds, meId: me.id }).getMany();
+              .createQueryBuilder('message')
+              .where(new Brackets(qb => {
+                qb.where(new Brackets(qb => {
+                  // 他人が送信したメッセージ
+                  qb.where('message.recipientId = :meId', { meId: me.id });
+
+                  if (muteeIds.length > 0) {
+                    qb.andWhere('message.userId NOT IN (:...mute)', { mute: muteeIds });
+                  }
+                })).orWhere(new Brackets(qb => {
+                  // 自分が送信したメッセージ
+                  qb.where('message.userId = :meId', { meId: me.id });
+
+                  if (muteeIds.length > 0) {
+                    qb.andWhere('message.recipientId NOT IN (:...mute)', { mute: muteeIds });
+                  }
+                }));
+              }))
+              .andWhere('message.groupId IS NULL')
+              .groupBy('message.userId')
+              .select('max(message.id) as id')
+              .getQuery() + ')');
+          }).setParameters({ meId: me.id }).getMany();
 
         const messages = Array.from(new Map([
           ...groupMessages,
