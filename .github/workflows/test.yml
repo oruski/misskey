@@ -41,7 +41,7 @@ jobs:
           packages/backend/package-lock.json
           packages/client/package-lock.json
     - name: Install dependencies
-      run: npm install
+      run: npm ci:all
     - name: Check package-lock.json
       run: git diff --exit-code package-lock.json
     - name: Copy Configure
@@ -92,7 +92,7 @@ jobs:
           packages/backend/package-lock.json
           packages/client/package-lock.json
     - name: Install dependencies
-      run: npm install
+      run: npm run ci:all
     - name: Check package-lock.json
       run: git diff --exit-code package-lock.json
     - name: Copy Configure

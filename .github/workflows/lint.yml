@@ -18,7 +18,7 @@ jobs:
       with:
         node-version: 20.10.0
         cache: 'npm'
-    - run: npm install
+    - run: npm run ci:all
     - run: npm --cwd ./packages/backend lint
 
   client:
@@ -31,5 +31,5 @@ jobs:
       with:
         node-version: 20.10.0
         cache: 'npm'
-    - run: npm install
+    - run: npm run ci:all
     - run: npm --cwd ./packages/frontend lint
