@@ -10,7 +10,7 @@
           @click="openInstanceMenu"
         >
           <img
-            :src="$instance.iconUrl || $instance.faviconUrl || '/client-assets/oranski_logo.png'"
+            :src="$instance.iconUrl || $instance.faviconUrl || '/client-assets/oranski_logo41.png'"
             alt=""
             class="icon"
           />
