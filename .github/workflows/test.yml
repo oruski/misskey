@@ -13,18 +13,18 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version-file: '.node-version'
 
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         ports:
           - 54312:5432
         env:
           POSTGRES_DB: test-misskey
           POSTGRES_HOST_AUTH_METHOD: trust
       redis:
-        image: redis:6
+        image: redis:7
         ports:
           - 56312:6379
 
@@ -41,7 +41,8 @@ jobs:
           packages/backend/package-lock.json
           packages/client/package-lock.json
     - name: Install dependencies
-      run: npm install
+      run: npm install --frozen-lockfile
+      run: npm ci:all
     - name: Check package-lock.json
       run: git diff --exit-code package-lock.json
     - name: Copy Configure
@@ -57,19 +58,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20.x]
+        node-version-file: '.node-version'
         browser: [chrome]
 
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         ports:
           - 54312:5432
         env:
           POSTGRES_DB: test-misskey
           POSTGRES_HOST_AUTH_METHOD: trust
       redis:
-        image: redis:6
+        image: redis:7
         ports:
           - 56312:6379
 
@@ -92,7 +93,8 @@ jobs:
           packages/backend/package-lock.json
           packages/client/package-lock.json
     - name: Install dependencies
-      run: npm install
+      run: npm install --frozen-lockfile
+      run: npm run ci:all
     - name: Check package-lock.json
       run: git diff --exit-code package-lock.json
     - name: Copy Configure

@@ -10,10 +10,20 @@
 You should also include the user name that made the change.
 -->
 
+
+## 13.x.x (unreleased)
+
+### Improvements
+- Chore: Workflow が正常に動作するように。
+
+### Bugfixes
+
 ## 13.8.1 (2023/02/26)
 
 ### Bugfixes
 - モバイルでドロワーメニューが表示されない問題を修正
+- Fix(QFE): Bypass authentication of Bull dashboard( GHSA-9fj2-gjcf-cqqc )
+- Fix(QFE): Misskey's missing signature validation allows arbitrary users to impersonate any remote user. ( GHSA-3f39-6537-3cgc ) 
 
 ## 13.8.0 (2023/02/26)
 

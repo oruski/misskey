@@ -16,14 +16,13 @@ jobs:
         submodules: true
     - uses: actions/setup-node@v3
       with:
-        node-version: 20.x
+        node-version-file: '.node-version'
         cache: 'npm'
-        cache-dependency-path: |
-          packages/backend/package-lock.json
-    - run: npm install
+    - run: npm install --frozen-lockfile
+    - run: npm run ci:all
     - run: npm --cwd ./packages/backend lint
 
-  client:
+  frontend:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -31,9 +30,31 @@ jobs:
         submodules: true
     - uses: actions/setup-node@v3
       with:
-        node-version: 20.x
+        node-version-file: '.node-version'
         cache: 'npm'
-        cache-dependency-path: |
-          packages/client/package-lock.json
-    - run: npm install
-    - run: npm --cwd ./packages/client lint
+    - run: npm install --frozen-lockfile
+    - run: npm run ci:all
+    - run: npm --cwd ./packages/frontend lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        workspace:
+        - backend
+        - misskey-js
+    steps:
+    - uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: actions/setup-node@v4.0.2
+      with:
+        node-version-file: '.node-version'
+        cache: 'npm'
+    - run: corepack enable
+    - run: npm install --frozen-lockfile
+    - run: npm run ci:all
+      if: ${{ matrix.workspace == 'backend' }}
+    - run: pnpm --filter ${{ matrix.workspace }} run typecheck
