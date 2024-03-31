@@ -2,6 +2,7 @@ import cluster from 'node:cluster';
 import * as fs from 'node:fs';
 import { Inject, Injectable } from '@nestjs/common';
 import Fastify from 'fastify';
+import fastifyRawBody from 'fastify-raw-body';
 import { IsNull } from 'typeorm';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import type { Config } from '@/config.js';
@@ -69,6 +70,13 @@ export class ServerService {
 			});
 		}
 
+		// Register raw-body parser for ActivityPub HTTP signature validation.
+		fastify.register(fastifyRawBody, {
+			global: false,
+			encoding: 'utf-8',
+			runFirst: true,
+		});
+		
 		fastify.register(this.apiServerService.createServer, { prefix: '/api' });
 		fastify.register(this.fileServerService.createServer);
 		fastify.register(this.activityPubServerService.createServer);
