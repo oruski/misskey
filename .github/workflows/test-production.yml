@@ -27,7 +27,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm install
+    - run: npm install --frozen-lockfile
     - run: npm run ci:all
     - name: Copy Configure
       run: cp .github/misskey/test.yml .config/default.yml
