@@ -13,7 +13,6 @@ You should also include the user name that made the change.
 ## 13.x.x (unreleased)
 
 ### Improvements
-- Chore: Node.js Version をLTSに追従(20.10.0以上なら起動するように。)
 - Chore: Workflow が正常に動作するように。
 
 ### Bugfixes

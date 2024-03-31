@@ -16,7 +16,7 @@ jobs:
         submodules: true
     - uses: actions/setup-node@v3
       with:
-        node-version: 20.10.0
+        node-version-file: '.node-version'
         cache: 'npm'
     - run: npm install --frozen-lockfile
     - run: npm run ci:all
@@ -30,7 +30,7 @@ jobs:
         submodules: true
     - uses: actions/setup-node@v3
       with:
-        node-version: 20.10.0
+        node-version-file: '.node-version'
         cache: 'npm'
     - run: npm install --frozen-lockfile
     - run: npm run ci:all
