@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch } from 'vue';
+import { nextTick, onActivated, onMounted, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 //import insertTextAtCursor from 'insert-text-at-cursor';
 import { throttle } from 'throttle-debounce';
@@ -63,11 +63,24 @@ const typing = throttle(3000, () => {
   stream.send('typingOnMessaging', props.user ? { partner: props.user.id } : { group: props.group?.id });
 });
 
-let draftKey = $computed(() => (props.user ? 'user:' + props.user.id : 'group:' + props.group?.id));
+let draftKey = $ref<string | null>(null);
+
+// ドラフトキーの更新と下書きの復元
+watch([$$(props)], () => {
+  draftKey = props.user ? `user-${props.user.id}` : props.group ? `group-${props.group.id}` : null;
+  nextTick(() => {
+    restoreDraft();
+  });
+});
+
 let canSend = $computed(() => (text != null && text !== '') || file != null);
 
+// 下書き保存
 watch([$$(text), $$(file)], saveDraft);
 
+/**
+ * 貼り付け
+ */
 async function onPaste(ev: ClipboardEvent) {
   if (!ev.clipboardData) return;
 
@@ -97,6 +110,9 @@ async function onPaste(ev: ClipboardEvent) {
   }
 }
 
+/**
+ * ドラッグオーバー
+ */
 function onDragover(ev: DragEvent) {
   if (!ev.dataTransfer) return;
 
@@ -123,6 +139,9 @@ function onDragover(ev: DragEvent) {
   }
 }
 
+/**
+ * ドロップ
+ */
 function onDrop(ev: DragEvent): void {
   if (!ev.dataTransfer) return;
 
@@ -149,6 +168,9 @@ function onDrop(ev: DragEvent): void {
   //#endregion
 }
 
+/**
+ * キー入力中
+ */
 function onKeydown(ev: KeyboardEvent) {
   typing();
   if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey) && canSend) {
@@ -167,7 +189,7 @@ function chooseFile(ev: MouseEvent) {
 }
 
 function onChangeFile() {
-  if (fileEl.files![0]) upload(fileEl.files[0]);
+  if (fileEl?.files?.[0]) upload(fileEl.files[0]);
 }
 
 function upload(fileToUpload: File, name?: string) {
@@ -221,6 +243,7 @@ function clear() {
  * 下書き保存
  */
 function saveDraft() {
+  if (!draftKey) return;
   const drafts = JSON.parse(miLocalStorage.getItem('message_drafts') || '{}');
 
   drafts[draftKey] = {
@@ -231,7 +254,6 @@ function saveDraft() {
       file: file,
     },
   };
-
   miLocalStorage.setItem('message_drafts', JSON.stringify(drafts));
 }
 
@@ -239,6 +261,7 @@ function saveDraft() {
  * 下書き削除
  */
 function deleteDraft() {
+  if (!draftKey) return;
   const drafts = JSON.parse(miLocalStorage.getItem('message_drafts') || '{}');
 
   delete drafts[draftKey];
@@ -246,22 +269,33 @@ function deleteDraft() {
   miLocalStorage.setItem('message_drafts', JSON.stringify(drafts));
 }
 
-async function insertEmoji(ev: MouseEvent) {
-  // @ts-ignore
-  os.openEmojiPicker(ev.currentTarget ?? ev.target, {}, textEl);
-}
-
-onMounted(() => {
-  // TODO: detach when unmount
-  // TODO
-  //new Autocomplete(textEl, this, { model: 'text' });
-
-  // 書きかけの投稿を復元
+/**
+ * 下書きの復旧
+ */
+function restoreDraft() {
+  if (!draftKey) return;
   const draft = JSON.parse(miLocalStorage.getItem('message_drafts') || '{}')[draftKey];
   if (draft) {
     text = draft.data.text;
     file = draft.data.file;
   }
+}
+
+async function insertEmoji(ev: MouseEvent) {
+  // @ts-ignore
+  os.openEmojiPicker(ev.currentTarget ?? ev.target, {}, textEl);
+}
+
+let isFirst = $ref(true);
+
+onMounted(() => {
+  restoreDraft();
+  isFirst = false;
+});
+
+onActivated(() => {
+  if (isFirst) return;
+  restoreDraft();
 });
 
 defineExpose({

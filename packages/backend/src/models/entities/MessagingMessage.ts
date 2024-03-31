@@ -5,6 +5,7 @@ import { DriveFile } from './DriveFile.js';
 import { UserGroup } from './UserGroup.js';
 
 @Entity()
+@Index(['userId', 'recipientId'])
 export class MessagingMessage {
 	@PrimaryColumn(id())
 	public id: string;

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import ms from 'ms';
 import type { NotesRepository } from '@/models/index.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
@@ -61,35 +62,37 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		private queryService: QueryService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId);
+			// const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId);
+      //
+			// if (ps.userId) {
+			// 	query.andWhere('note.userId = :userId', { userId: ps.userId });
+			// } else if (ps.channelId) {
+			// 	query.andWhere('note.channelId = :channelId', { channelId: ps.channelId });
+			// }
+      //
+			// query
+			// 	.andWhere('note.text ILIKE :q', { q: `%${ sqlLikeEscape(ps.query) }%` })
+			// 	.innerJoinAndSelect('note.user', 'user')
+			// 	.leftJoinAndSelect('user.avatar', 'avatar')
+			// 	.leftJoinAndSelect('user.banner', 'banner')
+			// 	.leftJoinAndSelect('note.reply', 'reply')
+			// 	.leftJoinAndSelect('note.renote', 'renote')
+			// 	.leftJoinAndSelect('reply.user', 'replyUser')
+			// 	.leftJoinAndSelect('replyUser.avatar', 'replyUserAvatar')
+			// 	.leftJoinAndSelect('replyUser.banner', 'replyUserBanner')
+			// 	.leftJoinAndSelect('renote.user', 'renoteUser')
+			// 	.leftJoinAndSelect('renoteUser.avatar', 'renoteUserAvatar')
+			// 	.leftJoinAndSelect('renoteUser.banner', 'renoteUserBanner');
+      //
+			// this.queryService.generateVisibilityQuery(query, me);
+			// if (me) this.queryService.generateMutedUserQuery(query, me);
+			// if (me) this.queryService.generateBlockedUserQuery(query, me);
 
-			if (ps.userId) {
-				query.andWhere('note.userId = :userId', { userId: ps.userId });
-			} else if (ps.channelId) {
-				query.andWhere('note.channelId = :channelId', { channelId: ps.channelId });
-			}
+			// const notes = await query.take(ps.limit).getMany();
 
-			query
-				.andWhere('note.text ILIKE :q', { q: `%${ sqlLikeEscape(ps.query) }%` })
-				.innerJoinAndSelect('note.user', 'user')
-				.leftJoinAndSelect('user.avatar', 'avatar')
-				.leftJoinAndSelect('user.banner', 'banner')
-				.leftJoinAndSelect('note.reply', 'reply')
-				.leftJoinAndSelect('note.renote', 'renote')
-				.leftJoinAndSelect('reply.user', 'replyUser')
-				.leftJoinAndSelect('replyUser.avatar', 'replyUserAvatar')
-				.leftJoinAndSelect('replyUser.banner', 'replyUserBanner')
-				.leftJoinAndSelect('renote.user', 'renoteUser')
-				.leftJoinAndSelect('renoteUser.avatar', 'renoteUserAvatar')
-				.leftJoinAndSelect('renoteUser.banner', 'renoteUserBanner');
-
-			this.queryService.generateVisibilityQuery(query, me);
-			if (me) this.queryService.generateMutedUserQuery(query, me);
-			if (me) this.queryService.generateBlockedUserQuery(query, me);
-
-			const notes = await query.take(ps.limit).getMany();
-
-			return await this.noteEntityService.packMany(notes, me);
+			// return await this.noteEntityService.packMany(notes, me);
+      // 負荷対策のため 2024-03-28
+      return [];
 		});
 	}
 }

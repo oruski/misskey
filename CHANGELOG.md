@@ -10,15 +10,20 @@
 You should also include the user name that made the change.
 -->
 
+
 ## 13.x.x (unreleased)
 
 ### Improvements
 - Chore: Workflow が正常に動作するように。
 
 ### Bugfixes
-- Fix(QFE): Bypass authentication of Bull dashboard( GHSA-9fj2-gjcf-cqqc )
-- Fix(QFE): Misskey's missing signature validation allows arbitrary users to impersonate any remote user. ( GHSA-3f39-6537-3cgc )
 
+## 13.8.1 (2023/02/26)
+
+### Bugfixes
+- モバイルでドロワーメニューが表示されない問題を修正
+- Fix(QFE): Bypass authentication of Bull dashboard( GHSA-9fj2-gjcf-cqqc )
+- Fix(QFE): Misskey's missing signature validation allows arbitrary users to impersonate any remote user. ( GHSA-3f39-6537-3cgc ) 
 
 ## 13.8.0 (2023/02/26)
 
@@ -39,6 +44,7 @@ You should also include the user name that made the change.
 - fix(client): Android ChromeでPWAとしてインストールできない問題を修正
 - 未知のユーザーが deleteActor されたら処理をスキップする
 - fix(server): notes/createで、fileIdsと見つかったファイルの数が異なる場合はエラーにする
+- fix(server): notes/createのバリデーションが機能していないのを修正
 - fix(server): エラーのスタックトレースは返さないように
 
 ## 13.7.5 (2023/02/24)
