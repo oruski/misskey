@@ -9,6 +9,18 @@
 
 You should also include the user name that made the change.
 -->
+
+## 13.x.x (unreleased)
+
+### Improvements
+- Chore: Node.js Version をLTSに追従(20.10.0以上なら起動するように。)
+- Chore: Workflow が正常に動作するように。
+
+### Bugfixes
+- Fix(QFE): Bypass authentication of Bull dashboard( GHSA-9fj2-gjcf-cqqc )
+- Fix(QFE): Misskey's missing signature validation allows arbitrary users to impersonate any remote user. ( GHSA-3f39-6537-3cgc )
+
+
 ## 13.8.0 (2023/02/26)
 
 ### Improvements
