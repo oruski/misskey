@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "npx nodemon --watch src --watch ../../built/_vite_ -e 'js,ts,json' --exec 'npm run build:swc && npm run start'",
+		"dev": "npx nodemon --watch src --watch ../../built/_vite_ -e 'js,ts,json' --exec 'npm run build && npm run start'",
 		"livereload": "npx livereload ./ -e 'start-time'",
 		"build:start": "npm run build && npm run start",
 		"start": "node --experimental-json-modules --experimental-specifier-resolution=node ./built/boot/index.js",
