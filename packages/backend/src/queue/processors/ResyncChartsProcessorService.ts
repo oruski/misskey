@@ -19,42 +19,45 @@ import type Bull from 'bull';
 
 @Injectable()
 export class ResyncChartsProcessorService {
-	private logger: Logger;
+  private logger: Logger;
 
-	constructor(
-		@Inject(DI.config)
-		private config: Config,
+  constructor(
+    @Inject(DI.config)
+    private config: Config,
+    private federationChart: FederationChart,
+    private notesChart: NotesChart,
+    private usersChart: UsersChart,
+    private activeUsersChart: ActiveUsersChart,
+    private instanceChart: InstanceChart,
+    private perUserNotesChart: PerUserNotesChart,
+    private driveChart: DriveChart,
+    private perUserReactionsChart: PerUserReactionsChart,
+    private perUserFollowingChart: PerUserFollowingChart,
+    private perUserDriveChart: PerUserDriveChart,
+    private apRequestChart: ApRequestChart,
+    private queueLoggerService: QueueLoggerService,
+  ) {
+    this.logger = this.queueLoggerService.logger.createSubLogger('resync-charts');
+  }
 
-		private federationChart: FederationChart,
-		private notesChart: NotesChart,
-		private usersChart: UsersChart,
-		private activeUsersChart: ActiveUsersChart,
-		private instanceChart: InstanceChart,
-		private perUserNotesChart: PerUserNotesChart,
-		private driveChart: DriveChart,
-		private perUserReactionsChart: PerUserReactionsChart,
-		private perUserFollowingChart: PerUserFollowingChart,
-		private perUserDriveChart: PerUserDriveChart,
-		private apRequestChart: ApRequestChart,
+  @bindThis
+  public async process(job: Bull.Job<Record<string, unknown>>, done: () => void): Promise<void> {
+    this.logger.info('Resync charts...');
 
-		private queueLoggerService: QueueLoggerService,
-	) {
-		this.logger = this.queueLoggerService.logger.createSubLogger('resync-charts');
-	}
+    // TODO: ユーザーごとのチャートも更新する
+    // TODO: インスタンスごとのチャートも更新する
 
-	@bindThis
-	public async process(job: Bull.Job<Record<string, unknown>>, done: () => void): Promise<void> {
-		this.logger.info('Resync charts...');
+    await this.driveChart.resync().catch((err) => {
+      this.logger.error('Failed to resync drive chart.', err);
+    });
+    await this.notesChart.resync().catch((err) => {
+      this.logger.error('Failed to resync notes chart.', err);
+    });
+    await this.usersChart.resync().catch((err) => {
+      this.logger.error('Failed to resync users chart.', err);
+    });
 
-		// TODO: ユーザーごとのチャートも更新する
-		// TODO: インスタンスごとのチャートも更新する
-		await Promise.all([
-			this.driveChart.resync(),
-			this.notesChart.resync(),
-			this.usersChart.resync(),
-		]);
-
-		this.logger.succ('All charts successfully resynced.');
-		done();
-	}
+    this.logger.succ('All charts successfully resynced.');
+    done();
+  }
 }

@@ -48,7 +48,7 @@ export class CleanChartsProcessorService {
 	public async process(job: Bull.Job<Record<string, unknown>>, done: () => void): Promise<void> {
 		this.logger.info('Clean charts...');
 
-		await Promise.all([
+		const promises = [
 			this.federationChart.clean(),
 			this.notesChart.clean(),
 			this.usersChart.clean(),
@@ -61,7 +61,13 @@ export class CleanChartsProcessorService {
 			this.perUserFollowingChart.clean(),
 			this.perUserDriveChart.clean(),
 			this.apRequestChart.clean(),
-		]);
+		];
+
+    for (const promise of promises) {
+      await promise.catch((err) => {
+        this.logger.error('Failed to clean chart.', err);
+      });
+    }
 
 		this.logger.succ('All charts successfully cleaned.');
 		done();
