@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: syuilo and misskey-project
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 import * as fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
@@ -6,7 +11,7 @@ import rename from 'rename';
 import sharp from 'sharp';
 import { sharpBmp } from '@misskey-dev/sharp-read-bmp';
 import type { Config } from '@/config.js';
-import type { DriveFile, DriveFilesRepository } from '@/models/index.js';
+import type { MiDriveFile, DriveFilesRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
 import { createTemp } from '@/misc/create-temp.js';
 import { FILE_TYPE_BROWSERSAFE } from '@/const.js';
@@ -208,7 +213,9 @@ export class FileServerService {
 					file.cleanup();
 				}
 
-				reply.header('Content-Type', image.type === 'video/quicktime' ? 'video/mp4' : FILE_TYPE_BROWSERSAFE.includes(image.type) ? image.type : 'application/octet-stream');
+				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(image.type) ? image.type : 'application/octet-stream');
+				reply.header('Content-Length', file.file.size);
+				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition',
 					contentDisposition(
 						'inline',
@@ -224,7 +231,7 @@ export class FileServerService {
 					extname: file.ext ? `.${file.ext}` : '.unknown',
 				}).toString();
 
-				reply.header('Content-Type', file.mime === 'video/quicktime' ? 'video/mp4' : FILE_TYPE_BROWSERSAFE.includes(file.mime) ? file.mime : 'application/octet-stream');
+				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(file.mime) ? file.mime : 'application/octet-stream');
 				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition', contentDisposition('inline', filename));
 
@@ -250,7 +257,8 @@ export class FileServerService {
 
 				return fs.createReadStream(file.path);
 			} else {
-				reply.header('Content-Type', file.mime === 'video/quicktime' ? 'video/mp4' : FILE_TYPE_BROWSERSAFE.includes(file.file.type) ? file.file.type : 'application/octet-stream');
+				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(file.file.type) ? file.file.type : 'application/octet-stream');
+				reply.header('Content-Length', file.file.size);
 				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition', contentDisposition('inline', file.filename));
 
@@ -338,7 +346,7 @@ export class FileServerService {
 			) {
 				if (!isConvertibleImage) {
 					// 画像でないなら404でお茶を濁す
-					throw new StatusError(`Unexpected mime url = ${request.url}`, 404);
+					throw new StatusError('Unexpected mime', 404);
 				}
 			}
 
@@ -351,27 +359,18 @@ export class FileServerService {
 						type: file.mime,
 					};
 				} else {
-					try {
-						const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in request.query) }))
-							.resize({
-								height: 'emoji' in request.query ? 128 : 320,
-								withoutEnlargement: true,
-							})
-							.webp(webpDefault);
+					const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in request.query) }))
+						.resize({
+							height: 'emoji' in request.query ? 128 : 320,
+							withoutEnlargement: true,
+						})
+						.webp(webpDefault);
 
-						image = {
-							data,
-							ext: 'webp',
-							type: 'image/webp',
-						};
-					} catch (e) {
-						// sharpの変換に失敗した場合は通常の画像として返す
-						image = {
-							data: fs.createReadStream(file.path),
-							ext: file.ext,
-							type: file.mime,
-						};
-					}
+					image = {
+						data,
+						ext: 'webp',
+						type: 'image/webp',
+					};
 				}
 			} else if ('static' in request.query) {
 				image = this.imageProcessingService.convertSharpToWebpStream(await sharpBmp(file.path, file.mime), 498, 422);
@@ -394,7 +393,7 @@ export class FileServerService {
 
 				if (stats.entropy < 0.1) {
 					// エントロピーがあまりない場合は404にする
-					throw new StatusError(`Skip to provide badge url = ${url}`, 404);
+					throw new StatusError('Skip to provide badge', 404);
 				}
 
 				const data = sharp({
@@ -411,7 +410,7 @@ export class FileServerService {
 			} else if (file.mime === 'image/svg+xml') {
 				image = this.imageProcessingService.convertToWebpStream(file.path, 2048, 2048);
 			} else if (!file.mime.startsWith('image/') || !FILE_TYPE_BROWSERSAFE.includes(file.mime)) {
-				throw new StatusError(`Rejected type url = ${url}`, 403, 'Rejected type');
+				throw new StatusError('Rejected type', 403, 'Rejected type');
 			}
 
 			if (!image) {
@@ -475,14 +474,14 @@ export class FileServerService {
 
 	@bindThis
 	private async getStreamAndTypeFromUrl(url: string): Promise<
-		{ state: 'remote'; fileRole?: 'thumbnail' | 'webpublic' | 'original'; file?: DriveFile; mime: string; ext: string | null; path: string; cleanup: () => void; filename: string; }
-		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: DriveFile; filename: string; mime: string; ext: string | null; path: string; }
+		{ state: 'remote'; fileRole?: 'thumbnail' | 'webpublic' | 'original'; file?: MiDriveFile; mime: string; ext: string | null; path: string; cleanup: () => void; filename: string; }
+		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: MiDriveFile; filename: string; mime: string; ext: string | null; path: string; }
 		| '404'
 		| '204'
 	> {
 		if (url.startsWith(`${this.config.url}/files/`)) {
 			const key = url.replace(`${this.config.url}/files/`, '').split('/').shift();
-			if (!key) throw new StatusError(`Invalid File Key key = ${key}`, 400, 'Invalid File Key');
+			if (!key) throw new StatusError('Invalid File Key', 400, 'Invalid File Key');
 
 			return await this.getFileFromKey(key);
 		}
@@ -514,8 +513,8 @@ export class FileServerService {
 
 	@bindThis
 	private async getFileFromKey(key: string): Promise<
-		{ state: 'remote'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: DriveFile; filename: string; url: string; mime: string; ext: string | null; path: string; cleanup: () => void; }
-		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: DriveFile; filename: string; mime: string; ext: string | null; path: string; }
+		{ state: 'remote'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: MiDriveFile; filename: string; url: string; mime: string; ext: string | null; path: string; cleanup: () => void; }
+		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: MiDriveFile; filename: string; mime: string; ext: string | null; path: string; }
 		| '404'
 		| '204'
 	> {
@@ -534,9 +533,7 @@ export class FileServerService {
 		if (!file.storedInternal) {
 			if (!(file.isLink && file.uri)) return '204';
 			const result = await this.downloadAndDetectTypeFromUrl(file.uri);
-			if (!file.size) {
-				file.size = (await fs.promises.stat(result.path)).size;
-			}
+			file.size = (await fs.promises.stat(result.path)).size;	// DB file.sizeは正確とは限らないので
 			return {
 				...result,
 				url: file.uri,
