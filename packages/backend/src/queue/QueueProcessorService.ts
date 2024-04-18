@@ -124,28 +124,28 @@ export class QueueProcessorService {
 
 		this.queueService.systemQueue.add('resyncCharts', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
       attempts: 0,
 		});
 
 		this.queueService.systemQueue.add('cleanCharts', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
       attempts: 0,
 		});
 
 		this.queueService.systemQueue.add('aggregateRetention', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
       attempts: 0,
 		});
 
 		this.queueService.systemQueue.add('clean', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
       attempts: 0,
 		});
