@@ -66,6 +66,7 @@ export type Source = {
 	deliverJobMaxAttempts?: number;
 	inboxJobMaxAttempts?: number;
   mediaProxy?: string;
+  internalMediaProxy?: string;
   externalMediaProxyEnabled?: boolean;
 	proxyRemoteFiles?: boolean;
 	videoThumbnailGenerator?: string;
@@ -145,11 +146,12 @@ export function loadConfig() {
 	const externalMediaProxy = config.mediaProxy ?
 		config.mediaProxy.endsWith('/') ? config.mediaProxy.substring(0, config.mediaProxy.length - 1) : config.mediaProxy
 		: null;
-	const internalMediaProxy = `${mixin.scheme}://${mixin.host}/proxy`;
+	const internalMediaProxy = config.internalMediaProxy ?? `${mixin.scheme}://${mixin.host}/proxy`;
 	mixin.mediaProxy = externalMediaProxy ?? internalMediaProxy;
   console.debug('config.externalMediaProxyEnabled =', config.externalMediaProxyEnabled, typeof config.externalMediaProxyEnabled);
 	// @ts-ignore
-  mixin.externalMediaProxyEnabled = (config.externalMediaProxyEnabled === false || config.externalMediaProxyEnabled === 'false') ? false : externalMediaProxy !== null && externalMediaProxy !== internalMediaProxy;
+  mixin.externalMediaProxyEnabled = config.externalMediaProxyEnabled === false ? false : externalMediaProxy !== null && externalMediaProxy !== internalMediaProxy;
+  console.debug('mixin.externalMediaProxyEnabled =', mixin.externalMediaProxyEnabled);
 
 	mixin.videoThumbnailGenerator = config.videoThumbnailGenerator ?
 		config.videoThumbnailGenerator.endsWith('/') ? config.videoThumbnailGenerator.substring(0, config.videoThumbnailGenerator.length - 1) : config.videoThumbnailGenerator
