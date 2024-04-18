@@ -147,8 +147,9 @@ export function loadConfig() {
 		: null;
 	const internalMediaProxy = `${mixin.scheme}://${mixin.host}/proxy`;
 	mixin.mediaProxy = externalMediaProxy ?? internalMediaProxy;
-  console.debug('config.externalMediaProxyEnabled =', config.externalMediaProxyEnabled);
-	mixin.externalMediaProxyEnabled = config.externalMediaProxyEnabled === false ? false : externalMediaProxy !== null && externalMediaProxy !== internalMediaProxy;
+  console.debug('config.externalMediaProxyEnabled =', config.externalMediaProxyEnabled, typeof config.externalMediaProxyEnabled);
+	// @ts-ignore
+  mixin.externalMediaProxyEnabled = (config.externalMediaProxyEnabled === false || config.externalMediaProxyEnabled === 'false') ? false : externalMediaProxy !== null && externalMediaProxy !== internalMediaProxy;
 
 	mixin.videoThumbnailGenerator = config.videoThumbnailGenerator ?
 		config.videoThumbnailGenerator.endsWith('/') ? config.videoThumbnailGenerator.substring(0, config.videoThumbnailGenerator.length - 1) : config.videoThumbnailGenerator
