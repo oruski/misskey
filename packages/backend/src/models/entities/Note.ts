@@ -199,6 +199,7 @@ export class Note {
 	})
 	public userHost: string | null;
 
+  @Index()
 	@Column({
 		...id(),
 		nullable: true,
@@ -212,7 +213,8 @@ export class Note {
 	})
 	public replyUserHost: string | null;
 
-	@Column({
+  @Index()
+  @Column({
 		...id(),
 		nullable: true,
 		comment: '[Denormalized]',

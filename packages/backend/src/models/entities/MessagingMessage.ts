@@ -23,7 +23,7 @@ export class MessagingMessage {
 	})
 	public userId: User['id'];
 
-	@ManyToOne(type => User, {
+  @ManyToOne(type => User, {
 		onDelete: 'CASCADE',
 	})
 	@JoinColumn()
