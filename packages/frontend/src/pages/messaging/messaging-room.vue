@@ -109,12 +109,10 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 // @ts-ignore
 
 let isFirstFetch = $ref(true);
-let isStopScrollBottom = $ref(false);
 let finishFirstFetch = debounce(() => {
-  if (isStopScrollBottom) {
+  if (location.href.includes('/my/messaging/')) {
     console.debug('thisScrollToBottom SCROLL008');
     thisScrollToBottom({ behavior: 'instant' });
-    isStopScrollBottom = false;
   }
   console.debug('初回ローディング完了');
   isFirstFetch = false;
@@ -506,12 +504,10 @@ function onSetContextDisposes(disposes: Promise<() => void>[]) {
 }
 
 onMounted(async () => {
-  isStopScrollBottom = false;
   await fetch();
 });
 
 onActivated(async () => {
-  isStopScrollBottom = false;
   if (isFirstFetch) return;
   isFirstFetch = true;
   if (pagingComponent) {
@@ -522,14 +518,12 @@ onActivated(async () => {
 });
 
 onDeactivated(() => {
-  isStopScrollBottom = true;
   connection?.dispose();
   document.removeEventListener('visibilitychange', onVisibilitychange);
   if (scrollRemove) scrollRemove();
 });
 
 onBeforeUnmount(() => {
-  isStopScrollBottom = true;
   connection?.dispose();
   document.removeEventListener('visibilitychange', onVisibilitychange);
   if (scrollRemove) scrollRemove();
