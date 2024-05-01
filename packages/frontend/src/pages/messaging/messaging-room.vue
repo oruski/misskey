@@ -111,7 +111,7 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 let isFirstFetch = $ref(true);
 let isStopScrollBottom = $ref(false);
 let finishFirstFetch = debounce(() => {
-  if (!isStopScrollBottom) return;
+  if (isStopScrollBottom) return;
   console.debug('thisScrollToBottom SCROLL008');
   thisScrollToBottom({ behavior: 'instant' });
   console.debug('初回ローディング完了');
