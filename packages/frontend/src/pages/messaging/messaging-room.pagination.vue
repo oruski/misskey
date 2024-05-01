@@ -149,6 +149,9 @@ const scroll1Timer = ref<NodeJS.Timeout | number | null>(null);
 // @ts-ignore
 // eslint-disable-next-line no-undef
 const scroll2Timer = ref<NodeJS.Timeout | number | null>(null);
+// @ts-ignore
+// eslint-disable-next-line no-undef
+const scroll3Timer = ref<NodeJS.Timeout | number | null>(null);
 
 // 先頭が表示されているかどうかを検出
 // https://qiita.com/mkataigi/items/0154aefd2223ce23398e
@@ -265,9 +268,12 @@ async function init(): Promise<void> {
       if (props.isFirstFetch) {
         console.debug('scrollToBottomForWindow SCROLL011');
         scrollToBottomForWindow({ behavior: 'instant' });
-        setTimeout(() => {
+        scroll3Timer.value = setTimeout(() => {
           console.debug('scrollToBottomForWindow SCROLL001');
           scrollToBottomForWindow({ behavior: 'instant' });
+        }, 500);
+
+        setTimeout(() => {
           props.onFirstFetch?.();
         }, 500);
       }
@@ -449,6 +455,7 @@ onDeactivated(() => {
     : window.scrollY === 0;
   if (scroll1Timer.value) clearTimeout(scroll1Timer.value as number);
   if (scroll2Timer.value) clearTimeout(scroll2Timer.value as number);
+  if (scroll3Timer.value) clearTimeout(scroll3Timer.value as number);
 });
 
 onMounted(() => {});

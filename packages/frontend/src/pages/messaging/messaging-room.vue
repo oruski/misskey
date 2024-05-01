@@ -109,7 +109,9 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 // @ts-ignore
 
 let isFirstFetch = $ref(true);
+let isStopScrollBottom = $ref(false);
 let finishFirstFetch = debounce(() => {
+  if (!isStopScrollBottom) return;
   console.debug('thisScrollToBottom SCROLL008');
   thisScrollToBottom({ behavior: 'instant' });
   console.debug('初回ローディング完了');
@@ -506,6 +508,7 @@ onMounted(async () => {
 });
 
 onActivated(async () => {
+  isStopScrollBottom = false;
   if (isFirstFetch) return;
   isFirstFetch = true;
   if (pagingComponent) {
@@ -516,12 +519,14 @@ onActivated(async () => {
 });
 
 onDeactivated(() => {
+  isStopScrollBottom = true;
   connection?.dispose();
   document.removeEventListener('visibilitychange', onVisibilitychange);
   if (scrollRemove) scrollRemove();
 });
 
 onBeforeUnmount(() => {
+  isStopScrollBottom = true;
   connection?.dispose();
   document.removeEventListener('visibilitychange', onVisibilitychange);
   if (scrollRemove) scrollRemove();
