@@ -111,9 +111,11 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 let isFirstFetch = $ref(true);
 let isStopScrollBottom = $ref(false);
 let finishFirstFetch = debounce(() => {
-  if (isStopScrollBottom) return;
-  console.debug('thisScrollToBottom SCROLL008');
-  thisScrollToBottom({ behavior: 'instant' });
+  if (isStopScrollBottom) {
+    console.debug('thisScrollToBottom SCROLL008');
+    thisScrollToBottom({ behavior: 'instant' });
+    isStopScrollBottom = false;
+  }
   console.debug('初回ローディング完了');
   isFirstFetch = false;
 }, 500);
@@ -504,6 +506,7 @@ function onSetContextDisposes(disposes: Promise<() => void>[]) {
 }
 
 onMounted(async () => {
+  isStopScrollBottom = false;
   await fetch();
 });
 
