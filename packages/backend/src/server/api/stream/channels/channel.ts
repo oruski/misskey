@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { NotesRepository, UsersRepository } from '@/models/index.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import type { User } from '@/models/entities/User.js';
-import type { Packed } from '@/misc/schema.js';
+import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { bindThis } from '@/decorators.js';
@@ -59,6 +59,8 @@ class ChannelChannel extends Channel {
 		if (isUserRelated(note, this.muting)) return;
 		// 流れてきたNoteがブロックされているユーザーが関わるものだったら無視する
 		if (isUserRelated(note, this.blocking)) return;
+
+		if (note.renote && !note.text && isUserRelated(note, this.renoteMuting)) return;
 
 		this.connection.cacheNote(note);
 

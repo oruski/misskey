@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version-file: '.node-version'
+        node-version: [20.10.0]
 
     services:
       postgres:

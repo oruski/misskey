@@ -6,11 +6,11 @@ import PerUserFollowingChart from '@/core/chart/charts/per-user-following.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { IdService } from '@/core/IdService.js';
 import { isDuplicateKeyValueError } from '@/misc/is-duplicate-key-value-error.js';
-import type { Packed } from '@/misc/schema.js';
+import type { Packed } from '@/misc/json-schema.js';
 import InstanceChart from '@/core/chart/charts/instance.js';
 import { FederatedInstanceService } from '@/core/FederatedInstanceService.js';
 import { WebhookService } from '@/core/WebhookService.js';
-import { CreateNotificationService } from '@/core/CreateNotificationService.js';
+import { NotificationService } from '@/core/NotificationService.js';
 import { DI } from '@/di-symbols.js';
 import type { FollowingsRepository, FollowRequestsRepository, InstancesRepository, UserProfilesRepository, UsersRepository } from '@/models/index.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
@@ -57,7 +57,7 @@ export class UserFollowingService {
 		private idService: IdService,
 		private queueService: QueueService,
 		private globalEventService: GlobalEventService,
-		private createNotificationService: CreateNotificationService,
+		private notificationService: NotificationService,
 		private federatedInstanceService: FederatedInstanceService,
 		private webhookService: WebhookService,
 		private apRendererService: ApRendererService,
@@ -82,7 +82,7 @@ export class UserFollowingService {
 		if (this.userEntityService.isRemoteUser(follower) && this.userEntityService.isLocalUser(followee) && blocked) {
 			// リモートフォローを受けてブロックしていた場合は、エラーにするのではなくRejectを送り返しておしまい。
 			const content = this.apRendererService.addContext(this.apRendererService.renderReject(this.apRendererService.renderFollow(follower, followee, requestId), followee));
-			this.queueService.deliver(followee, content, follower.inbox);
+			this.queueService.deliver(followee, content, follower.inbox, false);
 			return;
 		} else if (this.userEntityService.isRemoteUser(follower) && this.userEntityService.isLocalUser(followee) && blocking) {
 			// リモートフォローを受けてブロックされているはずの場合だったら、ブロック解除しておく。
@@ -132,7 +132,7 @@ export class UserFollowingService {
 		if (this.userEntityService.isRemoteUser(follower) && this.userEntityService.isLocalUser(followee)) {
       // @ts-ignore
 			const content = this.apRendererService.addContext(this.apRendererService.renderAccept(this.apRendererService.renderFollow(follower, followee, requestId), followee));
-			this.queueService.deliver(followee, content, follower.inbox);
+			this.queueService.deliver(followee, content, follower.inbox, false);
 		}
 	}
 
@@ -183,7 +183,7 @@ export class UserFollowingService {
 			});
 
 			// 通知を作成
-			this.createNotificationService.createNotification(follower.id, 'followRequestAccepted', {
+			this.notificationService.createNotification(follower.id, 'followRequestAccepted', {
 				notifierId: followee.id,
 			});
 		}
@@ -246,7 +246,7 @@ export class UserFollowingService {
 			});
 
 			// 通知を作成
-			this.createNotificationService.createNotification(followee.id, 'follow', {
+			this.notificationService.createNotification(followee.id, 'follow', {
 				notifierId: follower.id,
 			});
 		}
@@ -295,19 +295,19 @@ export class UserFollowingService {
 
 		if (this.userEntityService.isLocalUser(follower) && this.userEntityService.isRemoteUser(followee)) {
 			const content = this.apRendererService.addContext(this.apRendererService.renderUndo(this.apRendererService.renderFollow(follower, followee), follower));
-			this.queueService.deliver(follower, content, followee.inbox);
+			this.queueService.deliver(follower, content, followee.inbox, false);
 		}
 
 		if (this.userEntityService.isLocalUser(followee) && this.userEntityService.isRemoteUser(follower)) {
 			// local user has null host
 			const content = this.apRendererService.addContext(this.apRendererService.renderReject(this.apRendererService.renderFollow(follower, followee), followee));
-			this.queueService.deliver(followee, content, follower.inbox);
+			this.queueService.deliver(followee, content, follower.inbox, false);
 		}
 	}
 
 	@bindThis
 	private async decrementFollowing(
-		follower: {id: User['id']; host: User['host']; },
+		follower: { id: User['id']; host: User['host']; },
 		followee: { id: User['id']; host: User['host']; },
 	): Promise<void> {
 		this.globalEventService.publishInternalEvent('unfollow', { followerId: follower.id, followeeId: followee.id });
@@ -382,7 +382,7 @@ export class UserFollowingService {
 			}).then(packed => this.globalEventService.publishMainStream(followee.id, 'meUpdated', packed));
 
 			// 通知を作成
-			this.createNotificationService.createNotification(followee.id, 'receiveFollowRequest', {
+			this.notificationService.createNotification(followee.id, 'receiveFollowRequest', {
 				notifierId: follower.id,
 				followRequestId: followRequest.id,
 			});
@@ -390,7 +390,7 @@ export class UserFollowingService {
 
 		if (this.userEntityService.isLocalUser(follower) && this.userEntityService.isRemoteUser(followee)) {
 			const content = this.apRendererService.addContext(this.apRendererService.renderFollow(follower, followee));
-			this.queueService.deliver(follower, content, followee.inbox);
+			this.queueService.deliver(follower, content, followee.inbox, false);
 		}
 	}
 
@@ -407,7 +407,7 @@ export class UserFollowingService {
 			const content = this.apRendererService.addContext(this.apRendererService.renderUndo(this.apRendererService.renderFollow(follower, followee), follower));
 
 			if (this.userEntityService.isLocalUser(follower)) { // 本来このチェックは不要だけどTSに怒られるので
-				this.queueService.deliver(follower, content, followee.inbox);
+				this.queueService.deliver(follower, content, followee.inbox, false);
 			}
 		}
 
@@ -450,7 +450,7 @@ export class UserFollowingService {
 
 		if (this.userEntityService.isRemoteUser(follower) && this.userEntityService.isLocalUser(followee)) {
 			const content = this.apRendererService.addContext(this.apRendererService.renderAccept(this.apRendererService.renderFollow(follower, followee, request.requestId!), followee));
-			this.queueService.deliver(followee, content, follower.inbox);
+			this.queueService.deliver(followee, content, follower.inbox, false);
 		}
 
 		this.userEntityService.pack(followee.id, followee, {
@@ -558,7 +558,7 @@ export class UserFollowingService {
 		});
 
 		const content = this.apRendererService.addContext(this.apRendererService.renderReject(this.apRendererService.renderFollow(follower, followee, request?.requestId ?? undefined), followee));
-		this.queueService.deliver(followee, content, follower.inbox);
+		this.queueService.deliver(followee, content, follower.inbox, false);
 	}
 
 	/**

@@ -171,7 +171,7 @@ export class ApInboxService {
 			await this.flag(actor, activity);
 		} else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-			this.logger.warn(`unrecognized activity type: ${(activity as any).type}`);
+			this.logger.warn(`unrecognized activity type: ${activity.type}`);
 		}
 	}
 

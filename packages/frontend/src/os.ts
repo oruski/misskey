@@ -449,7 +449,7 @@ export function select<C = any>(
   });
 }
 
-export function success() {
+export function success(): Promise<void> {
   return new Promise((resolve, reject) => {
     const showing = ref(true);
     window.setTimeout(() => {
@@ -469,7 +469,7 @@ export function success() {
   });
 }
 
-export function waiting() {
+export function waiting(): Promise<void> {
   return new Promise((resolve, reject) => {
     const showing = ref(true);
     popup(
@@ -665,7 +665,7 @@ export function popupMenu(
     viaKeyboard?: boolean;
     onClosing?: () => void;
   },
-) {
+): Promise<void> {
   return new Promise((resolve, reject) => {
     let dispose;
     popup(
@@ -692,7 +692,7 @@ export function popupMenu(
   });
 }
 
-export function contextMenu(items: MenuItem[] | Ref<MenuItem[]>, ev: MouseEvent) {
+export function contextMenu(items: MenuItem[] | Ref<MenuItem[]>, ev: MouseEvent): Promise<void> {
   ev.preventDefault();
   return new Promise((resolve, reject) => {
     let dispose;
@@ -737,7 +737,7 @@ export function contextMenuWithoutPromise(items: MenuItem[] | Ref<MenuItem[]>, e
   });
 }
 
-export function post(props: Record<string, any> = {}) {
+export function post(props: Record<string, any> = {}): Promise<void> {
   return new Promise((resolve, reject) => {
     // NOTE: MkPostFormDialogをdynamic importするとiOSでテキストエリアに自動フォーカスできない
     // NOTE: ただ、dynamic importしない場合、MkPostFormDialogインスタンスが使いまわされ、

@@ -4,7 +4,7 @@ import Ajv from 'ajv';
 import { ModuleRef } from '@nestjs/core';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
-import type { Packed } from '@/misc/schema.js';
+import type { Packed } from '@/misc/json-schema.js';
 import type { Promiseable } from '@/misc/prelude/await-all.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
 import { USER_ACTIVE_THRESHOLD, USER_ONLINE_THRESHOLD } from '@/const.js';
@@ -38,6 +38,7 @@ import type {
   AntennaNotesRepository,
   PagesRepository,
   UserProfile,
+  RenoteMutingsRepository,
   MessagingMessagesRepository,
   UserGroupJoiningsRepository,
 } from '@/models/index.js';
@@ -98,6 +99,8 @@ export class UserEntityService implements OnModuleInit {
     private blockingsRepository: BlockingsRepository,
     @Inject(DI.mutingsRepository)
     private mutingsRepository: MutingsRepository,
+    @Inject(DI.renoteMutingsRepository)
+    private renoteMutingsRepository: RenoteMutingsRepository,
     @Inject(DI.driveFilesRepository)
     private driveFilesRepository: DriveFilesRepository,
     @Inject(DI.noteUnreadsRepository)
@@ -202,6 +205,13 @@ export class UserEntityService implements OnModuleInit {
         take: 1,
       }).then(n => n > 0),
       isMuted: this.mutingsRepository.count({
+        where: {
+          muterId: me,
+          muteeId: target,
+        },
+        take: 1,
+      }).then(n => n > 0),
+      isRenoteMuted: this.renoteMutingsRepository.count({
         where: {
           muterId: me,
           muteeId: target,
@@ -321,27 +331,27 @@ export class UserEntityService implements OnModuleInit {
   @bindThis
   public async getAvatarUrl(user: User): Promise<string> {
     if (user.avatar) {
-      return this.driveFileEntityService.getPublicUrl(user.avatar, 'avatar') ?? this.getIdenticonUrl(user.id);
+      return this.driveFileEntityService.getPublicUrl(user.avatar, 'avatar') ?? this.getIdenticonUrl(user);
     } else if (user.avatarId) {
       const avatar = await this.driveFilesRepository.findOneByOrFail({ id: user.avatarId });
-      return this.driveFileEntityService.getPublicUrl(avatar, 'avatar') ?? this.getIdenticonUrl(user.id);
+      return this.driveFileEntityService.getPublicUrl(avatar, 'avatar') ?? this.getIdenticonUrl(user);
     } else {
-      return this.getIdenticonUrl(user.id);
+      return this.getIdenticonUrl(user);
     }
   }
 
   @bindThis
   public getAvatarUrlSync(user: User): string {
     if (user.avatar) {
-      return this.driveFileEntityService.getPublicUrl(user.avatar, 'avatar') ?? this.getIdenticonUrl(user.id);
+      return this.driveFileEntityService.getPublicUrl(user.avatar, 'avatar') ?? this.getIdenticonUrl(user);
     } else {
-      return this.getIdenticonUrl(user.id);
+      return this.getIdenticonUrl(user);
     }
   }
 
   @bindThis
-  public getIdenticonUrl(userId: User['id']): string {
-    return `${this.config.url}/identicon/${userId}`;
+  public getIdenticonUrl(user: User): string {
+    return `${this.config.url}/identicon/${user.username.toLowerCase()}@${user.host ?? this.config.host}`;
   }
 
   public async pack<ExpectsMe extends boolean | null = null, D extends boolean = false>(
@@ -423,9 +433,10 @@ export class UserEntityService implements OnModuleInit {
       emojis: this.customEmojiService.populateEmojis(user.emojis, user.host),
       onlineStatus: this.getOnlineStatus(user),
       // パフォーマンス上の理由でローカルユーザーのみ
-      badgeRoles: user.host == null ? this.roleService.getUserBadgeRoles(user.id).then(rs => rs.map(r => ({
+      badgeRoles: user.host == null ? this.roleService.getUserBadgeRoles(user.id).then(rs => rs.sort((a, b) => b.displayOrder - a.displayOrder).map(r => ({
         name: r.name,
         iconUrl: r.iconUrl,
+        displayOrder: r.displayOrder,
       }))) : undefined,
 
       ...(opts.detail ? {
@@ -462,7 +473,7 @@ export class UserEntityService implements OnModuleInit {
             userId: user.id,
           }).then(result => result >= 1)
           : false,
-        roles: this.roleService.getUserRoles(user.id).then(roles => roles.filter(role => role.isPublic).map(role => ({
+        roles: this.roleService.getUserRoles(user.id).then(roles => roles.filter(role => role.isPublic).sort((a, b) => b.displayOrder - a.displayOrder).map(role => ({
           id: role.id,
           name: role.name,
           color: role.color,
@@ -470,6 +481,7 @@ export class UserEntityService implements OnModuleInit {
           description: role.description,
           isModerator: role.isModerator,
           isAdministrator: role.isAdministrator,
+          displayOrder: role.displayOrder,
         }))),
       } : {}),
 
@@ -537,6 +549,7 @@ export class UserEntityService implements OnModuleInit {
         isBlocking: relation.isBlocking,
         isBlocked: relation.isBlocked,
         isMuted: relation.isMuted,
+        isRenoteMuted: relation.isRenoteMuted,
       } : {}),
     } as Promiseable<Packed<'User'>> as Promiseable<IsMeAndIsUserDetailed<ExpectsMe, D>>;
 

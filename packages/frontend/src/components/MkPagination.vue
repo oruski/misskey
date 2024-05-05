@@ -28,7 +28,7 @@
           :disabled="moreFetching"
           :style="{ cursor: moreFetching ? 'wait' : 'pointer' }"
           primary
-          @click="fetchMoreAhead"
+         rounded @click="fetchMoreAhead"
         >
           {{ i18n.ts.loadMore }}
         </MkButton>
@@ -43,7 +43,7 @@
           :disabled="moreFetching"
           :style="{ cursor: moreFetching ? 'wait' : 'pointer' }"
           primary
-          @click="fetchMore"
+         rounded @click="fetchMore"
         >
           {{ i18n.ts.loadMore }}
         </MkButton>

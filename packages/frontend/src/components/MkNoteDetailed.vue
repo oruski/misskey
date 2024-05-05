@@ -135,7 +135,8 @@
             <i class="ti ti-ban"></i>
           </button>
           <button v-if="appearNote.myReaction == null" ref="reactButton" class="button _button" @mousedown="react()">
-            <i class="ti ti-plus"></i>
+					<i v-if="appearNote.reactionAcceptance === 'likeOnly'" class="ti ti-heart"></i>
+					<i v-else class="ti ti-plus"></i>
           </button>
           <button
             v-if="appearNote.myReaction != null"
@@ -193,6 +194,7 @@ import { deepClone } from '@/scripts/clone';
 import { useTooltip } from '@/scripts/use-tooltip';
 import { claimAchievement, hasPrincess } from '@/scripts/achievements';
 import { MenuItem } from '@/types/menu';
+import MkRippleEffect from '@/components/MkRippleEffect.vue';
 
 const props = defineProps<{
   note: misskey.entities.Note;
@@ -285,9 +287,19 @@ function renote(viaKeyboard = false) {
         text: i18n.ts.inChannelRenote,
         icon: 'ti ti-repeat',
         action: () => {
-				os.apiWithDialog('notes/create', {
+				const el = renoteButton.value as HTMLElement | null | undefined;
+				if (el) {
+					const rect = el.getBoundingClientRect();
+					const x = rect.left + (el.offsetWidth / 2);
+					const y = rect.top + (el.offsetHeight / 2);
+					os.popup(MkRippleEffect, { x, y }, {}, 'end');
+				}
+
+				os.api('notes/create', {
             renoteId: appearNote.id,
             channelId: appearNote.channelId,
+				}).then(() => {
+					os.toast(i18n.ts.renoted);
           });
         },
       },
@@ -310,8 +322,18 @@ function renote(viaKeyboard = false) {
       text: i18n.ts.renote,
       icon: 'ti ti-repeat',
       action: () => {
-			os.apiWithDialog('notes/create', {
+			const el = renoteButton.value as HTMLElement | null | undefined;
+			if (el) {
+				const rect = el.getBoundingClientRect();
+				const x = rect.left + (el.offsetWidth / 2);
+				const y = rect.top + (el.offsetHeight / 2);
+				os.popup(MkRippleEffect, { x, y }, {}, 'end');
+			}
+
+			os.api('notes/create', {
           renoteId: appearNote.id,
+			}).then(() => {
+				os.toast(i18n.ts.renoted);
         });
       },
     },
@@ -346,6 +368,19 @@ function reply(viaKeyboard = false): void {
 
 function react(viaKeyboard = false): void {
   pleaseLogin();
+	if (appearNote.reactionAcceptance === 'likeOnly') {
+		os.api('notes/reactions/create', {
+			noteId: appearNote.id,
+			reaction: '❤️',
+		});
+		const el = reactButton.value as HTMLElement | null | undefined;
+		if (el) {
+			const rect = el.getBoundingClientRect();
+			const x = rect.left + (el.offsetWidth / 2);
+			const y = rect.top + (el.offsetHeight / 2);
+			os.popup(MkRippleEffect, { x, y }, {}, 'end');
+		}
+	} else {
   blur();
   reactionPicker.show(
     reactButton.value,
@@ -368,6 +403,7 @@ function react(viaKeyboard = false): void {
       focus();
     },
   );
+	}
 }
 
 function undoReact(note): void {

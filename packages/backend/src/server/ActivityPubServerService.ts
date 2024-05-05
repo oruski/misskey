@@ -138,12 +138,14 @@ export class ActivityPubServerService {
 				return;
 			}
 
+      // @ts-ignore
 			if (request.rawBody == null) {
 				// Bad request
 				reply.code(400);
 				return;
 			}
 
+      // @ts-ignore
 			const hash = crypto.createHash('sha256').update(request.rawBody).digest('base64');
 
 			if (hash !== digestValue) {
