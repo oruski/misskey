@@ -5,6 +5,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import fastifyStatic from '@fastify/static';
 import rename from 'rename';
 import sharp from 'sharp';
+import { sharpBmp } from '@misskey-dev/sharp-read-bmp';
 import type { Config } from '@/config.js';
 import type { DriveFile, DriveFilesRepository } from '@/models/index.js';
 import { DI } from '@/di-symbols.js';
@@ -21,11 +22,8 @@ import { FileInfoService } from '@/core/FileInfoService.js';
 import { LoggerService } from '@/core/LoggerService.js';
 import { bindThis } from '@/decorators.js';
 import { isMimeImage } from '@/misc/is-mime-image.js';
-import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions } from 'fastify';
-import { isMimeImage } from '@/misc/is-mime-image.js';
-import sharp from 'sharp';
-import { sharpBmp } from 'sharp-read-bmp';
 import { correctFilename } from '@/misc/correct-filename.js';
+import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions } from 'fastify';
 
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
@@ -188,8 +186,8 @@ export class FileServerService {
 				reply.header('Content-Disposition',
 					contentDisposition(
 						'inline',
-						correctFilename(file.filename, image.ext)
-					)
+						correctFilename(file.filename, image.ext),
+					),
 				);
 				return image.data;
 			}
@@ -371,8 +369,8 @@ export class FileServerService {
 			reply.header('Content-Disposition',
 				contentDisposition(
 					'inline',
-					correctFilename(file.filename, image.ext)
-				)
+					correctFilename(file.filename, image.ext),
+				),
 			);
 			return image.data;
 		} catch (e) {
