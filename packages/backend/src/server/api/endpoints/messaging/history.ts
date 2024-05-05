@@ -116,11 +116,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
                   }
                 }));
               }))
+              .andWhere(
+                // 期間を一ヶ月前までに絞る
+                'message.createdAt > :monthAgo',
+                { monthAgo: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30) },
+              )
               .andWhere('message.groupId IS NULL')
               .groupBy('message.userId, message.recipientId')
               .select('max(message.id) as id')
               .getQuery() + ')');
-          }).setParameters({ meId: me.id, mute: muteeIds, block: blockeeIds }).getMany();
+          }).setParameters({ meId: me.id, mute: muteeIds, block: blockeeIds, monthAgo: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30) }).getMany();
 
         const messages = Array.from(new Map([
           ...groupMessages,

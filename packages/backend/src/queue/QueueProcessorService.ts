@@ -52,14 +52,14 @@ export class QueueProcessorService {
 				};
 			}
 		}
-	
+
 		const systemLogger = this.logger.createSubLogger('system');
 		const deliverLogger = this.logger.createSubLogger('deliver');
 		const webhookLogger = this.logger.createSubLogger('webhook');
 		const inboxLogger = this.logger.createSubLogger('inbox');
 		const dbLogger = this.logger.createSubLogger('db');
 		const objectStorageLogger = this.logger.createSubLogger('objectStorage');
-		
+
 		this.queueService.systemQueue
 			.on('waiting', (jobId) => systemLogger.debug(`waiting id=${jobId}`))
 			.on('active', (job) => systemLogger.debug(`active id=${job.id}`))
@@ -67,7 +67,7 @@ export class QueueProcessorService {
 			.on('failed', (job, err) => systemLogger.warn(`failed(${err}) id=${job.id}`, { job, e: renderError(err) }))
 			.on('error', (job: any, err: Error) => systemLogger.error(`error ${err}`, { job, e: renderError(err) }))
 			.on('stalled', (job) => systemLogger.warn(`stalled id=${job.id}`));
-		
+
 		this.queueService.deliverQueue
 			.on('waiting', (jobId) => deliverLogger.debug(`waiting id=${jobId}`))
 			.on('active', (job) => deliverLogger.debug(`active ${getJobInfo(job, true)} to=${job.data.to}`))
@@ -75,7 +75,7 @@ export class QueueProcessorService {
 			.on('failed', (job, err) => deliverLogger.warn(`failed(${err}) ${getJobInfo(job)} to=${job.data.to}`))
 			.on('error', (job: any, err: Error) => deliverLogger.error(`error ${err}`, { job, e: renderError(err) }))
 			.on('stalled', (job) => deliverLogger.warn(`stalled ${getJobInfo(job)} to=${job.data.to}`));
-		
+
 		this.queueService.inboxQueue
 			.on('waiting', (jobId) => inboxLogger.debug(`waiting id=${jobId}`))
 			.on('active', (job) => inboxLogger.debug(`active ${getJobInfo(job, true)}`))
@@ -83,7 +83,7 @@ export class QueueProcessorService {
 			.on('failed', (job, err) => inboxLogger.warn(`failed(${err}) ${getJobInfo(job)} activity=${job.data.activity ? job.data.activity.id : 'none'}`, { job, e: renderError(err) }))
 			.on('error', (job: any, err: Error) => inboxLogger.error(`error ${err}`, { job, e: renderError(err) }))
 			.on('stalled', (job) => inboxLogger.warn(`stalled ${getJobInfo(job)} activity=${job.data.activity ? job.data.activity.id : 'none'}`));
-		
+
 		this.queueService.dbQueue
 			.on('waiting', (jobId) => dbLogger.debug(`waiting id=${jobId}`))
 			.on('active', (job) => dbLogger.debug(`active id=${job.id}`))
@@ -91,7 +91,7 @@ export class QueueProcessorService {
 			.on('failed', (job, err) => dbLogger.warn(`failed(${err}) id=${job.id}`, { job, e: renderError(err) }))
 			.on('error', (job: any, err: Error) => dbLogger.error(`error ${err}`, { job, e: renderError(err) }))
 			.on('stalled', (job) => dbLogger.warn(`stalled id=${job.id}`));
-		
+
 		this.queueService.objectStorageQueue
 			.on('waiting', (jobId) => objectStorageLogger.debug(`waiting id=${jobId}`))
 			.on('active', (job) => objectStorageLogger.debug(`active id=${job.id}`))
@@ -99,7 +99,7 @@ export class QueueProcessorService {
 			.on('failed', (job, err) => objectStorageLogger.warn(`failed(${err}) id=${job.id}`, { job, e: renderError(err) }))
 			.on('error', (job: any, err: Error) => objectStorageLogger.error(`error ${err}`, { job, e: renderError(err) }))
 			.on('stalled', (job) => objectStorageLogger.warn(`stalled id=${job.id}`));
-		
+
 		this.queueService.webhookDeliverQueue
 			.on('waiting', (jobId) => webhookLogger.debug(`waiting id=${jobId}`))
 			.on('active', (job) => webhookLogger.debug(`active ${getJobInfo(job, true)} to=${job.data.to}`))
@@ -107,50 +107,56 @@ export class QueueProcessorService {
 			.on('failed', (job, err) => webhookLogger.warn(`failed(${err}) ${getJobInfo(job)} to=${job.data.to}`))
 			.on('error', (job: any, err: Error) => webhookLogger.error(`error ${err}`, { job, e: renderError(err) }))
 			.on('stalled', (job) => webhookLogger.warn(`stalled ${getJobInfo(job)} to=${job.data.to}`));
-	
+
 		this.queueService.deliverQueue.process(this.config.deliverJobConcurrency ?? 128, (job) => this.deliverProcessorService.process(job));
 		this.queueService.inboxQueue.process(this.config.inboxJobConcurrency ?? 16, (job) => this.inboxProcessorService.process(job));
 		this.queueService.endedPollNotificationQueue.process((job, done) => this.endedPollNotificationProcessorService.process(job, done));
 		this.queueService.webhookDeliverQueue.process(64, (job) => this.webhookDeliverProcessorService.process(job));
 		this.dbQueueProcessorsService.start(this.queueService.dbQueue);
 		this.objectStorageQueueProcessorsService.start(this.queueService.objectStorageQueue);
-	
+
 		this.queueService.systemQueue.add('tickCharts', {
 		}, {
 			repeat: { cron: '55 * * * *' },
 			removeOnComplete: true,
+      attempts: 0,
 		});
-	
+
 		this.queueService.systemQueue.add('resyncCharts', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
+      attempts: 0,
 		});
-	
+
 		this.queueService.systemQueue.add('cleanCharts', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
+      attempts: 0,
 		});
 
 		this.queueService.systemQueue.add('aggregateRetention', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
+      attempts: 0,
 		});
-	
+
 		this.queueService.systemQueue.add('clean', {
 		}, {
-			repeat: { cron: '0 0 * * *' },
+			repeat: { cron: '0 9 * * *' },
 			removeOnComplete: true,
+      attempts: 0,
 		});
-	
+
 		this.queueService.systemQueue.add('checkExpiredMutings', {
 		}, {
 			repeat: { cron: '*/5 * * * *' },
 			removeOnComplete: true,
+      attempts: 0,
 		});
-	
+
 		this.systemQueueProcessorsService.start(this.queueService.systemQueue);
 	}
 }

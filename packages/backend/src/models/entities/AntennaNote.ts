@@ -4,7 +4,7 @@ import { Note } from './Note.js';
 import { Antenna } from './Antenna.js';
 
 @Entity()
-@Index(['noteId', 'antennaId'], { unique: true })
+@Index(['noteId', 'antennaId'])
 export class AntennaNote {
 	@PrimaryColumn(id())
 	public id: string;

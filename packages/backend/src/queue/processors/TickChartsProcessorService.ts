@@ -48,20 +48,26 @@ export class TickChartsProcessorService {
 	public async process(job: Bull.Job<Record<string, unknown>>, done: () => void): Promise<void> {
 		this.logger.info('Tick charts...');
 
-		await Promise.all([
-			this.federationChart.tick(false),
-			this.notesChart.tick(false),
-			this.usersChart.tick(false),
-			this.activeUsersChart.tick(false),
-			this.instanceChart.tick(false),
-			this.perUserNotesChart.tick(false),
-			this.perUserPvChart.tick(false),
-			this.driveChart.tick(false),
-			this.perUserReactionsChart.tick(false),
-			this.perUserFollowingChart.tick(false),
-			this.perUserDriveChart.tick(false),
-			this.apRequestChart.tick(false),
-		]);
+    const promises = [
+      this.federationChart.tick(false),
+      this.notesChart.tick(false),
+      this.usersChart.tick(false),
+      this.activeUsersChart.tick(false),
+      this.instanceChart.tick(false),
+      this.perUserNotesChart.tick(false),
+      this.perUserPvChart.tick(false),
+      this.driveChart.tick(false),
+      this.perUserReactionsChart.tick(false),
+      this.perUserFollowingChart.tick(false),
+      this.perUserDriveChart.tick(false),
+      this.apRequestChart.tick(false),
+    ];
+
+		for (const promise of promises) {
+      await promise.catch((err) => {
+        this.logger.error('Failed to tick chart.', err);
+      });
+    }
 
 		this.logger.succ('All charts successfully ticked.');
 		done();

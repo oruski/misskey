@@ -179,8 +179,16 @@ export class AntennaService implements OnApplicationShutdown {
 
 		const keywords = antenna.keywords
 			// Clean up
-			.map(xs => xs.filter(x => x !== ''))
+			.map(xs => xs
+        .map(x => x.trim())
+        // 空欄は無視
+        .filter(x => x !== ''))
 			.filter(xs => xs.length > 0);
+
+    // キーワード未指定アンテナは動作させない
+    if (keywords.length === 0) {
+      return false;
+    }
 
 		if (keywords.length > 0) {
 			if (note.text == null) return false;

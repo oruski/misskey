@@ -110,8 +110,10 @@ let pagingComponent = $shallowRef<InstanceType<typeof XPagination>>();
 
 let isFirstFetch = $ref(true);
 let finishFirstFetch = debounce(() => {
-  console.debug('thisScrollToBottom SCROLL008');
-  thisScrollToBottom({ behavior: 'instant' });
+  if (location.href.includes('/my/messaging/')) {
+    console.debug('thisScrollToBottom SCROLL008');
+    thisScrollToBottom({ behavior: 'instant' });
+  }
   console.debug('初回ローディング完了');
   isFirstFetch = false;
 }, 500);

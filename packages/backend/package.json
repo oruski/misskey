@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "npx nodemon --watch src --watch ../../built/_vite_ -e 'js,ts,json' --exec 'npm run build:swc && npm run start'",
+		"dev": "npx nodemon --watch src --watch ../../built/_vite_ -e 'js,ts,json' --exec 'npm run build && npm run start'",
 		"livereload": "npx livereload ./ -e 'start-time'",
 		"build:start": "npm run build && npm run start",
 		"start": "node --experimental-json-modules --experimental-specifier-resolution=node ./built/boot/index.js",
@@ -23,7 +23,7 @@
 		"mocha": "cross-env NODE_ENV=test TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=\"./test/tsconfig.json\" mocha",
 		"test": "npm run jest",
 		"db:migrate": "npx typeorm migration:run -d ormconfig.js",
-    "db:revert": "npx typeorm migration:revert -d ormconfig.js",
+		"db:revert": "npx typeorm migration:revert -d ormconfig.js",
 		"db:migration:generate": "read NAME; npm run build && npx typeorm migration:generate -d ormconfig.js migration/$NAME",
 		"upgrade-interactive": "npx npm-check --update",
 		"jest-and-coverage": "cross-env NODE_ENV=test node --experimental-vm-modules --experimental-import-meta-resolve node_modules/jest/bin/jest.js --coverage --forceExit --runInBand --detectOpenHandles",
