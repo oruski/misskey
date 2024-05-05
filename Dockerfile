@@ -1,6 +1,8 @@
 ARG NODE_VERSION=21.6.2-bullseye
 
-FROM node:${NODE_VERSION} AS builder
+# build assets & compile TypeScript
+
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION} AS native-builder
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -37,8 +39,14 @@ RUN apt-get update \
 RUN corepack enable
 
 WORKDIR /misskey
+
+COPY --link ["package-lock.json", "package.json", "./"]
 COPY --link ["scripts", "./scripts"]
 COPY --link ["packages/backend/package.json", "./packages/backend/"]
+
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store,sharing=locked \
+	pnpm i --frozen-lockfile --aggregate-output
+
 FROM --platform=$TARGETPLATFORM node:${NODE_VERSION}-slim AS runner
 
 ARG UID="991"
