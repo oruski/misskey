@@ -77,6 +77,9 @@ export class NotificationEntityService implements OnModuleInit {
 			userId: notification.notifierId,
 			user: notification.notifierId ? this.userEntityService.pack(notification.notifier ?? notification.notifierId) : null,
 			...(noteIfNeed != null ? { note: noteIfNeed } : {}),
+			...(notification.type === 'reaction' ? {
+				reaction: notification.reaction,
+			} : {}),
 			...(notification.type === 'groupInvited' ? {
 				invitation: this.userGroupInvitationEntityService.pack(notification.userGroupInvitationId!),
 			} : {}),
