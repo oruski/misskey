@@ -44,9 +44,6 @@ COPY --link ["package-lock.json", "package.json", "./"]
 COPY --link ["scripts", "./scripts"]
 COPY --link ["packages/backend/package.json", "./packages/backend/"]
 
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store,sharing=locked \
-	pnpm i --frozen-lockfile --aggregate-output
-
 FROM --platform=$TARGETPLATFORM node:${NODE_VERSION}-slim AS runner
 
 ARG UID="991"
