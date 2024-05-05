@@ -275,10 +275,10 @@ export const defaultStore = markRaw(
       where: 'device',
       default: 5,
     },
-	showNoteActionsOnlyHover: {
-		where: 'device',
-		default: false,
-	},
+    showNoteActionsOnlyHover: {
+      where: 'device',
+      default: false,
+    },
     aiChanMode: {
       where: 'device',
       default: false,
@@ -294,11 +294,11 @@ export type Plugin = {
   id: string;
   name: string;
   active: boolean;
-	config?: Record<string, { default: any }>;
+  config?: Record<string, { default: any }>;
   configData: Record<string, any>;
   token: string;
-	src: string | null;
-	version: string;
+  src: string | null;
+  version: string;
   ast: any[];
 };
 
@@ -322,14 +322,14 @@ export class ColdDeviceStorage {
     syncDeviceDarkMode: true,
     plugins: [] as Plugin[],
     mediaVolume: 0.5,
-		sound_masterVolume: 0.5,
-		sound_note: { type: 'syuilo/n-aec', volume: 0.5 },
-		sound_noteMy: { type: 'syuilo/n-cea', volume: 0.5 },
-		sound_notification: { type: 'syuilo/n-ea', volume: 0.5 },
-		sound_chat: { type: 'syuilo/pope1', volume: 0.5 },
-		sound_chatBg: { type: 'syuilo/waon', volume: 0.5 },
-		sound_antenna: { type: 'syuilo/triple', volume: 0.5 },
-		sound_channel: { type: 'syuilo/square-pico', volume: 0.5 },
+    sound_masterVolume: 0.3,
+    sound_note: { type: 'syuilo/down', volume: 1 },
+    sound_noteMy: { type: 'syuilo/up', volume: 1 },
+    sound_notification: { type: 'syuilo/pope2', volume: 1 },
+    sound_chat: { type: 'syuilo/pope1', volume: 1 },
+    sound_chatBg: { type: 'syuilo/waon', volume: 1 },
+    sound_antenna: { type: 'syuilo/triple', volume: 1 },
+    sound_channel: { type: 'syuilo/square-pico', volume: 1 },
   };
 
   public static watchers: Watcher[] = [];
