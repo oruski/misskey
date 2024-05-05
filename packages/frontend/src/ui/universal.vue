@@ -2,7 +2,7 @@
   <div :class="[$style.root, { [$style.withWallpaper]: wallpaper }]">
     <XSidebar v-if="!isMobile" :class="$style.sidebar" />
 
-    <MkStickyContainer :class="$style.contents">
+	<MkStickyContainer v-container :class="$style.contents">
       <template #header><XStatusBars :class="$style.statusbars" /></template>
       <main style="min-width: 0" :style="{ background: pageMetadata?.value?.bg }" @contextmenu.stop="onContextmenu">
         <div :class="$style.content" style="container-type: inline-size">
@@ -20,7 +20,7 @@
       <i class="ti ti-apps"></i>
     </button>
 
-    <div v-if="isMobile" :class="$style.nav">
+    <div v-if="isMobile" ref="navFooter" :class="$style.nav">
       <button :class="$style.navButton" class="_button" @click="drawerMenuShowing = true">
         <i :class="$style.navButtonIcon" class="ti ti-menu-2"></i
         ><span v-if="menuIndicated" :class="$style.navButtonIndicator"><i class="_indicatorCircle"></i></span>
@@ -110,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, provide, onMounted, computed, ref, ComputedRef } from 'vue';
+import { defineAsyncComponent, provide, onMounted, computed, ref, ComputedRef, watch, inject, Ref } from 'vue';
 import XCommon from './_common_/common.vue';
 import { instanceName } from '@/config';
 import { StickySidebar } from '@/scripts/sticky-sidebar';
@@ -124,6 +124,7 @@ import { mainRouter, useRouter } from '@/router';
 import { PageMetadata, provideMetadataReceiver } from '@/scripts/page-metadata';
 import { deviceKind } from '@/scripts/device-kind';
 import { miLocalStorage } from '@/local-storage';
+import { CURRENT_STICKY_BOTTOM } from '@/const';
 const XWidgets = defineAsyncComponent(() => import('./universal.widgets.vue'));
 const XSidebar = defineAsyncComponent(() => import('@/ui/_common_/navbar.vue'));
 const XStatusBars = defineAsyncComponent(() => import('@/ui/_common_/statusbars.vue'));
@@ -141,6 +142,7 @@ window.addEventListener('resize', () => {
 let pageMetadata = $ref<null | ComputedRef<PageMetadata>>();
 const widgetsEl = $shallowRef<HTMLElement>();
 const widgetsShowing = $ref(false);
+const navFooter = $shallowRef<HTMLElement>();
 
 const router = useRouter();
 let currentPage = $computed(() => router.currentRef.value);
@@ -267,6 +269,21 @@ function top() {
 }
 
 const wallpaper = miLocalStorage.getItem('wallpaper') != null;
+
+let navFooterHeight = $ref(0);
+provide<Ref<number>>(CURRENT_STICKY_BOTTOM, $$(navFooterHeight));
+
+watch($$(navFooter), () => {
+	if (navFooter) {
+		navFooterHeight = navFooter.offsetHeight;
+		document.body.style.setProperty('--stickyBottom', `${navFooterHeight}px`);
+	} else {
+		navFooterHeight = 0;
+		document.body.style.setProperty('--stickyBottom', '0px');
+	}
+}, {
+	immediate: true,
+});
 </script>
 
 <style lang="scss" module>
@@ -402,8 +419,8 @@ $widgets-hide-threshold: 1090px;
   grid-gap: 8px;
   width: 100%;
   box-sizing: border-box;
-  -webkit-backdrop-filter: var(--blur, blur(32px));
-  backdrop-filter: var(--blur, blur(32px));
+	-webkit-backdrop-filter: var(--blur, blur(24px));
+	backdrop-filter: var(--blur, blur(24px));
   background-color: var(--header);
   border-top: solid 0.5px var(--divider);
 }
