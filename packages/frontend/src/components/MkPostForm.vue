@@ -128,6 +128,15 @@
       />
       <MkPollEditor v-if="poll" v-model="poll" @destroyed="poll = null" />
       <XNotePreview v-if="showPreview" :class="$style.preview" :text="text" />
+		<div v-if="showingOptions" style="padding: 0 16px;">
+			<MkSelect v-model="reactionAcceptance" small>
+				<template #label>{{ i18n.ts.reactionAcceptance }}</template>
+				<option :value="null">{{ i18n.ts.all }}</option>
+				<option value="likeOnly">{{ i18n.ts.likeOnly }}</option>
+				<option value="likeOnlyForRemote">{{ i18n.ts.likeOnlyForRemote }}</option>
+			</MkSelect>
+		</div>
+		<button v-tooltip="i18n.ts.emoji" class="_button" :class="$style.emojiButton" @click="insertEmoji"><i class="ti ti-mood-happy"></i></button>
       <footer :class="$style.footer">
         <button v-tooltip="i18n.ts.attachFile" class="_button" :class="$style.footerButton" @click="chooseFileFrom">
           <i class="ti ti-photo-plus"></i>
@@ -159,17 +168,17 @@
         >
           <i class="ti ti-hash"></i>
         </button>
-        <button v-tooltip="i18n.ts.emoji" class="_button" :class="$style.footerButton" @click="insertEmoji">
-          <i class="ti ti-mood-happy"></i>
+        <button v-if="postFormActions.length > 0" v-tooltip="i18n.ts.plugin" class="_button" :class="$style.footerButton" @click="showActions">
+          <i class="ti ti-plug"></i>
         </button>
         <button
-          v-if="postFormActions.length > 0"
-          v-tooltip="i18n.ts.plugin"
+
+          v-tooltip="i18n.ts.more"
           class="_button"
           :class="$style.footerButton"
-          @click="showActions"
+          @click="showingOptions = !showingOptions"
         >
-          <i class="ti ti-plug"></i>
+          <i class="ti ti-dots"></i>
         </button>
       </footer>
       <datalist id="hashtags">
@@ -186,6 +195,7 @@ import * as misskey from 'misskey-js';
 import insertTextAtCursor from 'insert-text-at-cursor';
 import { toASCII } from 'punycode/';
 import { acct as Acct } from 'misskey-js';
+import MkSelect from './MkSelect.vue';
 import MkNoteSimple from '@/components/MkNoteSimple.vue';
 import XNotePreview from '@/components/MkNotePreview.vue';
 import XPostFormAttaches from '@/components/MkPostFormAttaches.vue';
@@ -273,12 +283,14 @@ let visibleUsers = $ref([]);
 if (props.initialVisibleUsers) {
   props.initialVisibleUsers.forEach(pushVisibleUser);
 }
+let reactionAcceptance = $ref(defaultStore.state.reactionAcceptance);
 let autocomplete = $ref(null);
 let draghover = $ref(false);
 let quoteId = $ref(null);
 let hasNotSpecifiedMentions = $ref(false);
 let recentHashtags = $ref(JSON.parse(miLocalStorage.getItem('hashtags') ?? '[]'));
 let imeText = $ref('');
+let showingOptions = $ref(false);
 
 const draftKey = $computed((): string => {
   let key = props.channel ? `channel:${props.channel.id}` : '';
@@ -288,7 +300,7 @@ const draftKey = $computed((): string => {
   } else if (props.reply) {
     key += `reply:${props.reply.id}`;
   } else {
-    key += 'note';
+		key += `note:${$i.id}`;
   }
 
   return key;
@@ -561,6 +573,10 @@ function pushVisibleUser(user) {
 function addVisibleUser() {
   os.selectUser().then((user) => {
     pushVisibleUser(user);
+
+		if (!text.toLowerCase().includes(`@${user.username.toLowerCase()}`)) {
+			text = `@${Acct.toString(user)} ${text}`;
+		}
   });
 }
 
@@ -756,6 +772,7 @@ async function post(ev?: MouseEvent) {
     localOnly: localOnly,
     visibility: visibility,
     visibleUserIds: visibility === 'specified' ? visibleUsers.map((u) => u.id) : undefined,
+		reactionAcceptance,
   };
 
   if (withHashtags && hashtags && hashtags.trim() !== '') {
@@ -1190,6 +1207,18 @@ defineExpose({
   &.footerButtonActive {
     color: var(--accent);
   }
+}
+
+.emojiButton {
+	position: absolute;
+	top: 55px;
+	right: 13px;
+	display: inline-block;
+	padding: 0;
+	margin: 0;
+	font-size: 1em;
+	width: 32px;
+	height: 32px;
 }
 
 @container (max-width: 500px) {

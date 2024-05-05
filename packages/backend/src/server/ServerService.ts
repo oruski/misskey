@@ -1,8 +1,9 @@
 import cluster from 'node:cluster';
 import * as fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { Inject, Injectable, OnApplicationShutdown } from '@nestjs/common';
 import Fastify, { FastifyInstance } from 'fastify';
-import fastifyRawBody from 'fastify-raw-body';
+import fastifyStatic from '@fastify/static';
 import { IsNull } from 'typeorm';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import type { Config } from '@/config.js';
@@ -22,6 +23,9 @@ import { StreamingApiServerService } from './api/StreamingApiServerService.js';
 import { WellKnownServerService } from './WellKnownServerService.js';
 import { FileServerService } from './FileServerService.js';
 import { ClientServerService } from './web/ClientServerService.js';
+import { OpenApiServerService } from './api/openapi/OpenApiServerService.js';
+
+const _dirname = fileURLToPath(new URL('.', import.meta.url));
 
 @Injectable()
 export class ServerService implements OnApplicationShutdown {
@@ -43,6 +47,7 @@ export class ServerService implements OnApplicationShutdown {
 
 		private userEntityService: UserEntityService,
 		private apiServerService: ApiServerService,
+		private openApiServerService: OpenApiServerService,
 		private streamingApiServerService: StreamingApiServerService,
 		private activityPubServerService: ActivityPubServerService,
 		private wellKnownServerService: WellKnownServerService,
@@ -72,14 +77,15 @@ export class ServerService implements OnApplicationShutdown {
 			});
 		}
 
-		// Register raw-body parser for ActivityPub HTTP signature validation.
-		fastify.register(fastifyRawBody, {
-			global: false,
-			encoding: 'utf-8',
-			runFirst: true,
+		// Register non-serving static server so that the child services can use reply.sendFile.
+		// `root` here is just a placeholder and each call must use its own `rootPath`.
+		fastify.register(fastifyStatic, {
+			root: _dirname,
+			serve: false,
 		});
 
 		fastify.register(this.apiServerService.createServer, { prefix: '/api' });
+		fastify.register(this.openApiServerService.createServer);
 		fastify.register(this.fileServerService.createServer);
 		fastify.register(this.activityPubServerService.createServer);
 		fastify.register(this.nodeinfoServerService.createServer);

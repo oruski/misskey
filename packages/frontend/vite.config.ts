@@ -1,6 +1,7 @@
 import path from 'path';
 import pluginVue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
+import { configDefaults as vitestConfigDefaults } from 'vitest/config';
 
 import VueMacros from 'unplugin-vue-macros/vite';
 import VitePluginBuildMetadata from 'vite-plugin-build-metadata';
@@ -122,5 +123,15 @@ export default defineConfig(({ command, mode }) => {
       sourcemap: process.env.NODE_ENV === 'development',
       reportCompressedSize: false,
     },
+
+		test: {
+			environment: 'happy-dom',
+			deps: {
+				inline: [
+					// XXX: misskey-dev/browser-image-resizer has no "type": "module"
+					'browser-image-resizer',
+				],
+			},
+		},
   };
 });

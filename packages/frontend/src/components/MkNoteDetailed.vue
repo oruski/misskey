@@ -135,7 +135,8 @@
             <i class="ti ti-ban"></i>
           </button>
           <button v-if="appearNote.myReaction == null" ref="reactButton" class="button _button" @mousedown="react()">
-            <i class="ti ti-plus"></i>
+					<i v-if="appearNote.reactionAcceptance === 'likeOnly'" class="ti ti-heart"></i>
+					<i v-else class="ti ti-plus"></i>
           </button>
           <button
             v-if="appearNote.myReaction != null"
@@ -367,6 +368,19 @@ function reply(viaKeyboard = false): void {
 
 function react(viaKeyboard = false): void {
   pleaseLogin();
+	if (appearNote.reactionAcceptance === 'likeOnly') {
+		os.api('notes/reactions/create', {
+			noteId: appearNote.id,
+			reaction: '❤️',
+		});
+		const el = reactButton.value as HTMLElement | null | undefined;
+		if (el) {
+			const rect = el.getBoundingClientRect();
+			const x = rect.left + (el.offsetWidth / 2);
+			const y = rect.top + (el.offsetHeight / 2);
+			os.popup(MkRippleEffect, { x, y }, {}, 'end');
+		}
+	} else {
   blur();
   reactionPicker.show(
     reactButton.value,
@@ -389,6 +403,7 @@ function react(viaKeyboard = false): void {
       focus();
     },
   );
+	}
 }
 
 function undoReact(note): void {

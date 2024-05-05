@@ -7,6 +7,8 @@ import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { sqlLikeEscape } from '@/misc/sql-like-escape.js';
+import { RoleService } from '@/core/RoleService.js';
+import { ApiError } from '../../error.js';
 
 export const meta = {
 	tags: ['notes'],
@@ -24,6 +26,11 @@ export const meta = {
 	},
 
 	errors: {
+		unavailable: {
+			message: 'Search of notes unavailable.',
+			code: 'UNAVAILABLE',
+			id: '0b44998d-77aa-4427-80d0-d2c9b8523011',
+		},
 	},
 } as const;
 
@@ -60,33 +67,21 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 
 		private noteEntityService: NoteEntityService,
 		private queryService: QueryService,
+		private roleService: RoleService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			// const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId);
-      //
-			// if (ps.userId) {
-			// 	query.andWhere('note.userId = :userId', { userId: ps.userId });
-			// } else if (ps.channelId) {
-			// 	query.andWhere('note.channelId = :channelId', { channelId: ps.channelId });
-			// }
-      //
-			// query
-			// 	.andWhere('note.text ILIKE :q', { q: `%${ sqlLikeEscape(ps.query) }%` })
-			// 	.innerJoinAndSelect('note.user', 'user')
-			// 	.leftJoinAndSelect('user.avatar', 'avatar')
-			// 	.leftJoinAndSelect('user.banner', 'banner')
-			// 	.leftJoinAndSelect('note.reply', 'reply')
-			// 	.leftJoinAndSelect('note.renote', 'renote')
-			// 	.leftJoinAndSelect('reply.user', 'replyUser')
-			// 	.leftJoinAndSelect('replyUser.avatar', 'replyUserAvatar')
-			// 	.leftJoinAndSelect('replyUser.banner', 'replyUserBanner')
-			// 	.leftJoinAndSelect('renote.user', 'renoteUser')
-			// 	.leftJoinAndSelect('renoteUser.avatar', 'renoteUserAvatar')
-			// 	.leftJoinAndSelect('renoteUser.banner', 'renoteUserBanner');
-      //
-			// this.queryService.generateVisibilityQuery(query, me);
-			// if (me) this.queryService.generateMutedUserQuery(query, me);
-			// if (me) this.queryService.generateBlockedUserQuery(query, me);
+			const policies = await this.roleService.getUserPolicies(me ? me.id : null);
+			if (!policies.canSearchNotes) {
+				throw new ApiError(meta.errors.unavailable);
+			}
+
+			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId);
+
+			if (ps.userId) {
+				query.andWhere('note.userId = :userId', { userId: ps.userId });
+			} else if (ps.channelId) {
+				query.andWhere('note.channelId = :channelId', { channelId: ps.channelId });
+			}
 
 			// const notes = await query.take(ps.limit).getMany();
 
