@@ -87,6 +87,7 @@ const defaultStoreSaveKeys: (keyof (typeof defaultStore)['state'])[] = [
   'useBlurEffectForModal',
   'useBlurEffect',
   'showFixedPostForm',
+	'showFixedPostFormInChannel',
   'enableInfiniteScroll',
   'useReactionPickerForContextMenu',
   'showGapBetweenNotesInTimeline',
