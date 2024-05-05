@@ -51,7 +51,7 @@ jobs:
     - name: Build
       run: npm run build
     - name: Test
-      run: npm run mocha
+      run: npm run test
 
   e2e:
     runs-on: ubuntu-latest
