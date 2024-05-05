@@ -147,6 +147,7 @@ export class MessagingService {
 
 			const activity = this.apRendererService.addContext(this.apRendererService.renderCreate(await this.apRendererService.renderNote(note, false, true), note));
 
+      // @ts-ignore
 			this.queueService.deliver(user, activity, recipientUser.inbox);
 		}
 		return messageObj;
@@ -170,6 +171,7 @@ export class MessagingService {
 			if (this.userEntityService.isLocalUser(user) && this.userEntityService.isRemoteUser(recipient)) {
         // @ts-ignore
 				const activity = this.apRendererService.addContext(this.apRendererService.renderDelete(this.apRendererService.renderTombstone(`${this.config.url}/notes/${message.id}`), user));
+        // @ts-ignore
 				this.queueService.deliver(user, activity, recipient.inbox);
 			}
 		} else if (message.groupId) {
@@ -388,6 +390,7 @@ export class MessagingService {
 		if (contents.length > 1) {
 			// @ts-ignore
 			const collection = this.apRendererService.renderOrderedCollection(null, contents.length, undefined, undefined, contents);
+      // @ts-ignore
 			this.queueService.deliver(user, this.apRendererService.addContext(collection), recipient.inbox);
 		} else {
 			for (const content of contents) {

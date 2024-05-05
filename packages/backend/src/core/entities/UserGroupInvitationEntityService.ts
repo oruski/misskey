@@ -1,14 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
 import type { UserGroupInvitationsRepository } from '@/models/index.js';
-import { awaitAll } from '@/misc/prelude/await-all.js';
-import type { Packed } from '@/misc/schema.js';
-import type { } from '@/models/entities/Blocking.js';
-import type { User } from '@/models/entities/User.js';
 import type { UserGroupInvitation } from '@/models/entities/UserGroupInvitation.js';
-import { UserEntityService } from './UserEntityService.js';
-import { UserGroupEntityService } from './UserGroupEntityService.js';
 import { bindThis } from '@/decorators.js';
+import { UserGroupEntityService } from './UserGroupEntityService.js';
 
 @Injectable()
 export class UserGroupInvitationEntityService {
