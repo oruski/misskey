@@ -5,6 +5,7 @@
 		"dev": "npm run watch",
 		"watch": "vite build --watch",
 		"build": "vite build",
+    "tsc": "tsc --noEmit",
 		"lint": "vue-tsc --noEmit && eslint --quiet \"src/**/*.{ts,vue}\"",
 		"upgrade-interactive": "npx npm-check --update"
 	},

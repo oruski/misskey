@@ -42,6 +42,7 @@ jobs:
           packages/client/package-lock.json
     - name: Install dependencies
       run: npm install --frozen-lockfile
+    - name: npm ci all
       run: npm ci:all
     - name: Check package-lock.json
       run: git diff --exit-code package-lock.json
