@@ -150,7 +150,7 @@ watch(
     if (!group) {
       return 0;
     }
-    const userIds: string[] = group.userIds;
+    const userIds: string[] = Array.from(new Set(group.userIds));
     const users: User[] = Array.from(
       new Map(
         (
