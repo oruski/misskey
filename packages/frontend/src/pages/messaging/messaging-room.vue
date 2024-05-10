@@ -158,7 +158,7 @@ watch(
       if (a.id === group?.ownerId || b.id === group?.ownerId) {
         return a.id === group?.ownerId ? -1 : 1;
       }
-      return dayjs(a.updatedAt).isBefore(dayjs(b.updatedAt)) ? 1 : -1;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
     // @ts-ignore
     groupUsers = users;
