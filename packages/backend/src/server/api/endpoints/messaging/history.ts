@@ -30,11 +30,7 @@ export const meta = {
 
 export const paramDef = {
   type: 'object',
-  properties: {
-    limit: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
-    group: { type: 'boolean', default: false },
-    isAll: { type: 'boolean', default: false },
-  },
+  properties: {},
   required: [],
 } as const;
 
@@ -56,8 +52,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
       const mute = await this.mutingsRepository.findBy({
         muterId: me.id,
       });
+
+      // 自分がミュートした人
       const muteeIds = mute.map(m => m.muteeId);
 
+      // 自分がブロックした人
       const block = await this.blockingsRepository.findBy({
         blockerId: me.id,
       });
