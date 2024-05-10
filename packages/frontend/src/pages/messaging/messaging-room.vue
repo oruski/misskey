@@ -81,6 +81,7 @@ import { computed, watch, onMounted, nextTick, onBeforeUnmount, onActivated, onD
 import * as Misskey from 'misskey-js';
 import { acct as Acct } from 'misskey-js';
 import debounce from 'lodash/debounce';
+import dayjs from 'dayjs';
 import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
 import XPageHeader from './messaging-room.header.vue';
@@ -149,13 +150,16 @@ watch(
       return 0;
     }
     const userIds: string[] = group.userIds;
-    const users = await Promise.all(
-      userIds.map((userId) => {
-        return os.api('users/show', {
-          userId: userId,
-        });
-      }),
-    );
+    const users = (
+      await os.api('users/show', {
+        userIds,
+      })
+    ).sort((a, b) => {
+      if (a.id === group?.ownerId || b.id === group?.ownerId) {
+        return a.id === group?.ownerId ? -1 : 1;
+      }
+      return dayjs(a.updatedAt).isBefore(dayjs(b.updatedAt)) ? 1 : -1;
+    });
     // @ts-ignore
     groupUsers = users;
     onlineUserCount = users.filter((_user) => _user.onlineStatus === 'online').length;
