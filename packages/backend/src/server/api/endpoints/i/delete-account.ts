@@ -33,10 +33,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: me.id });
-			const userDetailed = await this.usersRepository.findOneByOrFail({ id: me.id });
-			if (userDetailed.isDeleted) {
-				return;
-			}
 
 			// Compare password
 			const same = await bcrypt.compare(ps.password, profile.password!);
