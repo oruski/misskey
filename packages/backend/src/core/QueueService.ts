@@ -213,6 +213,7 @@ export class QueueService {
 		}, {
 			removeOnComplete: true,
 			removeOnFail: false,
+      attempts: 10,
 		});
 	}
 
