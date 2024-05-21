@@ -7,11 +7,8 @@
     <div :class="$style.username">
       <MkAcct :user="note.user" />
     </div>
-    <div
-      v-if="note.user.badgeRoles"
-      :class="[$style.badgeRoles, note.user.badgeRoles.length >= 3 ? $style.badgeRolesStack : null]"
-    >
-      <template v-if="note.user.badgeRoles.length < 3">
+    <div v-if="note.user.badgeRoles" :class="[$style.badgeRoles, badgeIconCount >= 3 ? $style.badgeRolesStack : null]">
+      <template v-if="badgeIconCount < 3">
         <template v-for="role in note.user.badgeRoles" :key="role.id">
           <img v-if="role.iconUrl" v-tooltip="role.name" :class="$style.badgeRole" :src="role.iconUrl" />
         </template>
@@ -60,10 +57,12 @@ import { i18n } from '@/i18n';
 import { notePage } from '@/filters/note';
 import { userPage } from '@/filters/user';
 
-defineProps<{
+const props = defineProps<{
   note: misskey.entities.Note;
   pinned?: boolean;
 }>();
+
+const badgeIconCount = $computed(() => props.note.user.badgeRoles?.filter((role) => role.iconUrl).length ?? 0);
 </script>
 
 <style lang="scss" module>
@@ -128,7 +127,19 @@ defineProps<{
     }
   }
 
+  @media (max-width: 421px) {
+    & {
+      max-width: 160px;
+    }
+  }
+
   @media (max-width: 390px) {
+    & {
+      max-width: 130px;
+    }
+  }
+
+  @media (max-width: 375px) {
     & {
       max-width: 100px;
     }
@@ -152,7 +163,7 @@ defineProps<{
       display: -webkit-box;
       display: -ms-flexbox;
       display: flex;
-      width: 60px;
+      width: 40px;
       height: 18px;
       right: -1px;
       position: absolute;
