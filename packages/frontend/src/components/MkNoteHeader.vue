@@ -153,7 +153,7 @@ defineProps<{
       display: -ms-flexbox;
       display: flex;
       width: 60px;
-      height: 20px;
+      height: 18px;
       right: -1px;
       position: absolute;
       z-index: 9999999;
