@@ -630,6 +630,8 @@ useGlobalSettingDesc: "If turned on, your account's notification settings will b
 other: "Other"
 regenerateLoginToken: "Regenerate login token"
 regenerateLoginTokenDescription: "Regenerates the token used internally during login. Normally this action is not necessary. If regenerated, all devices will be logged out."
+tokenRegenerated: "Token regenerated"
+tokenRegenerationFailed: "Failed to regenerate token"
 setMultipleBySeparatingWithSpace: "Separate multiple entries with spaces."
 fileIdOrUrl: "File ID or URL"
 behavior: "Behavior"

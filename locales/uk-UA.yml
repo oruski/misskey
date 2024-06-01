@@ -625,6 +625,8 @@ useGlobalSettingDesc: "Якщо увімкнено, то будуть викор
 other: "Інше"
 regenerateLoginToken: "Оновити Login Token"
 regenerateLoginTokenDescription: "Регенерувати внутрішній ключ використовуваний під час входу. Зазвичай цього не потрібно робити. При регенерації всі пристрої вийдуть з системи."
+tokenRegenerated: "Токен було оновлено"
+tokenRegenerationFailed: "Не вдалося оновити токен"
 setMultipleBySeparatingWithSpace: "Можна вказати кілька значень, відділивши їх пробілом."
 fileIdOrUrl: "Ідентифікатор файлу або посилання"
 behavior: "Поведінка"

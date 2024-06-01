@@ -610,6 +610,8 @@ useGlobalSettingDesc: "Jeżeli włączone, zostaną wykorzystane ustawienia powi
 other: "Inne"
 regenerateLoginToken: "Generuj token logowania ponownie"
 regenerateLoginTokenDescription: "Regeneruje token używany wewnętrznie podczas logowania. Zazwyczaj nie jest to konieczne. Po regeneracji wszystkie urządzenia zostaną wylogowane."
+tokenRegenerated: "Token został wygenerowany ponownie"
+tokenRegenerationFailed: "Nie udało się wygenerować tokena"
 setMultipleBySeparatingWithSpace: "Możesz ustawić wiele, oddzielając je spacjami."
 fileIdOrUrl: "ID pliku albo URL"
 behavior: "Zachowanie"

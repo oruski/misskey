@@ -624,6 +624,8 @@ useGlobalSettingDesc: "S'il est activé, les paramètres de notification de votr
 other: "Autre"
 regenerateLoginToken: "Régénérer le jeton de connexion"
 regenerateLoginTokenDescription: "Générer un nouveau jeton d'authentification. Cette opération ne devrait pas être nécessaire ; lors de la génération d'un nouveau jeton, tous les appareils seront déconnectés. "
+tokenRegenerated: "Token regenerado"
+tokenRegenerationFailed: "Error al regenerar el token"
 setMultipleBySeparatingWithSpace: "Vous pouvez en définir plusieurs, en les séparant par des espaces."
 fileIdOrUrl: "ID du fichier ou URL"
 behavior: "Comportement"

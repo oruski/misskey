@@ -643,6 +643,8 @@ useGlobalSettingDesc: "启用时，将使用账户通知设置。关闭时，则
 other: "其他"
 regenerateLoginToken: "重新生成登录令牌"
 regenerateLoginTokenDescription: "重新生成用于登录的内部令牌。通常您不需要这样做。重新生成后，您将在所有设备上登出。"
+tokenRegenerated: "令牌已重新生成"
+tokenRegenerationFailed: "令牌重新生成失败"
 setMultipleBySeparatingWithSpace: "您可以使用空格分隔多个项目。"
 fileIdOrUrl: "文件ID或者URL"
 behavior: "行为"
