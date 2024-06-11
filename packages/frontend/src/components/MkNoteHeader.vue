@@ -7,14 +7,19 @@
     <div :class="$style.username">
       <MkAcct :user="note.user" />
     </div>
-    <div v-if="note.user.badgeRoles" :class="[$style.badgeRoles, badgeIconCount >= 3 ? $style.badgeRolesStack : null]">
+    <div
+      v-if="note.user.badgeRoles"
+      :class="[
+        $style.badgeRoles,
+        badgeIconCount >= 3 ? (badgeIconCount >= 6 ? $style.badgeRolesStackForce : $style.badgeRolesStack) : null,
+      ]"
+    >
       <template v-if="badgeIconCount < 3">
         <template v-for="role in note.user.badgeRoles" :key="role.id">
           <img v-if="role.iconUrl" v-tooltip="role.name" :class="$style.badgeRole" :src="role.iconUrl" />
         </template>
       </template>
       <template v-else>
-        <!-- 3つ以上で重ねて表示させる -->
         <div :class="$style.badgeRolesStackInner">
           <template v-for="role in note.user.badgeRoles" :key="role.id">
             <img
@@ -121,6 +126,84 @@ const badgeIconCount = $computed(() => props.note.user.badgeRoles?.filter((role)
   margin: 0 0.5em 0 0;
   width: auto;
 
+  @media (max-width: 1400px) {
+    & {
+      max-width: 67%;
+    }
+  }
+
+  @media (max-width: 1300px) {
+    & {
+      max-width: 67%;
+    }
+  }
+
+  @media (max-width: 800px) {
+    & {
+      max-width: 69%;
+    }
+  }
+
+  @media (max-width: 700px) {
+    & {
+      max-width: 62%;
+    }
+  }
+
+  @media (max-width: 600px) {
+    & {
+      max-width: 170px;
+    }
+  }
+
+  @media (max-width: 421px) {
+    & {
+      max-width: 160px;
+    }
+  }
+
+  @media (max-width: 390px) {
+    & {
+      max-width: 130px;
+    }
+  }
+
+  @media (max-width: 375px) {
+    & {
+      max-width: 100px;
+    }
+  }
+}
+
+.badgeRolesStackForce {
+  position: relative;
+  margin: 0 0.5em 0 0;
+  max-width: 67%;
+
+  @media (max-width: 1400px) {
+    & {
+      max-width: 67%;
+    }
+  }
+
+  @media (max-width: 1300px) {
+    & {
+      max-width: 67%;
+    }
+  }
+
+  @media (max-width: 800px) {
+    & {
+      max-width: 69%;
+    }
+  }
+
+  @media (max-width: 700px) {
+    & {
+      max-width: 62%;
+    }
+  }
+
   @media (max-width: 600px) {
     & {
       max-width: 170px;
@@ -157,21 +240,19 @@ const badgeIconCount = $computed(() => props.note.user.badgeRoles?.filter((role)
   -ms-overflow-style: none;
   scrollbar-width: none;
 
-  @media (max-width: 600px) {
-    &::after {
-      content: '';
-      display: -webkit-box;
-      display: -ms-flexbox;
-      display: flex;
-      width: 40px;
-      height: 18px;
-      right: -1px;
-      position: absolute;
-      z-index: 9999999;
-      margin-left: auto;
-      top: -1px;
-      background: linear-gradient(to right, #fff0 0, #19241f96 40%, #19241f 70%);
-    }
+  &::after {
+    content: '';
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 40px;
+    height: 20px;
+    right: -1px;
+    position: absolute;
+    z-index: 9999999;
+    margin-left: auto;
+    top: -1px;
+    background: linear-gradient(to right, #fff0 0, var(--panel) 40%, var(--panel) 70%);
   }
 }
 

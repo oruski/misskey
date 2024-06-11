@@ -81,7 +81,6 @@ import { computed, watch, onMounted, nextTick, onBeforeUnmount, onActivated, onD
 import * as Misskey from 'misskey-js';
 import { acct as Acct } from 'misskey-js';
 import debounce from 'lodash/debounce';
-import dayjs from 'dayjs';
 import { User } from 'misskey-js/built/dts/autogen/models';
 import XMessage from './messaging-room.message.vue';
 import XForm from './messaging-room.form.vue';
