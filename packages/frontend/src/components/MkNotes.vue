@@ -19,7 +19,12 @@
           :ad="true"
           :class="$style.notes"
         >
-          <XNote :key="note._featuredId_ || note._prId_ || note.id" :class="$style.note" :note="note" />
+          <XNote
+            :key="note._featuredId_ || note._prId_ || note.id"
+            :class="$style.note"
+            :note="note"
+            :hide-role="props.hideNote"
+          />
         </MkDateSeparatedList>
       </div>
     </template>
@@ -36,6 +41,7 @@ import { i18n } from '@/i18n';
 const props = defineProps<{
   pagination: Paging;
   noGap?: boolean;
+  hideNote?: boolean;
 }>();
 
 const pagingComponent = shallowRef<InstanceType<typeof MkPagination>>();

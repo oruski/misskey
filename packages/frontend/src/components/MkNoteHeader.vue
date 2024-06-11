@@ -8,7 +8,7 @@
       <MkAcct :user="note.user" />
     </div>
     <div
-      v-if="note.user.badgeRoles"
+      v-if="note.user.badgeRoles && !hideRole"
       :class="[
         $style.badgeRoles,
         badgeIconCount >= 3 ? (badgeIconCount >= 6 ? $style.badgeRolesStackForce : $style.badgeRolesStack) : null,
@@ -65,6 +65,7 @@ import { userPage } from '@/filters/user';
 const props = defineProps<{
   note: misskey.entities.Note;
   pinned?: boolean;
+  hideRole?: boolean;
 }>();
 
 const badgeIconCount = $computed(() => props.note.user.badgeRoles?.filter((role) => role.iconUrl).length ?? 0);
