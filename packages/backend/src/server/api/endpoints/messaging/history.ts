@@ -67,7 +67,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
         userId: me.id,
       }).then(xs => xs.map(x => x.userGroupId));
 
-      // グループから最新のメッセージを一つずつ取得 (ミュートを除外)
+      // グループから最新のメッセージを一つずつ取得
+      // グループの場合ブロックとミュートを除外できない
       const groupMessages = groupIds.length ? await this
         .messagingMessagesRepository
         .createQueryBuilder('root')
@@ -77,14 +78,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
             .where('message.groupId IN (:...groupIds)', { groupIds: groupIds })
             .groupBy('message.groupId')
             .select('max(message.id) as id').getQuery() + ')');
-          if (muteeIds.length > 0) {
-            qb.andWhere('root.userId NOT IN (:...mute)', { mute: muteeIds });
-          }
-          if (blockeeIds.length > 0) {
-            qb.andWhere('root.userId NOT IN (:...block)', { block: blockeeIds });
-          }
         })
-        .setParameters({ groupIds: groupIds, mute: muteeIds, block: blockeeIds }).getMany() : [];
+        .setParameters({ groupIds: groupIds }).getMany() : [];
 
       // ユーザー一覧から最新のメッセージを一つずつ取得
       const userMessages = await this
