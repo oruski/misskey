@@ -83,11 +83,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				query.andWhere('note.channelId = :channelId', { channelId: ps.channelId });
 			}
 
-			// const notes = await query.take(ps.limit).getMany();
-
-			// return await this.noteEntityService.packMany(notes, me);
-      // 負荷対策のため 2024-03-28
-      return [];
+			const notes = await query.take(ps.limit).getMany();
+			return await this.noteEntityService.packMany(notes, me);
 		});
 	}
 }
