@@ -363,6 +363,10 @@ export class UserEntityService implements OnModuleInit {
       userProfile?: UserProfile,
     },
   ): Promise<IsMeAndIsUserDetailed<ExpectsMe, D>> {
+    if (!src) {
+      throw new Error('User not found');
+    }
+
     const opts = Object.assign({
       detail: false,
       includeSecrets: false,

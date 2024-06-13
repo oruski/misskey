@@ -107,7 +107,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				// リクエストされた通りに並べ替え
 				const _users: User[] = [];
 				for (const id of ps.userIds) {
-					_users.push(users.find(x => x.id === id)!);
+          const user = users.find(x => x.id === id);
+          if (!user) {
+            continue;
+          }
+					_users.push(user);
 				}
 
 				return await Promise.all(_users.map(u => this.userEntityService.pack(u, me, {
