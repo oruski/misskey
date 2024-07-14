@@ -635,6 +635,8 @@ useGlobalSettingDesc: "Ak je zapnuté, použijú sa oznámenia vášho účtu. A
 other: "Ostatní"
 regenerateLoginToken: "Pregenerovať prihlasovací token"
 regenerateLoginTokenDescription: "Pregeneruje token interne používaný počas prihlásenia. Normálne toto netreba robiť. Ak sa pregeneruje, všetky zariadenia sa odhlásia."
+tokenRegenerated: "Token bol pregenerovaný"
+tokenRegenerationFailed: "Token sa nepodarilo pregenerovať"
 setMultipleBySeparatingWithSpace: "Viaceré položky oddeľte medzerami."
 fileIdOrUrl: "ID alebo URL súboru"
 behavior: "Správanie"

@@ -40,9 +40,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		private userGroupEntityService: UserGroupEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const userGroups = await this.userGroupsRepository.findBy({
-				userId: me.id,
-			});
+			const userGroups = await this.userGroupsRepository.find({
+        where: {
+          userId: me.id,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+      });
 
 			return await Promise.all(userGroups.map(x => this.userGroupEntityService.pack(x)));
 		});

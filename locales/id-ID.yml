@@ -628,6 +628,8 @@ useGlobalSettingDesc: "Jika dinyalakan, setelan pemberitahuan akun kamu akan dig
 other: "Lainnya"
 regenerateLoginToken: "Perbarui token login"
 regenerateLoginTokenDescription: "Perbarui token yang digunakan secara internal saat login. Normalnya aksi ini tidak diperlukan. Jika diperbarui, semua perangkat akan dilogout."
+tokenRegenerated: "Token telah diperbarui"
+tokenRegenerationFailed: "Gagal memperbarui token"
 setMultipleBySeparatingWithSpace: "Kamu dapat menyetel banyak dengan memisahkannya menggunakan spasi."
 fileIdOrUrl: "File-ID atau URL"
 behavior: "Perilaku"

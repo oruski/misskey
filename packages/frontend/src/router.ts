@@ -63,10 +63,11 @@ export const routes = [
         component: page(() => import('./pages/settings/profile.vue')),
       },
       {
-		path: '/roles',
-		name: 'roles',
-		component: page(() => import('./pages/settings/roles.vue')),
-	}, {
+        path: '/roles',
+        name: 'roles',
+        component: page(() => import('./pages/settings/roles.vue')),
+      },
+      {
         path: '/privacy',
         name: 'privacy',
         component: page(() => import('./pages/settings/privacy.vue')),
@@ -82,10 +83,11 @@ export const routes = [
         component: page(() => import('./pages/settings/drive.vue')),
       },
       {
-		path: '/drive/cleaner',
-		name: 'drive',
-		component: page(() => import('./pages/settings/drive-cleaner.vue')),
-	}, {
+        path: '/drive/cleaner',
+        name: 'drive',
+        component: page(() => import('./pages/settings/drive-cleaner.vue')),
+      },
+      {
         path: '/notifications',
         name: 'notifications',
         component: page(() => import('./pages/settings/notifications.vue')),
@@ -253,9 +255,10 @@ export const routes = [
     component: page(() => import('./pages/about-misskey.vue')),
   },
   {
-	path: '/ads',
-	component: page(() => import('./pages/ads.vue')),
-}, {
+    path: '/ads',
+    component: page(() => import('./pages/ads.vue')),
+  },
+  {
     path: '/theme-editor',
     component: page(() => import('./pages/theme-editor.vue')),
     loginRequired: true,
@@ -263,15 +266,18 @@ export const routes = [
   {
     path: '/roles/:role',
     component: page(() => import('./pages/role.vue')),
+    loginRequired: true,
   },
   {
     path: '/user-tags/:tag',
     component: page(() => import('./pages/user-tag.vue')),
+    loginRequired: true,
   },
   {
     path: '/explore',
     component: page(() => import('./pages/explore.vue')),
     hash: 'initialTab',
+    loginRequired: true,
   },
   {
     path: '/search',
@@ -279,9 +285,10 @@ export const routes = [
     query: {
       q: 'query',
       channel: 'channel',
-		type: 'type',
-		origin: 'origin',
+      type: 'type',
+      origin: 'origin',
     },
+    loginRequired: true,
   },
   {
     path: '/authorize-follow',
@@ -387,14 +394,17 @@ export const routes = [
   {
     path: '/channels/:channelId',
     component: page(() => import('./pages/channel.vue')),
+    loginRequired: true,
   },
   {
     path: '/channels',
     component: page(() => import('./pages/channels.vue')),
+    loginRequired: true,
   },
   {
     path: '/custom-emojis-manager',
     component: page(() => import('./pages/custom-emojis-manager.vue')),
+    loginRequired: true,
   },
   {
     path: '/registry/keys/system/:path(*)?',
@@ -496,10 +506,11 @@ export const routes = [
         component: page(() => import('./pages/admin/settings.vue')),
       },
       {
-		path: '/moderation',
-		name: 'moderation',
-		component: page(() => import('./pages/admin/moderation.vue')),
-	}, {
+        path: '/moderation',
+        name: 'moderation',
+        component: page(() => import('./pages/admin/moderation.vue')),
+      },
+      {
         path: '/email-settings',
         name: 'email-settings',
         component: page(() => import('./pages/admin/email-settings.vue')),
@@ -646,6 +657,7 @@ export const routes = [
   {
     path: '/timeline',
     component: page(() => import('./pages/timeline.vue')),
+    loginRequired: true,
   },
   {
     name: 'index',

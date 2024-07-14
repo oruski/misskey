@@ -13,7 +13,7 @@ import { ApiError } from '../../error.js';
 export const meta = {
 	tags: ['notes'],
 
-	requireCredential: false,
+	requireCredential: true,
 
 	res: {
 		type: 'array',
@@ -83,11 +83,26 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				query.andWhere('note.channelId = :channelId', { channelId: ps.channelId });
 			}
 
-			// const notes = await query.take(ps.limit).getMany();
+			query
+				.andWhere('note.text ILIKE :q', { q: `%${ sqlLikeEscape(ps.query) }%` })
+				.innerJoinAndSelect('note.user', 'user')
+				.leftJoinAndSelect('user.avatar', 'avatar')
+				.leftJoinAndSelect('user.banner', 'banner')
+				.leftJoinAndSelect('note.reply', 'reply')
+				.leftJoinAndSelect('note.renote', 'renote')
+				.leftJoinAndSelect('reply.user', 'replyUser')
+				.leftJoinAndSelect('replyUser.avatar', 'replyUserAvatar')
+				.leftJoinAndSelect('replyUser.banner', 'replyUserBanner')
+				.leftJoinAndSelect('renote.user', 'renoteUser')
+				.leftJoinAndSelect('renoteUser.avatar', 'renoteUserAvatar')
+				.leftJoinAndSelect('renoteUser.banner', 'renoteUserBanner');
 
-			// return await this.noteEntityService.packMany(notes, me);
-      // 負荷対策のため 2024-03-28
-      return [];
+			this.queryService.generateVisibilityQuery(query, me);
+			if (me) this.queryService.generateMutedUserQuery(query, me);
+			if (me) this.queryService.generateBlockedUserQuery(query, me);
+
+			const notes = await query.take(ps.limit).getMany();
+			return await this.noteEntityService.packMany(notes, me);
 		});
 	}
 }

@@ -90,14 +90,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		super(meta, paramDef, async (ps, me, _1, _2, _3, ip) => {
 			let user;
 
-			const isModerator = await this.roleService.isModerator(me);
-
 			if (ps.userIds) {
 				if (ps.userIds.length === 0) {
 					return [];
 				}
 
-				const users = await this.usersRepository.findBy(isModerator ? {
+        const isAdministrator = await this.roleService.isAdministrator(me);
+
+				const users = await this.usersRepository.findBy(isAdministrator ? {
 					id: In(ps.userIds),
 				} : {
 					id: In(ps.userIds),
@@ -107,13 +107,19 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 				// リクエストされた通りに並べ替え
 				const _users: User[] = [];
 				for (const id of ps.userIds) {
-					_users.push(users.find(x => x.id === id)!);
+          const user = users.find(x => x.id === id);
+          if (!user) {
+            continue;
+          }
+					_users.push(user);
 				}
 
 				return await Promise.all(_users.map(u => this.userEntityService.pack(u, me, {
 					detail: true,
 				})));
 			} else {
+        const isModerator = await this.roleService.isModerator(me);
+
 				// Lookup user
 				if (typeof ps.host === 'string' && typeof ps.username === 'string') {
 					user = await this.remoteUserResolveService.resolveUser(ps.username, ps.host).catch(err => {

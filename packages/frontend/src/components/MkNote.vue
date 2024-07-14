@@ -4,7 +4,7 @@
     v-show="!isDeleted"
     ref="el"
     v-hotkey="keymap"
-	:class="[$style.root, { [$style.showActionsOnlyHover]: defaultStore.state.showNoteActionsOnlyHover }]"
+    :class="[$style.root, { [$style.showActionsOnlyHover]: defaultStore.state.showNoteActionsOnlyHover }]"
     :tabindex="!isDeleted ? '-1' : undefined"
   >
     <MkNoteSub v-if="appearNote.reply && !renoteCollapsed" :note="appearNote.reply" :class="$style.replyTo" />
@@ -38,7 +38,9 @@
         <span v-if="note.localOnly" style="margin-left: 0.5em" :title="i18n.ts._visibility['disableFederation']"
           ><i class="ti ti-world-off"></i
         ></span>
-			<span v-if="note.channel" style="margin-left: 0.5em;" :title="note.channel.name"><i class="ti ti-device-tv"></i></span>
+        <span v-if="note.channel" style="margin-left: 0.5em" :title="note.channel.name"
+          ><i class="ti ti-device-tv"></i
+        ></span>
       </div>
     </div>
     <div v-if="renoteCollapsed" :class="$style.collapsedRenoteTarget">
@@ -55,7 +57,7 @@
     <article v-else :class="$style.article" @contextmenu.stop="onContextmenu">
       <MkAvatar :class="$style.avatar" :user="appearNote.user" link preview />
       <div :class="$style.main">
-        <MkNoteHeader :class="$style.header" :note="appearNote" :mini="true" />
+        <MkNoteHeader :class="$style.header" :note="appearNote" :mini="true" :hide-role="props.hideRole" />
         <MkInstanceTicker v-if="showTicker" :class="$style.ticker" :instance="appearNote.user.instance" />
         <div style="container-type: inline-size">
           <p v-if="appearNote.cw != null" :class="$style.cw">
@@ -71,9 +73,9 @@
           <div v-show="appearNote.cw == null || showContent" :class="[{ [$style.contentCollapsed]: collapsed }]">
             <div :class="$style.text">
               <span v-if="appearNote.isHidden" style="opacity: 0.5">({{ i18n.ts.private }})</span>
-              <MkA v-if="appearNote.replyId" :class="$style.replyIcon" :to="`/notes/${appearNote.replyId}`"
-                ><i class="ti ti-arrow-back-up"></i
-              ></MkA>
+              <MkA v-if="appearNote.replyId" :class="$style.replyIcon" :to="`/notes/${appearNote.replyId}`">
+                <i class="ti ti-arrow-back-up"></i>
+              </MkA>
               <Mfm
                 v-if="appearNote.text"
                 :text="appearNote.text"
@@ -115,17 +117,18 @@
             v-if="appearNote.channel && !inChannel"
             :class="$style.channel"
             :to="`/channels/${appearNote.channel.id}`"
-            ><i class="ti ti-device-tv"></i> {{ appearNote.channel.name }}</MkA
           >
+            <i class="ti ti-device-tv"></i> {{ appearNote.channel.name }}
+          </MkA>
         </div>
-          <MkReactionsViewer :note="appearNote" :max-number="16">
-            <template #more>
-              <button class="_button" :class="$style.reactionDetailsButton" @click="showReactions">
-                {{ i18n.ts.more }}
-              </button>
-            </template>
-          </MkReactionsViewer>
-			<footer :class="$style.footer">
+        <MkReactionsViewer :note="appearNote" :max-number="16">
+          <template #more>
+            <button class="_button" :class="$style.reactionDetailsButton" @click="showReactions">
+              {{ i18n.ts.more }}
+            </button>
+          </template>
+        </MkReactionsViewer>
+        <footer :class="$style.footer">
           <button :class="$style.footerButton" class="_button" @click="reply()">
             <i class="ti ti-arrow-back-up"></i>
             <p v-if="appearNote.repliesCount > 0" :class="$style.footerButtonCount">{{ appearNote.repliesCount }}</p>
@@ -151,7 +154,7 @@
             @mousedown="react()"
           >
             <i v-if="appearNote.reactionAcceptance === 'likeOnly'" class="ti ti-heart"></i>
-					<i v-else class="ti ti-plus"></i>
+            <i v-else class="ti ti-plus"></i>
           </button>
           <button
             v-if="appearNote.myReaction != null"
@@ -216,6 +219,7 @@ import MkRippleEffect from '@/components/MkRippleEffect.vue';
 const props = defineProps<{
   note: misskey.entities.Note;
   pinned?: boolean;
+  hideRole?: boolean;
 }>();
 
 const inChannel = inject('inChannel', null);
@@ -317,19 +321,19 @@ function renote(viaKeyboard = false) {
         text: i18n.ts.inChannelRenote,
         icon: 'ti ti-repeat',
         action: () => {
-				const el = renoteButton.value as HTMLElement | null | undefined;
-				if (el) {
-					const rect = el.getBoundingClientRect();
-					const x = rect.left + (el.offsetWidth / 2);
-					const y = rect.top + (el.offsetHeight / 2);
-					os.popup(MkRippleEffect, { x, y }, {}, 'end');
-				}
+          const el = renoteButton.value as HTMLElement | null | undefined;
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const x = rect.left + el.offsetWidth / 2;
+            const y = rect.top + el.offsetHeight / 2;
+            os.popup(MkRippleEffect, { x, y }, {}, 'end');
+          }
 
-				os.api('notes/create', {
+          os.api('notes/create', {
             renoteId: appearNote.id,
             channelId: appearNote.channelId,
-				}).then(() => {
-					os.toast(i18n.ts.renoted);
+          }).then(() => {
+            os.toast(i18n.ts.renoted);
           });
         },
       },
@@ -352,18 +356,18 @@ function renote(viaKeyboard = false) {
       text: i18n.ts.renote,
       icon: 'ti ti-repeat',
       action: () => {
-			const el = renoteButton.value as HTMLElement | null | undefined;
-			if (el) {
-				const rect = el.getBoundingClientRect();
-				const x = rect.left + (el.offsetWidth / 2);
-				const y = rect.top + (el.offsetHeight / 2);
-				os.popup(MkRippleEffect, { x, y }, {}, 'end');
-			}
+        const el = renoteButton.value as HTMLElement | null | undefined;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const x = rect.left + el.offsetWidth / 2;
+          const y = rect.top + el.offsetHeight / 2;
+          os.popup(MkRippleEffect, { x, y }, {}, 'end');
+        }
 
-			os.api('notes/create', {
+        os.api('notes/create', {
           renoteId: appearNote.id,
-			}).then(() => {
-				os.toast(i18n.ts.renoted);
+        }).then(() => {
+          os.toast(i18n.ts.renoted);
         });
       },
     },
@@ -398,42 +402,42 @@ function reply(viaKeyboard = false): void {
 
 function react(viaKeyboard = false): void {
   pleaseLogin();
-	if (appearNote.reactionAcceptance === 'likeOnly') {
-		os.api('notes/reactions/create', {
-			noteId: appearNote.id,
-			reaction: '❤️',
-		});
-		const el = reactButton.value as HTMLElement | null | undefined;
-		if (el) {
-			const rect = el.getBoundingClientRect();
-			const x = rect.left + (el.offsetWidth / 2);
-			const y = rect.top + (el.offsetHeight / 2);
-			os.popup(MkRippleEffect, { x, y }, {}, 'end');
-		}
-	} else {
-  blur();
-  reactionPicker.show(
-    reactButton.value,
-    (reaction) => {
-      if (hasPrincess(reaction)) claimAchievement('princess');
+  if (appearNote.reactionAcceptance === 'likeOnly') {
+    os.api('notes/reactions/create', {
+      noteId: appearNote.id,
+      reaction: '❤️',
+    });
+    const el = reactButton.value as HTMLElement | null | undefined;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + el.offsetWidth / 2;
+      const y = rect.top + el.offsetHeight / 2;
+      os.popup(MkRippleEffect, { x, y }, {}, 'end');
+    }
+  } else {
+    blur();
+    reactionPicker.show(
+      reactButton.value,
+      (reaction) => {
+        if (hasPrincess(reaction)) claimAchievement('princess');
 
-      os.api('notes/reactions/create', {
-        noteId: appearNote.id,
-        reaction: reaction,
-      });
-      if (
-        appearNote.text &&
-        appearNote.text.length > 100 &&
-        Date.now() - new Date(appearNote.createdAt).getTime() < 1000 * 3
-      ) {
-        claimAchievement('reactWithoutRead');
-      }
-    },
-    () => {
-      focus();
-    },
-  );
-	}
+        os.api('notes/reactions/create', {
+          noteId: appearNote.id,
+          reaction: reaction,
+        });
+        if (
+          appearNote.text &&
+          appearNote.text.length > 100 &&
+          Date.now() - new Date(appearNote.createdAt).getTime() < 1000 * 3
+        ) {
+          claimAchievement('reactWithoutRead');
+        }
+      },
+      () => {
+        focus();
+      },
+    );
+  }
 }
 
 function undoReact(note): void {
@@ -577,33 +581,33 @@ function showReactions(): void {
     opacity: 1;
   }
 
-	&.showActionsOnlyHover {
-		.footer {
-			visibility: hidden;
-			position: absolute;
-			top: 12px;
-			right: 12px;
-			padding: 0 4px;
-			margin-bottom: 0 !important;
-			background: var(--popup);
-			border-radius: 8px;
-			box-shadow: 0px 4px 32px var(--shadow);
-		}
+  &.showActionsOnlyHover {
+    .footer {
+      visibility: hidden;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 0 4px;
+      margin-bottom: 0 !important;
+      background: var(--popup);
+      border-radius: 8px;
+      box-shadow: 0px 4px 32px var(--shadow);
+    }
 
-		.footerButton {
-			font-size: 90%;
+    .footerButton {
+      font-size: 90%;
 
-			&:not(:last-child) {
-				margin-right: 0;
-			}
-		}
-	}
+      &:not(:last-child) {
+        margin-right: 0;
+      }
+    }
+  }
 
-	&.showActionsOnlyHover:hover {
-		.footer {
-			visibility: visible;
-		}
-	}
+  &.showActionsOnlyHover:hover {
+    .footer {
+      visibility: visible;
+    }
+  }
 }
 
 .tip {
@@ -702,15 +706,15 @@ function showReactions(): void {
 }
 
 .article {
-	position: relative;
+  position: relative;
   display: flex;
-	padding: 28px 32px;
+  padding: 28px 32px;
 }
 
 .avatar {
   flex-shrink: 0;
   display: block !important;
-	margin: 0 14px 0 0;
+  margin: 0 14px 0 0;
   width: 58px;
   height: 58px;
   position: sticky !important;
@@ -733,9 +737,9 @@ function showReactions(): void {
 
 .showLess {
   width: 100%;
-	margin-top: 14px;
+  margin-top: 14px;
   position: sticky;
-	bottom: calc(var(--stickyBottom, 0px) + 14px);
+  bottom: calc(var(--stickyBottom, 0px) + 14px);
 }
 
 .showLessLabel {
@@ -816,7 +820,7 @@ function showReactions(): void {
 }
 
 .footer {
-	margin-bottom: -14px;
+  margin-bottom: -14px;
 }
 
 .footerButton {
@@ -841,15 +845,15 @@ function showReactions(): void {
 
 @container (max-width: 580px) {
   .root {
-		font-size: 0.95em;
-	}
+    font-size: 0.95em;
+  }
 
-	.renote {
-		padding: 12px 26px 0 26px;
-	}
+  .renote {
+    padding: 12px 26px 0 26px;
+  }
 
-	.article {
-		padding: 24px 26px;
+  .article {
+    padding: 24px 26px;
   }
 
   .avatar {
@@ -859,21 +863,21 @@ function showReactions(): void {
 }
 
 @container (max-width: 500px) {
-	.root {
-		font-size: 0.9em;
-	}
+  .root {
+    font-size: 0.9em;
+  }
 
-	.renote {
-		padding: 10px 22px 0 22px;
-	}
+  .renote {
+    padding: 10px 22px 0 22px;
+  }
 
-	.article {
-		padding: 20px 22px;
-	}
+  .article {
+    padding: 20px 22px;
+  }
 
-	.footer {
-		margin-bottom: -8px;
-	}
+  .footer {
+    margin-bottom: -8px;
+  }
 }
 
 @container (max-width: 480px) {
@@ -891,13 +895,13 @@ function showReactions(): void {
   }
 
   .article {
-		padding: 14px 16px;
+    padding: 14px 16px;
   }
 }
 
 @container (max-width: 450px) {
   .avatar {
-		margin: 0 10px 0 0;
+    margin: 0 10px 0 0;
     width: 46px;
     height: 46px;
     top: calc(14px + var(--stickyTop, 0px));
@@ -905,23 +909,23 @@ function showReactions(): void {
 }
 
 @container (max-width: 400px) {
-	.root:not(.showActionsOnlyHover) {
-  .footerButton {
-    &:not(:last-child) {
-      margin-right: 18px;
+  .root:not(.showActionsOnlyHover) {
+    .footerButton {
+      &:not(:last-child) {
+        margin-right: 18px;
+      }
     }
   }
 }
-}
 
 @container (max-width: 350px) {
-	.root:not(.showActionsOnlyHover) {
-		.footerButton {
-			&:not(:last-child) {
-				margin-right: 12px;
-			}
-		}
-	}
+  .root:not(.showActionsOnlyHover) {
+    .footerButton {
+      &:not(:last-child) {
+        margin-right: 12px;
+      }
+    }
+  }
 }
 
 @container (max-width: 300px) {
@@ -930,13 +934,13 @@ function showReactions(): void {
     height: 44px;
   }
 
-	.root:not(.showActionsOnlyHover) {
-  .footerButton {
-    &:not(:last-child) {
-			margin-right: 8px;
+  .root:not(.showActionsOnlyHover) {
+    .footerButton {
+      &:not(:last-child) {
+        margin-right: 8px;
+      }
     }
   }
-}
 }
 
 @container (max-width: 250px) {

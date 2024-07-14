@@ -220,7 +220,7 @@ function attach() {
   // @ts-ignore
   connection.on('read', onRead);
 
-  os.api('messaging/history', { isAll: true, limit: 100 })
+  os.api('messaging/history', {})
     .then((_messages) => {
       _messages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       messages = _messages;

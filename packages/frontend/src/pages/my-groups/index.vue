@@ -16,10 +16,6 @@
                 <MkA :to="`/my/groups/${group.id}`" class="_link">{{ group.name }}</MkA>
               </div>
             </div>
-            <div class="_divider" />
-            <div class="_content">
-              <MkAvatars :user-ids="group.userIds" />
-            </div>
           </div>
         </MkPagination>
       </div>
@@ -32,10 +28,6 @@
               <div class="_buttons">
                 <MkButton danger @click="leave(group)">{{ i18n.ts.leaveGroup }}</MkButton>
               </div>
-            </div>
-            <div class="_divider" />
-            <div class="_content">
-              <MkAvatars :user-ids="group.userIds" />
             </div>
           </div>
         </MkPagination>
@@ -55,10 +47,6 @@
                 </MkButton>
               </div>
             </div>
-            <div class="_divider" />
-            <div class="_content">
-              <MkAvatars :user-ids="invitation.group.userIds" />
-            </div>
           </div>
         </MkPagination>
       </div>
@@ -73,7 +61,6 @@ import MkButton from '@/components/MkButton.vue';
 import * as os from '@/os';
 import { i18n } from '@/i18n';
 import { definePageMetadata } from '@/scripts/page-metadata';
-import MkAvatars from '@/components/MkAvatars.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -164,15 +151,15 @@ async function leave(group) {
 
 let ownedPagination = $ref({
   endpoint: 'users/groups/owned' as const,
-  limit: 10,
+  noPaging: true,
 });
 let joinedPagination = $ref({
   endpoint: 'users/groups/joined' as const,
-  limit: 10,
+  noPaging: true,
 });
 let invitationPagination = $ref({
   endpoint: 'i/user-group-invites' as const,
-  limit: 10,
+  noPaging: true,
 });
 
 definePageMetadata(
@@ -197,7 +184,6 @@ definePageMetadata(
     padding: 1em;
     border: 1px solid var(--border);
     border-radius: 0.5em;
-    margin-bottom: 1em;
 
     ._title {
       display: flex;
@@ -209,7 +195,7 @@ definePageMetadata(
       font-weight: bold;
       padding: 0.25em;
       gap: 0.25em;
-      border-radius: 0.5em 0.5em 0 0;
+      border-radius: 0.5em;
 
       ._title__name {
         margin: 0.5em;

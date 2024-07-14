@@ -643,6 +643,8 @@ useGlobalSettingDesc: "Quando attiva, verranno utilizzate le impostazioni notifi
 other: "Avanzate"
 regenerateLoginToken: "Genera di nuovo un token di connessione"
 regenerateLoginTokenDescription: "Genera un nuovo token di autenticazione. Solitamente questa operazione non è necessaria: quando si genera un nuovo token, tutti i dispositivi vanno disconnessi."
+tokenRegenerated: "Il token è stato rigenerato"
+tokenRegenerationFailed: "Impossibile rigenerare il token"
 setMultipleBySeparatingWithSpace: "È possibile creare multiple voci separate da spazi."
 fileIdOrUrl: "ID o URL del file"
 behavior: "Comportamento"

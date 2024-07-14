@@ -56,7 +56,7 @@ export class QueueService {
 			activity: activity,
 			signature,
 		};
-	
+
 		return this.inboxQueue.add(data, {
 			attempts: this.config.inboxJobMaxAttempts ?? 8,
 			timeout: 5 * 60 * 1000,	// 5min
@@ -212,7 +212,8 @@ export class QueueService {
 			soft: opts.soft,
 		}, {
 			removeOnComplete: true,
-			removeOnFail: true,
+			removeOnFail: false,
+      attempts: 10,
 		});
 	}
 
@@ -246,7 +247,7 @@ export class QueueService {
 			createdAt: Date.now(),
 			eventId: uuid(),
 		};
-	
+
 		return this.webhookDeliverQueue.add(data, {
 			attempts: 4,
 			timeout: 1 * 60 * 1000,	// 1min
@@ -264,7 +265,7 @@ export class QueueService {
 			//deliverLogger.succ(`Cleaned ${jobs.length} ${status} jobs`);
 		});
 		this.deliverQueue.clean(0, 'delayed');
-	
+
 		this.inboxQueue.once('cleaned', (jobs, status) => {
 			//inboxLogger.succ(`Cleaned ${jobs.length} ${status} jobs`);
 		});

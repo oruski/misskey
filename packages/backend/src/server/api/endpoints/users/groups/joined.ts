@@ -44,16 +44,23 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		private userGroupEntityService: UserGroupEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const ownedGroups = await this.userGroupsRepository.findBy({
-				userId: me.id,
-			});
+			const ownedGroups = await this.userGroupsRepository.find({
+        where: {
+          userId: me.id,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+      });
 
-			const joinings = await this.userGroupJoiningsRepository.findBy({
-				userId: me.id,
-				...(ownedGroups.length > 0 ? {
-					userGroupId: Not(In(ownedGroups.map(x => x.id))),
-				} : {}),
-			});
+			const joinings = await this.userGroupJoiningsRepository.find({ where: {
+          userId: me.id,
+          ...(ownedGroups.length > 0 ? {
+            userGroupId: Not(In(ownedGroups.map(x => x.id))),
+          } : {}),
+        }, order: {
+          createdAt: 'DESC',
+        } });
 
 			return await Promise.all(joinings.map(x => this.userGroupEntityService.pack(x.userGroupId)));
 		});

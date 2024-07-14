@@ -634,6 +634,8 @@ useGlobalSettingDesc: "Nếu được bật, cài đặt thông báo của bạn
 other: "Khác"
 regenerateLoginToken: "Tạo lại mã đăng nhập"
 regenerateLoginTokenDescription: "Tạo lại mã nội bộ có thể dùng để đăng nhập. Thông thường hành động này là không cần thiết. Nếu được tạo lại, tất cả các thiết bị sẽ bị đăng xuất."
+tokenRegenerated: "Mã đã được tạo lại"
+tokenRegenerationFailed: "Không thể tạo lại mã"
 setMultipleBySeparatingWithSpace: "Tách nhiều mục nhập bằng dấu cách."
 fileIdOrUrl: "ID tập tin hoặc URL"
 behavior: "Thao tác"

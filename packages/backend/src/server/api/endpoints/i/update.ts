@@ -91,7 +91,7 @@ export const paramDef = {
 		fields: {
 			type: 'array',
 			minItems: 0,
-			maxItems: 16,
+			maxItems: 50,
 			items: {
 				type: 'object',
 				properties: {

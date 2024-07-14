@@ -12,19 +12,19 @@
             <div :class="$style.bannerStatus">
               <div>
                 <i class="ti ti-users ti-fw"></i
-                ><I18n :src="i18n.ts._channel.usersCount" tag="span" style="margin-left: 4px"
-                  ><template #n
-                    ><b>{{ channel.usersCount }}</b></template
-                  ></I18n
-                >
+                ><I18n :src="i18n.ts._channel.usersCount" tag="span" style="margin-left: 4px">
+                  <template #n>
+                    <b>{{ channel.usersCount }}</b>
+                  </template>
+                </I18n>
               </div>
               <div>
                 <i class="ti ti-pencil ti-fw"></i
-                ><I18n :src="i18n.ts._channel.notesCount" tag="span" style="margin-left: 4px"
-                  ><template #n
-                    ><b>{{ channel.notesCount }}</b></template
-                  ></I18n
-                >
+                ><I18n :src="i18n.ts._channel.notesCount" tag="span" style="margin-left: 4px">
+                  <template #n>
+                    <b>{{ channel.notesCount }}</b>
+                  </template>
+                </I18n>
               </div>
             </div>
             <div :class="$style.bannerFade"></div>
@@ -54,9 +54,9 @@
       <div :class="$style.footer">
         <MkSpacer :content-max="700" :margin-min="16" :margin-max="16">
           <div class="_buttonsCenter">
-            <MkButton inline rounded primary gradate @click="openPostForm()"
-              ><i class="ti ti-pencil"></i> {{ i18n.ts.postToTheChannel }}</MkButton
-            >
+            <MkButton inline rounded primary gradate @click="openPostForm()">
+              <i class="ti ti-pencil"></i> {{ i18n.ts.postToTheChannel }}
+            </MkButton>
           </div>
         </MkSpacer>
       </div>
