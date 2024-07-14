@@ -5,7 +5,7 @@
         <div class="banner" :style="{ backgroundImage: `url(${$instance.bannerUrl})` }"></div>
         <button v-click-anime class="item _button instance" @click="openInstanceMenu">
           <img
-            :src="$instance.iconUrl || $instance.faviconUrl || '/client-assets/oranski_logo.png'"
+            :src="$instance.iconUrl || $instance.faviconUrl || '/client-assets/oruski_logo.png'"
             alt=""
             class="icon"
           />
