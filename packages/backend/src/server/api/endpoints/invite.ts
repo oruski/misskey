@@ -28,7 +28,9 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: {},
+  properties: {
+    userId: { type: 'string', format: 'misskey:id' },
+  },
 	required: [],
 } as const;
 
@@ -42,6 +44,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		private idService: IdService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+      const userId = ps.userId || me.id;
+
 			const code = rndstr({
 				length: 8,
 				chars: '2-9A-HJ-NP-Z', // [0-9A-Z] w/o [01IO] (32 patterns)
@@ -50,6 +54,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 			await this.registrationTicketsRepository.insert({
 				id: this.idService.genId(),
 				createdAt: new Date(),
+        requestUserId: userId,
 				code,
 			});
 
