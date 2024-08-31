@@ -1,5 +1,6 @@
-import { PrimaryColumn, Entity, Index, Column } from 'typeorm';
+import { PrimaryColumn, Entity, Index, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { id } from '../id.js';
+import { RegistrationTicket } from './RegistrationTicket.js';
 
 @Entity()
 export class UserPending {
@@ -29,4 +30,18 @@ export class UserPending {
 		length: 128,
 	})
 	public password: string;
+
+  @Index()
+  @Column({
+    ...id(),
+    nullable: true,
+    comment: 'The registration ticket ID.',
+  })
+  public registrationTicketId: string | null;
+
+  @ManyToOne(type => RegistrationTicket, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  public registrationTicket: RegistrationTicket | null;
 }

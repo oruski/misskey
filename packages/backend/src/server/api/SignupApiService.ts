@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import rndstr from 'rndstr';
 import bcrypt from 'bcryptjs';
+import { IsNull, Not } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { RegistrationTicketsRepository, UsedUsernamesRepository, UserPendingsRepository, UserProfilesRepository, UsersRepository } from '@/models/index.js';
 import type { Config } from '@/config.js';
@@ -15,7 +16,6 @@ import { FastifyReplyError } from '@/misc/fastify-reply-error.js';
 import { bindThis } from '@/decorators.js';
 import { SigninService } from './SigninService.js';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { IsNull } from 'typeorm';
 
 @Injectable()
 export class SignupApiService {
@@ -67,7 +67,7 @@ export class SignupApiService {
 		const body = request.body;
 
 		const instance = await this.metaService.fetch(true);
-	
+
 		// Verify *Captcha
 		// ただしテスト時はこの機構は障害となるため無効にする
 		if (process.env.NODE_ENV !== 'test') {
@@ -76,7 +76,7 @@ export class SignupApiService {
 					throw new FastifyReplyError(400, err);
 				});
 			}
-	
+
 			if (instance.enableRecaptcha && instance.recaptchaSecretKey) {
 				await this.captchaService.verifyRecaptcha(instance.recaptchaSecretKey, body['g-recaptcha-response']).catch(err => {
 					throw new FastifyReplyError(400, err);
@@ -89,44 +89,48 @@ export class SignupApiService {
 				});
 			}
 		}
-	
+
 		const username = body['username'];
 		const password = body['password'];
 		const host: string | null = process.env.NODE_ENV === 'test' ? (body['host'] ?? null) : null;
 		const invitationCode = body['invitationCode'];
 		const emailAddress = body['emailAddress'];
-	
+
 		if (instance.emailRequiredForSignup) {
 			if (emailAddress == null || typeof emailAddress !== 'string') {
 				reply.code(400);
 				return;
 			}
-	
+
 			const res = await this.emailService.validateEmailForAccount(emailAddress);
 			if (!res.available) {
 				reply.code(400);
 				return;
 			}
 		}
-	
+
 		if (instance.disableRegistration) {
 			if (invitationCode == null || typeof invitationCode !== 'string') {
 				reply.code(400);
 				return;
 			}
-	
+
 			const ticket = await this.registrationTicketsRepository.findOneBy({
 				code: invitationCode,
+        usedAt: IsNull(),
 			});
-	
+
 			if (ticket == null) {
 				reply.code(400);
 				return;
 			}
-	
-			this.registrationTicketsRepository.delete(ticket.id);
+
+			await this.registrationTicketsRepository.update({ id: ticket.id }, {
+        usedAt: new Date(),
+        invitedUserId: null,
+      });
 		}
-	
+
 		if (instance.emailRequiredForSignup) {
 			if (await this.usersRepository.findOneBy({ usernameLower: username.toLowerCase(), host: IsNull() })) {
 				throw new FastifyReplyError(400, 'DUPLICATED_USERNAME');
@@ -143,6 +147,11 @@ export class SignupApiService {
 			const salt = await bcrypt.genSalt(8);
 			const hash = await bcrypt.hash(password, salt);
 
+      const ticket = instance.disableRegistration ? await this.registrationTicketsRepository.findOneBy({
+        code: invitationCode,
+        usedAt: Not(IsNull()),
+      }) : undefined;
+
 			await this.userPendingsRepository.insert({
 				id: this.idService.genId(),
 				createdAt: new Date(),
@@ -150,6 +159,7 @@ export class SignupApiService {
 				email: emailAddress!,
 				username: username,
 				password: hash,
+        registrationTicketId: ticket?.id ?? undefined,
 			});
 
 			const link = `${this.config.url}/signup-complete/${code}`;
@@ -165,12 +175,26 @@ export class SignupApiService {
 				const { account, secret } = await this.signupService.signup({
 					username, password, host,
 				});
-	
+
+        if (instance.disableRegistration) {
+          const ticket = await this.registrationTicketsRepository.findOneBy({
+            code: invitationCode,
+            usedAt: Not(IsNull()),
+          });
+
+          if (ticket) {
+            this.registrationTicketsRepository.update({ id: ticket.id }, {
+              usedAt: new Date(),
+              invitedUserId: account.id,
+            });
+          }
+        }
+
 				const res = await this.userEntityService.pack(account, account, {
 					detail: true,
 					includeSecrets: true,
 				});
-	
+
 				return {
 					...res,
 					token: secret,
@@ -195,7 +219,16 @@ export class SignupApiService {
 				passwordHash: pendingUser.password,
 			});
 
-			this.userPendingsRepository.delete({
+      if (pendingUser.registrationTicketId) {
+        await this.registrationTicketsRepository.update({
+          id: pendingUser.registrationTicketId,
+        }, {
+          usedAt: new Date(),
+          invitedUserId: account.id,
+        });
+      }
+
+			await this.userPendingsRepository.delete({
 				id: pendingUser.id,
 			});
 
