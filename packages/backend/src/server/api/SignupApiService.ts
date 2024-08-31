@@ -183,7 +183,7 @@ export class SignupApiService {
           });
 
           if (ticket) {
-            this.registrationTicketsRepository.update({ id: ticket.id }, {
+            await this.registrationTicketsRepository.update({ id: ticket.id }, {
               usedAt: new Date(),
               invitedUserId: account.id,
             });
