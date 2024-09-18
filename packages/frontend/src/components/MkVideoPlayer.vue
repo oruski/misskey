@@ -36,9 +36,8 @@ export default {
 };
 </script>
 
-<style lang="scss" module>
-.video-js {
-  width: 100% !important;
-  height: 100% !important;
+<style lang="scss">
+.vjs-error .vjs-error-display .vjs-modal-dialog-content {
+  padding-top: 40px;
 }
 </style>

@@ -61,6 +61,7 @@ const hide = ref(
     padding: 3px 6px;
     text-align: center;
     cursor: pointer;
+    z-index: 1;
     top: 12px;
     right: 12px;
   }
