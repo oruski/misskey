@@ -176,7 +176,7 @@ export class FileServerService {
 					file.cleanup();
 				}
 
-				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(image.type) ? image.type : 'application/octet-stream');
+				reply.header('Content-Type', image.type === 'video/quicktime' ? 'video/mp4' : FILE_TYPE_BROWSERSAFE.includes(image.type) ? image.type : 'application/octet-stream');
 				reply.header('Content-Disposition',
 					contentDisposition(
 						'inline',
@@ -192,12 +192,12 @@ export class FileServerService {
 					extname: file.ext ? `.${file.ext}` : '.unknown',
 				}).toString();
 
-				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(file.mime) ? file.mime : 'application/octet-stream');
+				reply.header('Content-Type', file.mime === 'video/quicktime' ? 'video/mp4' : FILE_TYPE_BROWSERSAFE.includes(file.mime) ? file.mime : 'application/octet-stream');
 				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition', contentDisposition('inline', filename));
 				return fs.createReadStream(file.path);
 			} else {
-				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(file.file.type) ? file.file.type : 'application/octet-stream');
+				reply.header('Content-Type', file.mime === 'video/quicktime' ? 'video/mp4' : FILE_TYPE_BROWSERSAFE.includes(file.file.type) ? file.file.type : 'application/octet-stream');
 				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition', contentDisposition('inline', file.filename));
 				return fs.createReadStream(file.path);
