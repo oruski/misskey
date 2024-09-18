@@ -45,8 +45,6 @@ const hide = ref(
 
 <style lang="scss" scoped>
 .kkjnbbplepmiyuadieoenjgutgcmtsvu {
-  height: min-content;
-
   position: relative;
 
   --plyr-color-main: var(--accent);

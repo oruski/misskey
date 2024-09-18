@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="$style.root">
     <video ref="videoPlayer" class="video-js" vjs-default-skin playsinline :poster="poster"></video>
   </div>
 </template>
@@ -32,9 +32,11 @@ export default {
       this.$refs.videoPlayer,
       {
         ...this.options,
-        fill: true,
+        fill: false,
+        // 高さ制限
+        height: 343,
         // responsive: true,
-        fluid: true,
+        fluid: false,
         // aspectRatio: '4:3',
       },
       () => {
@@ -49,6 +51,14 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" module>
+.root {
+  display: flex;
+  justify-content: center;
+  background-color: black;
+}
+</style>
 
 <style lang="scss">
 .vjs-error .vjs-error-display .vjs-modal-dialog-content {
