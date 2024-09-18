@@ -1,6 +1,6 @@
 <template>
   <div>
-    <video ref="videoPlayer" class="video-js" vjs-default-skin playsinline></video>
+    <video ref="videoPlayer" class="video-js" vjs-default-skin playsinline :poster="poster"></video>
   </div>
 </template>
 
@@ -15,6 +15,10 @@ export default {
       type: Object,
       default() {
         return {};
+      },
+      poster: {
+        type: String,
+        default: '',
       },
     },
   },

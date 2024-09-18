@@ -7,12 +7,14 @@
   </div>
   <div v-else class="kkjnbbplepmiyuadieoenjgutgcmtsvu">
     <MkVideoPlayer
+      :poster="video.thumbnailUrl"
       :options="{
         autoplay: false,
         controls: true,
         sources: [
           {
             src: video.url,
+            poster: video.thumbnailUrl,
             type: video.type === 'video/quicktime' ? 'video/mp4' : video.type,
           },
         ],
