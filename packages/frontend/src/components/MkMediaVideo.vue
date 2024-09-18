@@ -13,7 +13,7 @@
         sources: [
           {
             src: video.url,
-            type: video.type,
+            type: video.type === 'video/quicktime' ? 'video/mp4' : video.type,
           },
         ],
       }"
