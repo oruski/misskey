@@ -1,6 +1,6 @@
 <template>
   <div>
-    <video ref="videoPlayer" class="video-js" vjs-default-skin data-setup='{"fluid": true}'></video>
+    <video ref="videoPlayer" class="video-js" vjs-default-skin></video>
   </div>
 </template>
 
@@ -24,9 +24,19 @@ export default {
     };
   },
   mounted() {
-    this.player = videojs(this.$refs.videoPlayer, this.options, () => {
-      this.player.log('onPlayerReady', this);
-    });
+    this.player = videojs(
+      this.$refs.videoPlayer,
+      {
+        ...this.options,
+        fill: true,
+        // responsive: true,
+        fluid: true,
+        // aspectRatio: '4:3',
+      },
+      () => {
+        this.player.log('onPlayerReady', this);
+      },
+    );
   },
   beforeUnmount() {
     if (this.player) {
