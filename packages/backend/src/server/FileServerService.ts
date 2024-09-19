@@ -350,7 +350,7 @@ export class FileServerService {
       ) {
         if (!isConvertibleImage) {
           // 画像でないなら404でお茶を濁す
-          throw new StatusError(`Unexpected mime url = ${request.url}`, 404);
+					throw new StatusError(`Unexpected mime url = ${request.url}`, 404);
         }
       }
 
@@ -363,7 +363,7 @@ export class FileServerService {
             type: file.mime,
           };
         } else {
-          try {
+					try {
             const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in request.query) }))
               .resize({
                 height: 'emoji' in request.query ? 128 : 320,
@@ -376,14 +376,14 @@ export class FileServerService {
               ext: 'webp',
               type: 'image/webp',
             };
-          } catch (e) {
-            // sharpの変換に失敗した場合は通常の画像として返す
-            image = {
-              data: fs.createReadStream(file.path),
-              ext: file.ext,
-              type: file.mime,
-            };
-          }
+					} catch (e) {
+						// sharpの変換に失敗した場合は通常の画像として返す
+						image = {
+							data: fs.createReadStream(file.path),
+							ext: file.ext,
+							type: file.mime,
+						};
+					}
         }
       } else if ('static' in request.query) {
         image = this.imageProcessingService.convertSharpToWebpStream(await sharpBmp(file.path, file.mime), 498, 422);
@@ -406,7 +406,7 @@ export class FileServerService {
 
         if (stats.entropy < 0.1) {
           // エントロピーがあまりない場合は404にする
-          throw new StatusError(`Skip to provide badge url = ${url}`, 404);
+					throw new StatusError(`Skip to provide badge url = ${url}`, 404);
         }
 
         const data = sharp({

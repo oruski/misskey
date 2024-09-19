@@ -77,14 +77,14 @@ An actual domain will be assigned so you can test the federation.
 
 ## Release
 ### Release Instructions
-1. Commit version changes in the `develop` branch ([package.json](https://github.com/nacika-ins/misskey/blob/develop/package.json))
+1. Commit version changes in the `develop` branch ([package.json](https://github.com/oruski/misskey/blob/develop/package.json))
 2. Create a release PR.
 	- Into `master` from `develop` branch.
 	- The title must be in the format `Release: x.y.z`.
 		- `x.y.z` is the new version you are trying to release.
 3. Deploy and perform a simple QA check. Also verify that the tests passed.
 4. Merge it. (Do not squash commit)
-5. Create a [release of GitHub](https://github.com/nacika-ins/misskey/releases)
+5. Create a [release of GitHub](https://github.com/oruski/misskey/releases)
 	- The target branch must be `master`
 	- The tag name must be the version
 

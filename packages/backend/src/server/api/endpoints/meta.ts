@@ -59,12 +59,12 @@ export const meta = {
 			repositoryUrl: {
 				type: 'string',
 				optional: false, nullable: false,
-				default: 'https://github.com/nacika-ins/misskey',
+				default: 'https://github.com/oruski/misskey',
 			},
 			feedbackUrl: {
 				type: 'string',
 				optional: false, nullable: false,
-				default: 'https://github.com/nacika-ins/misskey/issues/new',
+				default: 'https://github.com/oruski/misskey/issues/new',
 			},
 			defaultDarkTheme: {
 				type: 'string',
