@@ -46,33 +46,7 @@ const hide = ref(
 
 const height = ref<string | number>(0);
 
-const onPlayerReady = ref((player: any) => {
-  if (props.total > 1) {
-    return;
-  }
-
-  const watchElm = () => {
-    const exec = () => {
-      const img = player.el_.querySelector('.vjs-poster img');
-      if (!img) {
-        return;
-      }
-
-      if (!img.height) {
-        return;
-      }
-
-      height.value = img.height + 'px';
-      player.el_.removeEventListener('DOMSubtreeModified', watchElm);
-    };
-    setTimeout(exec, 300);
-    setTimeout(exec, 500);
-    setTimeout(exec, 1000);
-  };
-  // DOMが変更された
-  player.el_.addEventListener('DOMSubtreeModified', watchElm);
-  watchElm();
-});
+const onPlayerReady = ref((player: any) => {});
 </script>
 
 <style lang="scss" scoped>
