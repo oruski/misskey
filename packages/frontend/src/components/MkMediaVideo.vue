@@ -52,7 +52,7 @@ const onPlayerReady = ref((player: any) => {
   }
 
   const watchElm = () => {
-    setTimeout(() => {
+    const exec = () => {
       const img = player.el_.querySelector('.vjs-poster img');
       if (!img) {
         return;
@@ -64,7 +64,10 @@ const onPlayerReady = ref((player: any) => {
 
       height.value = img.height + 'px';
       player.el_.removeEventListener('DOMSubtreeModified', watchElm);
-    }, 1000);
+    };
+    setTimeout(exec, 300);
+    setTimeout(exec, 500);
+    setTimeout(exec, 1000);
   };
   // DOMが変更された
   player.el_.addEventListener('DOMSubtreeModified', watchElm);
