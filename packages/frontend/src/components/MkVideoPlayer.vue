@@ -16,10 +16,14 @@ export default {
       default() {
         return {};
       },
-      poster: {
-        type: String,
-        default: '',
-      },
+    },
+    poster: {
+      type: String,
+      default: '',
+    },
+    onPlayerReady: {
+      type: Function,
+      default: (player) => {},
     },
   },
   data() {
@@ -38,7 +42,7 @@ export default {
         // aspectRatio: '4:3',
       },
       () => {
-        this.player.log('onPlayerReady', this);
+        this.onPlayerReady(this.player);
       },
     );
   },

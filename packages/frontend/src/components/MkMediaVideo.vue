@@ -5,7 +5,7 @@
       <span>{{ $ts.clickToShow }}</span>
     </div>
   </div>
-  <div v-else class="kkjnbbplepmiyuadieoenjgutgcmtsvu">
+  <div v-else class="kkjnbbplepmiyuadieoenjgutgcmtsvu" :style="{ height: height ? height : 'inherit' }">
     <MkVideoPlayer
       :poster="video.thumbnailUrl"
       :options="{
@@ -19,6 +19,7 @@
           },
         ],
       }"
+      :on-player-ready="onPlayerReady"
     />
     <i class="ti ti-eye-off" @click="hide = true"></i>
     <a class="download" :href="video.url" :title="video.name" :download="video.name">
@@ -36,11 +37,39 @@ import MkVideoPlayer from '@/components/MkVideoPlayer.vue';
 
 const props = defineProps<{
   video: misskey.entities.DriveFile;
+  total: number;
 }>();
 
 const hide = ref(
   defaultStore.state.nsfw === 'force' ? true : props.video.isSensitive && defaultStore.state.nsfw !== 'ignore',
 );
+
+const height = ref<string | number>(0);
+
+const onPlayerReady = ref((player: any) => {
+  if (props.total > 1) {
+    return;
+  }
+
+  const watchElm = () => {
+    setTimeout(() => {
+      const img = player.el_.querySelector('.vjs-poster img');
+      if (!img) {
+        return;
+      }
+
+      if (!img.height) {
+        return;
+      }
+
+      height.value = img.height + 'px';
+      player.el_.removeEventListener('DOMSubtreeModified', watchElm);
+    }, 1000);
+  };
+  // DOMが変更された
+  player.el_.addEventListener('DOMSubtreeModified', watchElm);
+  watchElm();
+});
 </script>
 
 <style lang="scss" scoped>
