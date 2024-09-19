@@ -32,11 +32,9 @@ export default {
       this.$refs.videoPlayer,
       {
         ...this.options,
-        fill: false,
-        // 高さ制限
-        height: 343,
+        fluid: true,
+        fill: true,
         // responsive: true,
-        fluid: false,
         // aspectRatio: '4:3',
       },
       () => {
@@ -56,7 +54,10 @@ export default {
 .root {
   display: flex;
   justify-content: center;
+  align-items: center;
   background-color: black;
+  width: 100%;
+  height: 100%;
 }
 </style>
 
