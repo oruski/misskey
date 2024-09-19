@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <video ref="videoPlayer" class="video-js" vjs-default-skin data-setup='{"fluid": true}'></video>
+  <div :class="$style.root">
+    <video ref="videoPlayer" class="video-js" vjs-default-skin playsinline :poster="poster"></video>
   </div>
 </template>
 
@@ -17,6 +17,14 @@ export default {
         return {};
       },
     },
+    poster: {
+      type: String,
+      default: '',
+    },
+    onPlayerReady: {
+      type: Function,
+      default: (player) => {},
+    },
   },
   data() {
     return {
@@ -24,9 +32,19 @@ export default {
     };
   },
   mounted() {
-    this.player = videojs(this.$refs.videoPlayer, this.options, () => {
-      this.player.log('onPlayerReady', this);
-    });
+    this.player = videojs(
+      this.$refs.videoPlayer,
+      {
+        ...this.options,
+        fluid: true,
+        fill: true,
+        // responsive: true,
+        aspectRatio: '16:9',
+      },
+      () => {
+        this.onPlayerReady(this.player);
+      },
+    );
   },
   beforeUnmount() {
     if (this.player) {
@@ -37,8 +55,18 @@ export default {
 </script>
 
 <style lang="scss" module>
-.video-js {
-  width: 100% !important;
-  height: 100% !important;
+.root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  width: 100%;
+  height: 100%;
+}
+</style>
+
+<style lang="scss">
+.vjs-error .vjs-error-display .vjs-modal-dialog-content {
+  padding-top: 40px;
 }
 </style>

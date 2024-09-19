@@ -5,18 +5,21 @@
       <span>{{ $ts.clickToShow }}</span>
     </div>
   </div>
-  <div v-else class="kkjnbbplepmiyuadieoenjgutgcmtsvu">
+  <div v-else class="kkjnbbplepmiyuadieoenjgutgcmtsvu" :style="{ height: height ? height : 'inherit' }">
     <MkVideoPlayer
+      :poster="video.thumbnailUrl"
       :options="{
         autoplay: false,
         controls: true,
         sources: [
           {
             src: video.url,
-            type: video.type,
+            poster: video.thumbnailUrl,
+            type: video.type === 'video/quicktime' ? 'video/mp4' : video.type,
           },
         ],
       }"
+      :on-player-ready="onPlayerReady"
     />
     <i class="ti ti-eye-off" @click="hide = true"></i>
     <a class="download" :href="video.url" :title="video.name" :download="video.name">
@@ -34,11 +37,16 @@ import MkVideoPlayer from '@/components/MkVideoPlayer.vue';
 
 const props = defineProps<{
   video: misskey.entities.DriveFile;
+  total: number;
 }>();
 
 const hide = ref(
   defaultStore.state.nsfw === 'force' ? true : props.video.isSensitive && defaultStore.state.nsfw !== 'ignore',
 );
+
+const height = ref<string | number>(0);
+
+const onPlayerReady = ref((player: any) => {});
 </script>
 
 <style lang="scss" scoped>
@@ -61,6 +69,7 @@ const hide = ref(
     padding: 3px 6px;
     text-align: center;
     cursor: pointer;
+    z-index: 1;
     top: 12px;
     right: 12px;
   }
