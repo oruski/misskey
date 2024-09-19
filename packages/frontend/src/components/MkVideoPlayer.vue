@@ -39,7 +39,7 @@ export default {
         fluid: true,
         fill: true,
         // responsive: true,
-        // aspectRatio: '4:3',
+        aspectRatio: '16:9',
       },
       () => {
         this.onPlayerReady(this.player);
