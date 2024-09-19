@@ -72,6 +72,7 @@
 		"unplugin-vue-macros": "2.7.10",
 		"uuid": "9.0.1",
 		"vanilla-tilt": "1.8.1",
+		"video.js": "8.17.4",
 		"vite": "5.1.6",
 		"vite-plugin-build-metadata": "0.4.0",
 		"vue": "3.4.21",

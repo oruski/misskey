@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: syuilo and misskey-project
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 import * as fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
@@ -6,7 +11,7 @@ import rename from 'rename';
 import sharp from 'sharp';
 import { sharpBmp } from '@misskey-dev/sharp-read-bmp';
 import type { Config } from '@/config.js';
-import type { DriveFile, DriveFilesRepository } from '@/models/index.js';
+import type { DriveFilesRepository } from '@/models/index.js';
 import { DI } from '@/di-symbols.js';
 import { createTemp } from '@/misc/create-temp.js';
 import { FILE_TYPE_BROWSERSAFE } from '@/const.js';
@@ -22,6 +27,7 @@ import { LoggerService } from '@/core/LoggerService.js';
 import { bindThis } from '@/decorators.js';
 import { isMimeImage } from '@/misc/is-mime-image.js';
 import { correctFilename } from '@/misc/correct-filename.js';
+import { handleRequestRedirectToOmitSearch } from '@/misc/fastify-hook-handlers.js';
 import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions } from 'fastify';
 
 const _filename = fileURLToPath(import.meta.url);
@@ -56,23 +62,29 @@ export class FileServerService {
 	public createServer(fastify: FastifyInstance, options: FastifyPluginOptions, done: (err?: Error) => void) {
 		fastify.addHook('onRequest', (request, reply, done) => {
 			reply.header('Content-Security-Policy', 'default-src \'none\'; img-src \'self\'; media-src \'self\'; style-src \'unsafe-inline\'');
+			if (process.env.NODE_ENV === 'development') {
+				reply.header('Access-Control-Allow-Origin', '*');
+			}
 			done();
 		});
 
-		fastify.get('/files/app-default.jpg', (request, reply) => {
-			const file = fs.createReadStream(`${_dirname}/assets/dummy.png`);
-			reply.header('Content-Type', 'image/jpeg');
-			reply.header('Cache-Control', 'max-age=31536000, immutable');
-			return reply.send(file);
-		});
+		fastify.register((fastify, options, done) => {
+			fastify.addHook('onRequest', handleRequestRedirectToOmitSearch);
+			fastify.get('/files/app-default.jpg', (request, reply) => {
+				const file = fs.createReadStream(`${_dirname}/assets/dummy.png`);
+				reply.header('Content-Type', 'image/jpeg');
+				reply.header('Cache-Control', 'max-age=31536000, immutable');
+				return reply.send(file);
+			});
 
-		fastify.get<{ Params: { key: string; } }>('/files/:key', async (request, reply) => {
-			return await this.sendDriveFile(request, reply)
-				.catch(err => this.errorHandler(request, reply, err));
-		});
-		fastify.get<{ Params: { key: string; } }>('/files/:key/*', async (request, reply) => {
-			return await this.sendDriveFile(request, reply)
-				.catch(err => this.errorHandler(request, reply, err));
+			fastify.get<{ Params: { key: string; } }>('/files/:key', async (request, reply) => {
+				return await this.sendDriveFile(request, reply)
+					.catch(err => this.errorHandler(request, reply, err));
+			});
+			fastify.get<{ Params: { key: string; } }>('/files/:key/*', async (request, reply) => {
+				return await reply.redirect(301, `${this.config.url}/files/${request.params.key}`);
+			});
+			done();
 		});
 
 		fastify.get<{
@@ -160,11 +172,36 @@ export class FileServerService {
 				}
 
 				if (!image) {
-					image = {
-						data: fs.createReadStream(file.path),
-						ext: file.ext,
-						type: file.mime,
-					};
+					if (request.headers.range && file.file.size > 0) {
+						const range = request.headers.range as string;
+						const parts = range.replace(/bytes=/, '').split('-');
+						const start = parseInt(parts[0], 10);
+						let end = parts[1] ? parseInt(parts[1], 10) : file.file.size - 1;
+						if (end > file.file.size) {
+							end = file.file.size - 1;
+						}
+						const chunksize = end - start + 1;
+
+						image = {
+							data: fs.createReadStream(file.path, {
+								start,
+								end,
+							}),
+							ext: file.ext,
+							type: file.mime,
+						};
+
+						reply.header('Content-Range', `bytes ${start}-${end}/${file.file.size}`);
+						reply.header('Accept-Ranges', 'bytes');
+						reply.header('Content-Length', chunksize);
+						reply.code(206);
+					} else {
+						image = {
+							data: fs.createReadStream(file.path),
+							ext: file.ext,
+							type: file.mime,
+						};
+					}
 				}
 
 				if ('pipe' in image.data && typeof image.data.pipe === 'function') {
@@ -177,6 +214,8 @@ export class FileServerService {
 				}
 
 				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(image.type) ? image.type : 'application/octet-stream');
+				reply.header('Content-Length', file.file.size);
+				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition',
 					contentDisposition(
 						'inline',
@@ -195,11 +234,54 @@ export class FileServerService {
 				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(file.mime) ? file.mime : 'application/octet-stream');
 				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition', contentDisposition('inline', filename));
+
+				if (request.headers.range && file.file.size > 0) {
+					const range = request.headers.range as string;
+					const parts = range.replace(/bytes=/, '').split('-');
+					const start = parseInt(parts[0], 10);
+					let end = parts[1] ? parseInt(parts[1], 10) : file.file.size - 1;
+					if (end > file.file.size) {
+						end = file.file.size - 1;
+					}
+					const chunksize = end - start + 1;
+					const fileStream = fs.createReadStream(file.path, {
+						start,
+						end,
+					});
+					reply.header('Content-Range', `bytes ${start}-${end}/${file.file.size}`);
+					reply.header('Accept-Ranges', 'bytes');
+					reply.header('Content-Length', chunksize);
+					reply.code(206);
+					return fileStream;
+				}
+
 				return fs.createReadStream(file.path);
 			} else {
 				reply.header('Content-Type', FILE_TYPE_BROWSERSAFE.includes(file.file.type) ? file.file.type : 'application/octet-stream');
+				reply.header('Content-Length', file.file.size);
 				reply.header('Cache-Control', 'max-age=31536000, immutable');
 				reply.header('Content-Disposition', contentDisposition('inline', file.filename));
+
+				if (request.headers.range && file.file.size > 0) {
+					const range = request.headers.range as string;
+					const parts = range.replace(/bytes=/, '').split('-');
+					const start = parseInt(parts[0], 10);
+					let end = parts[1] ? parseInt(parts[1], 10) : file.file.size - 1;
+					if (end > file.file.size) {
+						end = file.file.size - 1;
+					}
+					const chunksize = end - start + 1;
+					const fileStream = fs.createReadStream(file.path, {
+						start,
+						end,
+					});
+					reply.header('Content-Range', `bytes ${start}-${end}/${file.file.size}`);
+					reply.header('Accept-Ranges', 'bytes');
+					reply.header('Content-Length', chunksize);
+					reply.code(206);
+					return fileStream;
+				}
+
 				return fs.createReadStream(file.path);
 			}
 		} catch (e) {
@@ -264,7 +346,7 @@ export class FileServerService {
 			) {
 				if (!isConvertibleImage) {
 					// 画像でないなら404でお茶を濁す
-					throw new StatusError(`Unexpected mime url = ${request.url}`, 404);
+					throw new StatusError('Unexpected mime', 404);
 				}
 			}
 
@@ -277,27 +359,18 @@ export class FileServerService {
 						type: file.mime,
 					};
 				} else {
-					try {
-						const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in request.query) }))
-							.resize({
-								height: 'emoji' in request.query ? 128 : 320,
-								withoutEnlargement: true,
-							})
-							.webp(webpDefault);
+					const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in request.query) }))
+						.resize({
+							height: 'emoji' in request.query ? 128 : 320,
+							withoutEnlargement: true,
+						})
+						.webp(webpDefault);
 
-						image = {
-							data,
-							ext: 'webp',
-							type: 'image/webp',
-						};
-					} catch (e) {
-						// sharpの変換に失敗した場合は通常の画像として返す
-						image = {
-							data: fs.createReadStream(file.path),
-							ext: file.ext,
-							type: file.mime,
-						};
-					}
+					image = {
+						data,
+						ext: 'webp',
+						type: 'image/webp',
+					};
 				}
 			} else if ('static' in request.query) {
 				image = this.imageProcessingService.convertSharpToWebpStream(await sharpBmp(file.path, file.mime), 498, 422);
@@ -306,7 +379,8 @@ export class FileServerService {
 			} else if ('badge' in request.query) {
 				const mask = (await sharpBmp(file.path, file.mime))
 					.resize(96, 96, {
-						fit: 'inside',
+						fit: 'contain',
+						position: 'centre',
 						withoutEnlargement: false,
 					})
 					.greyscale()
@@ -319,7 +393,7 @@ export class FileServerService {
 
 				if (stats.entropy < 0.1) {
 					// エントロピーがあまりない場合は404にする
-					throw new StatusError(`Skip to provide badge url = ${url}`, 404);
+					throw new StatusError('Skip to provide badge', 404);
 				}
 
 				const data = sharp({
@@ -336,15 +410,40 @@ export class FileServerService {
 			} else if (file.mime === 'image/svg+xml') {
 				image = this.imageProcessingService.convertToWebpStream(file.path, 2048, 2048);
 			} else if (!file.mime.startsWith('image/') || !FILE_TYPE_BROWSERSAFE.includes(file.mime)) {
-				throw new StatusError(`Rejected type url = ${url}`, 403, 'Rejected type');
+				throw new StatusError('Rejected type', 403, 'Rejected type');
 			}
 
 			if (!image) {
-				image = {
-					data: fs.createReadStream(file.path),
-					ext: file.ext,
-					type: file.mime,
-				};
+				if (request.headers.range && file.file && file.file.size > 0) {
+					const range = request.headers.range as string;
+					const parts = range.replace(/bytes=/, '').split('-');
+					const start = parseInt(parts[0], 10);
+					let end = parts[1] ? parseInt(parts[1], 10) : file.file.size - 1;
+					if (end > file.file.size) {
+						end = file.file.size - 1;
+					}
+					const chunksize = end - start + 1;
+
+					image = {
+						data: fs.createReadStream(file.path, {
+							start,
+							end,
+						}),
+						ext: file.ext,
+						type: file.mime,
+					};
+
+					reply.header('Content-Range', `bytes ${start}-${end}/${file.file.size}`);
+					reply.header('Accept-Ranges', 'bytes');
+					reply.header('Content-Length', chunksize);
+					reply.code(206);
+				} else {
+					image = {
+						data: fs.createReadStream(file.path),
+						ext: file.ext,
+						type: file.mime,
+					};
+				}
 			}
 
 			if ('cleanup' in file) {
@@ -375,14 +474,14 @@ export class FileServerService {
 
 	@bindThis
 	private async getStreamAndTypeFromUrl(url: string): Promise<
-		{ state: 'remote'; fileRole?: 'thumbnail' | 'webpublic' | 'original'; file?: DriveFile; mime: string; ext: string | null; path: string; cleanup: () => void; filename: string; }
-		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: DriveFile; filename: string; mime: string; ext: string | null; path: string; }
+		{ state: 'remote'; fileRole?: 'thumbnail' | 'webpublic' | 'original'; file?: any; mime: string; ext: string | null; path: string; cleanup: () => void; filename: string; }
+		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: any; filename: string; mime: string; ext: string | null; path: string; }
 		| '404'
 		| '204'
 	> {
 		if (url.startsWith(`${this.config.url}/files/`)) {
 			const key = url.replace(`${this.config.url}/files/`, '').split('/').shift();
-			if (!key) throw new StatusError(`Invalid File Key key = ${key}`, 400, 'Invalid File Key');
+			if (!key) throw new StatusError('Invalid File Key', 400, 'Invalid File Key');
 
 			return await this.getFileFromKey(key);
 		}
@@ -414,8 +513,8 @@ export class FileServerService {
 
 	@bindThis
 	private async getFileFromKey(key: string): Promise<
-		{ state: 'remote'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: DriveFile; filename: string; url: string; mime: string; ext: string | null; path: string; cleanup: () => void; }
-		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: DriveFile; filename: string; mime: string; ext: string | null; path: string; }
+		{ state: 'remote'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: any; filename: string; url: string; mime: string; ext: string | null; path: string; cleanup: () => void; }
+		| { state: 'stored_internal'; fileRole: 'thumbnail' | 'webpublic' | 'original'; file: any; filename: string; mime: string; ext: string | null; path: string; }
 		| '404'
 		| '204'
 	> {
@@ -434,6 +533,7 @@ export class FileServerService {
 		if (!file.storedInternal) {
 			if (!(file.isLink && file.uri)) return '204';
 			const result = await this.downloadAndDetectTypeFromUrl(file.uri);
+			file.size = (await fs.promises.stat(result.path)).size;	// DB file.sizeは正確とは限らないので
 			return {
 				...result,
 				url: file.uri,
@@ -462,7 +562,8 @@ export class FileServerService {
 			fileRole: 'original',
 			file,
 			filename: file.name,
-			mime: file.type,
+			// 古いファイルは修正前のmimeを持っているのでできるだけ修正してあげる
+			mime: this.fileInfoService.fixMime(file.type),
 			ext: null,
 			path,
 		};

@@ -1,91 +1,113 @@
 <template>
-<div v-if="hide" class="icozogqfvdetwohsdglrbswgrejoxbdj" @click="hide = false">
-	<div>
-		<b><i class="ti ti-alert-triangle"></i> {{ $ts.sensitive }}</b>
-		<span>{{ $ts.clickToShow }}</span>
-	</div>
-</div>
-<div v-else class="kkjnbbplepmiyuadieoenjgutgcmtsvu">
-	<VuePlyr :options="{ volume: 0.5 }">
-		<video
-			controls
-			:data-poster="video.thumbnailUrl"
-		>
-			<source
-				size="720"
-				:src="video.url" 
-				:type="video.type"
-			/>
-		</video>
-	</VuePlyr>
-	<i class="ti ti-eye-off" @click="hide = true"></i>
-</div>
+  <div v-if="hide" class="icozogqfvdetwohsdglrbswgrejoxbdj" @click="hide = false">
+    <div>
+      <b><i class="ti ti-alert-triangle"></i> {{ $ts.sensitive }}</b>
+      <span>{{ $ts.clickToShow }}</span>
+    </div>
+  </div>
+  <div v-else class="kkjnbbplepmiyuadieoenjgutgcmtsvu" :style="{ height: height ? height : 'inherit' }">
+    <MkVideoPlayer
+      :poster="video.thumbnailUrl"
+      :options="{
+        autoplay: false,
+        controls: true,
+        sources: [
+          {
+            src: video.url,
+            poster: video.thumbnailUrl,
+            type: video.type === 'video/quicktime' ? 'video/mp4' : video.type,
+          },
+        ],
+      }"
+      :on-player-ready="onPlayerReady"
+    />
+    <i class="ti ti-eye-off" @click="hide = true"></i>
+    <a class="download" :href="video.url" :title="video.name" :download="video.name">
+      <span class="icon"><i class="ti ti-download"></i></span>
+    </a>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
 import * as misskey from 'misskey-js';
-import VuePlyr from 'vue-plyr';
 import { defaultStore } from '@/store';
 import 'vue-plyr/dist/vue-plyr.css';
+import MkVideoPlayer from '@/components/MkVideoPlayer.vue';
 
 const props = defineProps<{
-	video: misskey.entities.DriveFile;
+  video: misskey.entities.DriveFile;
+  total: number;
 }>();
 
-const hide = ref((defaultStore.state.nsfw === 'force') ? true : props.video.isSensitive && (defaultStore.state.nsfw !== 'ignore'));
+const hide = ref(
+  defaultStore.state.nsfw === 'force' ? true : props.video.isSensitive && defaultStore.state.nsfw !== 'ignore',
+);
+
+const height = ref<string | number>(0);
+
+const onPlayerReady = ref((player: any) => {});
 </script>
 
 <style lang="scss" scoped>
 .kkjnbbplepmiyuadieoenjgutgcmtsvu {
-	position: relative;
+  position: relative;
 
-	--plyr-color-main: var(--accent);
+  --plyr-color-main: var(--accent);
 
-	> i {
-		display: block;
-		position: absolute;
-		border-radius: 6px;
-		background-color: var(--fg);
-		color: var(--accentLighten);
-		font-size: 14px;
-		opacity: .5;
-		padding: 3px 6px;
-		text-align: center;
-		cursor: pointer;
-		top: 12px;
-		right: 12px;
-	}
+  > i,
+  > .download {
+    display: flex;
+    justify-self: center;
+    justify-content: center;
+    position: absolute;
+    border-radius: 6px;
+    background-color: var(--fg);
+    color: var(--accentLighten);
+    font-size: 14px;
+    opacity: 0.5;
+    padding: 3px 6px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 1;
+    top: 12px;
+    right: 12px;
+  }
 
-	> video {
-		display: flex;
-		justify-content: center;
-		align-items: center;
+  > .download {
+    right: 52px;
+    font-size: 11px;
+  }
 
-		font-size: 3.5em;
-		overflow: hidden;
-		background-position: center;
-		background-size: cover;
-		width: 100%;
-		height: 100%;
-	}
+  > video {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 3.5em;
+    overflow: hidden;
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .icozogqfvdetwohsdglrbswgrejoxbdj {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background: #111;
-	color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111;
+  color: #fff;
 
-	> div {
-		display: table-cell;
-		text-align: center;
-		font-size: 12px;
+  > div {
+    display: table-cell;
+    text-align: center;
+    font-size: 12px;
 
-		> b {
-			display: block;
-		}
-	}
+    > b {
+      display: block;
+    }
+  }
 }
 </style>
