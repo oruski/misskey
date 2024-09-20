@@ -548,9 +548,22 @@ async function onPointerup(ev: PointerEvent): Promise<void> {
 
 @container (min-width: 250px) {
   .richcontent {
-    min-width: 200px;
+    min-width: 140px;
   }
 }
+
+@container (min-width: 320px) {
+  .richcontent {
+    min-width: 150px;
+  }
+}
+
+@container (min-width: 390px) {
+  .richcontent {
+    min-width: 250px;
+  }
+}
+
 @container (min-width: 400px) {
   .richcontent {
     min-width: 250px;
