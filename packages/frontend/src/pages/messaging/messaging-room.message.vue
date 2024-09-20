@@ -15,17 +15,13 @@
               class="content"
               @pointerdown.passive="onPointerdown"
               @pointerup.passive="onPointerup"
+              @pointermove.passive="resetTimer"
             >
               <Mfm v-if="message.text" ref="text" class="text" :text="message.text" :i="$i" />
               <div v-if="message.file" class="file">
-                <a :href="message.file.url" rel="noopener" target="_blank" :title="message.file.name">
-                  <img
-                    v-if="message.file.type.split('/')[0] == 'image'"
-                    :src="message.file.url"
-                    :alt="message.file.name"
-                  />
-                  <p v-else>{{ message.file.name }}</p>
-                </a>
+                <div class="richcontent">
+                  <MkMediaList :media-list="[message.file]" :hide-top-round="!!message.text" :use-bg="!!message.text" />
+                </div>
               </div>
             </div>
             <div v-else class="content">
@@ -70,7 +66,7 @@ import * as os from '@/os';
 import { $i } from '@/account';
 import { defaultStore } from '@/store';
 import { getMessageMenu } from '@/scripts/get-message-menu';
-// @ts-ignore
+import MkMediaList from '@/components/MkMediaList.vue';
 
 const props = defineProps<{
   // @ts-ignore
@@ -543,6 +539,39 @@ async function onPointerup(ev: PointerEvent): Promise<void> {
         }
       }
     }
+  }
+}
+
+.richcontent {
+  min-width: 128px;
+}
+
+@container (min-width: 250px) {
+  .richcontent {
+    min-width: 200px;
+  }
+}
+@container (min-width: 400px) {
+  .richcontent {
+    min-width: 250px;
+  }
+}
+
+@container (min-width: 500px) {
+  .richcontent {
+    min-width: 320px;
+  }
+}
+
+@container (min-width: 640px) {
+  .richcontent {
+    min-width: 480px;
+  }
+}
+
+@container (min-width: 840px) {
+  .richcontent {
+    min-width: 640px;
   }
 }
 </style>
