@@ -7,6 +7,7 @@
 <script>
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
+import { miLocalStorage } from '@/local-storage';
 
 export default {
   name: 'VideoPlayer',
@@ -32,6 +33,9 @@ export default {
     };
   },
   mounted() {
+    const volume = miLocalStorage.getItem('videojsVolume');
+    const muted = miLocalStorage.getItem('videojsMuted');
+
     this.player = videojs(
       this.$refs.videoPlayer,
       {
@@ -40,9 +44,17 @@ export default {
         fill: true,
         // responsive: true,
         aspectRatio: '16:9',
+        // ミュートをセット
+        muted: muted === '1',
       },
       () => {
         this.onPlayerReady(this.player);
+        // ボリュームを変更した
+        this.player.on('volumechange', () => {
+          miLocalStorage.setItem('videojsVolume', this.player.volume());
+          miLocalStorage.setItem('videojsMuted', this.player.muted() ? '1' : '0');
+        });
+        this.player.volume(volume ? parseFloat(volume) : 0.5);
       },
     );
   },
