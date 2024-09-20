@@ -4,7 +4,15 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-  <div :class="[$style.audioContainer, audio.isSensitive && $style.sensitive]" @contextmenu.stop>
+  <div
+    :class="[
+      $style.audioContainer,
+      audio.isSensitive && $style.sensitive,
+      hideTopRound ? $style.hideTopRound : null,
+      useBg ? $style.useBg : null,
+    ]"
+    @contextmenu.stop
+  >
     <button v-if="hide" :class="$style.hidden" @click="hide = false">
       <div :class="$style.hiddenTextWrapper">
         <b v-if="audio.isSensitive" style="display: block"
@@ -59,6 +67,8 @@ import { iAmModerator } from '@/account.js';
 
 const props = defineProps<{
   audio: Misskey.entities.DriveFile;
+  hideTopRound?: boolean;
+  useBg?: boolean;
 }>();
 
 const audioEl = shallowRef<HTMLAudioElement>();
@@ -251,6 +261,21 @@ onDeactivated(() => {
   border: 0.5px solid var(--divider);
   border-radius: var(--radius);
   overflow: clip;
+}
+
+.hideTopRound {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.useBg {
+  color: var(--fgOnAccent) !important;
+  :hover {
+    color: var(--fgOnAccent) !important;
+  }
+  input[type='range'] {
+    color: var(--fgOnAccent) !important;
+  }
 }
 
 .sensitive {

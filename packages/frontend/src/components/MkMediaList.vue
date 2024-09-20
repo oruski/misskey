@@ -1,20 +1,26 @@
 <template>
   <div>
-    <XBanner v-for="media in mediaList.filter((media) => !previewable(media))" :key="media.id" :media="media" />
+    <XBanner
+      v-for="media in mediaList.filter((media) => !previewable(media))"
+      :key="media.id"
+      :media="media"
+      :hide-top-round="hideTopRound"
+      :use-bg="useBg"
+    />
     <div v-if="mediaList.filter((media) => previewable(media)).length > 0" :class="$style.container">
       <div ref="gallery" :class="[$style.medias, count <= 4 ? $style['n' + count] : $style.nMany]">
         <template v-for="media in mediaList.filter((media) => previewable(media))">
           <XVideo
             v-if="media.type.startsWith('video')"
             :key="media.id"
-            :class="$style.media"
+            :class="[$style.media, hideTopRound ? $style.hideTopRound : null]"
             :video="media"
             :total="count"
           />
           <XImage
             v-else-if="media.type.startsWith('image')"
             :key="media.id"
-            :class="$style.media"
+            :class="[$style.media, hideTopRound ? $style.hideTopRound : null]"
             class="image"
             :data-id="media.id"
             :image="media"
@@ -41,6 +47,8 @@ import { FILE_TYPE_BROWSERSAFE } from '@/const';
 const props = defineProps<{
   mediaList: misskey.entities.DriveFile[];
   raw?: boolean;
+  hideTopRound?: boolean;
+  useBg?: boolean;
 }>();
 
 const $style = useCssModule();
@@ -219,6 +227,11 @@ const previewable = (file: misskey.entities.DriveFile): boolean => {
 .media {
   overflow: hidden; // clipにするとバグる
   border-radius: 8px;
+}
+
+.hideTopRound {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .pswp {
