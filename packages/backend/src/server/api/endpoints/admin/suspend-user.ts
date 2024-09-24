@@ -72,7 +72,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 
 			(async () => {
 				await this.userSuspendService.doPostSuspend(user).catch(e => {});
-				await this.unFollowAll(user).catch(e => {});
+				// await this.unFollowAll(user).catch(e => {});
 				await this.readAllNotify(user).catch(e => {});
 			})();
 		});
@@ -83,20 +83,20 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		const followings = await this.followingsRepository.findBy({
 			followerId: follower.id,
 		});
-	
+
 		for (const following of followings) {
 			const followee = await this.usersRepository.findOneBy({
 				id: following.followeeId,
 			});
-	
+
 			if (followee == null) {
 				throw `Cant find followee ${following.followeeId}`;
 			}
-	
+
 			await this.userFollowingService.unfollow(follower, followee, true);
 		}
 	}
-	
+
 	@bindThis
 	private async readAllNotify(notifier: User) {
 		await this.notificationsRepository.update({
