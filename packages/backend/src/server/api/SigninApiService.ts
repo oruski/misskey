@@ -67,7 +67,7 @@ export class SigninApiService {
 		const password = body['password'];
 		const token = body['token'];
 
-		function error(status: number, error: { id: string }) {
+		function error(status: number, error: { id: string, reason?: string }) {
 			reply.code(status);
 			return { error };
 		}
@@ -113,9 +113,12 @@ export class SigninApiService {
 			});
 		}
 
+    const userProfile = await this.userProfilesRepository.findOne({ where: { userId: user.id }, select: ['suspendedReason'] });
+
 		if (user.isSuspended) {
 			return error(403, {
 				id: 'e03a5f46-d309-4865-9b69-56282d94e1eb',
+        reason: userProfile?.suspendedReason || undefined,
 			});
 		}
 

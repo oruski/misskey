@@ -8,7 +8,7 @@ import { getIpHash } from '@/misc/get-ip-hash.js';
 import type { LocalUser, User } from '@/models/entities/User.js';
 import type { AccessToken } from '@/models/entities/AccessToken.js';
 import type Logger from '@/logger.js';
-import type { UserIpsRepository } from '@/models/index.js';
+import type { UserIpsRepository, UserProfilesRepository } from '@/models/index.js';
 import { MetaService } from '@/core/MetaService.js';
 import { createTemp } from '@/misc/create-temp.js';
 import { bindThis } from '@/decorators.js';
@@ -38,6 +38,9 @@ export class ApiCallService implements OnApplicationShutdown {
 	constructor(
 		@Inject(DI.userIpsRepository)
 		private userIpsRepository: UserIpsRepository,
+
+    @Inject(DI.userProfilesRepository)
+    private userProfilesRepository: UserProfilesRepository,
 
 		private metaService: MetaService,
 		private authenticateService: AuthenticateService,
@@ -158,6 +161,7 @@ export class ApiCallService implements OnApplicationShutdown {
 			reply.send({
 				error: {
 					message: y!.message,
+          reason: y!.reason,
 					code: y!.code,
 					id: y!.id,
 					kind: y!.kind,
@@ -253,8 +257,11 @@ export class ApiCallService implements OnApplicationShutdown {
 					httpStatusCode: 401,
 				});
 			} else if (user!.isSuspended) {
+        const userProfile = await this.userProfilesRepository.findOne({ where: { userId: user.id }, select: ['suspendedReason'] });
+
 				throw new ApiError({
 					message: 'Your account has been suspended.',
+          reason: userProfile?.suspendedReason || undefined,
 					code: 'YOUR_ACCOUNT_SUSPENDED',
 					id: 'a8c724b3-6e9c-4b46-b1a8-bc3ed6258370',
 					httpStatusCode: 403,
