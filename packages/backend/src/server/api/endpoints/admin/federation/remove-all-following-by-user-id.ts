@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { FollowingsRepository, UsersRepository } from '@/models/index.js';
+import type { FollowingsRepository, User, UsersRepository } from '@/models/index.js';
 import { UserFollowingService } from '@/core/UserFollowingService.js';
 import { DI } from '@/di-symbols.js';
+import { bindThis } from '@/decorators.js';
 
 export const meta = {
 	tags: ['admin'],
@@ -14,9 +15,9 @@ export const meta = {
 export const paramDef = {
 	type: 'object',
 	properties: {
-		host: { type: 'string' },
+		userId: { type: 'string' },
 	},
-	required: ['host'],
+	required: ['userId'],
 } as const;
 
 // eslint-disable-next-line import/no-default-export
@@ -26,24 +27,38 @@ export default class extends Endpoint<typeof meta, typeof paramDef> {
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
-		@Inject(DI.notesRepository)
+		@Inject(DI.followingsRepository)
 		private followingsRepository: FollowingsRepository,
 
 		private userFollowingService: UserFollowingService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const followings = await this.followingsRepository.findBy({
-				followerHost: ps.host,
-			});
+      const follower = await this.usersRepository.findOne({ where: { id: ps.userId } });
 
-			const pairs = await Promise.all(followings.map(f => Promise.all([
-				this.usersRepository.findOneByOrFail({ id: f.followerId }),
-				this.usersRepository.findOneByOrFail({ id: f.followeeId }),
-			])));
+      if (!follower) {
+        throw new Error(`User not found: ${ps.userId}`);
+      }
 
-			for (const pair of pairs) {
-				this.userFollowingService.unfollow(pair[0], pair[1]);
-			}
+      await this.unFollowAll(follower);
 		});
 	}
+
+  @bindThis
+  private async unFollowAll(follower: User) {
+    const followings = await this.followingsRepository.findBy({
+      followerId: follower.id,
+    });
+
+    for (const following of followings) {
+      const followee = await this.usersRepository.findOneBy({
+        id: following.followeeId,
+      });
+
+      if (followee == null) {
+        throw `Cant find followee ${following.followeeId}`;
+      }
+
+      await this.userFollowingService.unfollow(follower, followee, true);
+    }
+  }
 }
