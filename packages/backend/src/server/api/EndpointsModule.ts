@@ -33,6 +33,7 @@ import * as ep___admin_emoji_update from './endpoints/admin/emoji/update.js';
 import * as ep___admin_federation_deleteAllFiles from './endpoints/admin/federation/delete-all-files.js';
 import * as ep___admin_federation_refreshRemoteInstanceMetadata from './endpoints/admin/federation/refresh-remote-instance-metadata.js';
 import * as ep___admin_federation_removeAllFollowing from './endpoints/admin/federation/remove-all-following.js';
+import * as ep___admin_federation_removeAllFollowingByUserId from './endpoints/admin/federation/remove-all-following-by-user-id.js';
 import * as ep___admin_federation_updateInstance from './endpoints/admin/federation/update-instance.js';
 import * as ep___admin_getIndexStats from './endpoints/admin/get-index-stats.js';
 import * as ep___admin_getTableStats from './endpoints/admin/get-table-stats.js';
@@ -384,6 +385,7 @@ const $admin_emoji_update: Provider = { provide: 'ep:admin/emoji/update', useCla
 const $admin_federation_deleteAllFiles: Provider = { provide: 'ep:admin/federation/delete-all-files', useClass: ep___admin_federation_deleteAllFiles.default };
 const $admin_federation_refreshRemoteInstanceMetadata: Provider = { provide: 'ep:admin/federation/refresh-remote-instance-metadata', useClass: ep___admin_federation_refreshRemoteInstanceMetadata.default };
 const $admin_federation_removeAllFollowing: Provider = { provide: 'ep:admin/federation/remove-all-following', useClass: ep___admin_federation_removeAllFollowing.default };
+const $admin_federation_removeAllFollowingByUserId: Provider = { provide: 'ep:admin/federation/remove-all-following-by-user-id', useClass: ep___admin_federation_removeAllFollowingByUserId.default };
 const $admin_federation_updateInstance: Provider = { provide: 'ep:admin/federation/update-instance', useClass: ep___admin_federation_updateInstance.default };
 const $admin_getIndexStats: Provider = { provide: 'ep:admin/get-index-stats', useClass: ep___admin_getIndexStats.default };
 const $admin_getTableStats: Provider = { provide: 'ep:admin/get-table-stats', useClass: ep___admin_getTableStats.default };
@@ -739,6 +741,7 @@ const $retention: Provider = { provide: 'ep:retention', useClass: ep___retention
 		$admin_federation_deleteAllFiles,
 		$admin_federation_refreshRemoteInstanceMetadata,
 		$admin_federation_removeAllFollowing,
+    $admin_federation_removeAllFollowingByUserId,
 		$admin_federation_updateInstance,
 		$admin_getIndexStats,
 		$admin_getTableStats,
@@ -1088,6 +1091,7 @@ const $retention: Provider = { provide: 'ep:retention', useClass: ep___retention
 		$admin_federation_deleteAllFiles,
 		$admin_federation_refreshRemoteInstanceMetadata,
 		$admin_federation_removeAllFollowing,
+    $admin_federation_removeAllFollowingByUserId,
 		$admin_federation_updateInstance,
 		$admin_getIndexStats,
 		$admin_getTableStats,

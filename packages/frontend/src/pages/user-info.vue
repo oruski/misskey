@@ -113,6 +113,7 @@
             <MkButton v-if="user.host == null && iAmModerator" inline style="margin-right: 8px" @click="resetPassword">
               <i class="ti ti-key"></i> {{ i18n.ts.resetPassword }}
             </MkButton>
+            <MkButton v-if="$i.isAdmin" inline danger @click="unfollowAll">{{ i18n.ts.unfollowAll }}</MkButton>
             <MkButton v-if="$i.isAdmin" inline danger @click="deleteAccount">{{ i18n.ts.deleteAccount }}</MkButton>
           </div>
 
@@ -391,6 +392,30 @@ async function deleteAccount() {
 
   if (typed.result === user?.username) {
     await os.apiWithDialog('admin/delete-account', {
+      userId: user.id,
+    });
+  } else {
+    os.alert({
+      type: 'error',
+      text: 'input not match',
+    });
+  }
+}
+
+async function unfollowAll() {
+  const confirm = await os.confirm({
+    type: 'warning',
+    text: i18n.ts.unfollowAllConfirm,
+  });
+  if (confirm.canceled) return;
+
+  const typed = await os.inputText({
+    text: i18n.t('typeToConfirm', { x: user?.username }),
+  });
+  if (typed.canceled) return;
+
+  if (typed.result === user?.username) {
+    await os.apiWithDialog('admin/federation/remove-all-following-by-user-id', {
       userId: user.id,
     });
   } else {
