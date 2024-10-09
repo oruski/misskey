@@ -5,15 +5,15 @@ import type { UsersRepository, FollowingsRepository } from '@/models/index.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { UserFollowingService } from '@/core/UserFollowingService.js';
 import { DI } from '@/di-symbols.js';
-import { ApiError } from '../../error.js';
 import { GetterService } from '@/server/api/GetterService.js';
+import { ApiError } from '../../error.js';
 
 export const meta = {
 	tags: ['following', 'users'],
 
 	limit: {
 		duration: ms('1hour'),
-		max: 100,
+		max: 6000,
 	},
 
 	requireCredential: true,

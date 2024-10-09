@@ -1,21 +1,21 @@
 version: "3"
 
 services:
-  web:
-    build: .
-    restart: unless-stopped
-    links:
-      - db
-      - redis
-#      - es
-    ports:
-      - "3000:3000"
-    networks:
-      - internal_network
-      - external_network
-    volumes:
-      - ./files:/misskey/files
-      - ./.config:/misskey/.config:ro
+#  web:
+#    build: .
+#    restart: unless-stopped
+#    links:
+#      - db
+#      - redis
+##      - es
+#    ports:
+#      - "3000:3000"
+#    networks:
+#      - internal_network
+#      - external_network
+#    volumes:
+#      - ./files:/misskey/files
+#      - ./.config:/misskey/.config:ro
 
   redis:
     restart: unless-stopped
