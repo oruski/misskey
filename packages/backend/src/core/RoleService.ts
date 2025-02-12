@@ -18,11 +18,13 @@ import type { OnApplicationShutdown } from '@nestjs/common';
 export type RolePolicies = {
 	gtlAvailable: boolean;
 	ltlAvailable: boolean;
+  canNote: boolean;
 	canPublicNote: boolean;
 	canInvite: boolean;
 	canManageCustomEmojis: boolean;
 	canSearchNotes: boolean;
 	canHideAds: boolean;
+  suspendUponAccountDeletion: boolean;
 	driveCapacityMb: number;
 	pinLimit: number;
 	antennaLimit: number;
@@ -38,10 +40,12 @@ export type RolePolicies = {
 export const DEFAULT_POLICIES: RolePolicies = {
 	gtlAvailable: true,
 	ltlAvailable: true,
+  canNote: true,
 	canPublicNote: true,
 	canInvite: false,
 	canManageCustomEmojis: false,
 	canSearchNotes: false,
+  suspendUponAccountDeletion: false,
 	canHideAds: false,
 	driveCapacityMb: 100,
 	pinLimit: 5,
@@ -264,10 +268,12 @@ export class RoleService implements OnApplicationShutdown {
 		return {
 			gtlAvailable: calc('gtlAvailable', vs => vs.some(v => v === true)),
 			ltlAvailable: calc('ltlAvailable', vs => vs.some(v => v === true)),
+      canNote: calc('canNote', vs => vs.some(v => v === true)),
 			canPublicNote: calc('canPublicNote', vs => vs.some(v => v === true)),
 			canInvite: calc('canInvite', vs => vs.some(v => v === true)),
 			canManageCustomEmojis: calc('canManageCustomEmojis', vs => vs.some(v => v === true)),
 			canSearchNotes: calc('canSearchNotes', vs => vs.some(v => v === true)),
+      suspendUponAccountDeletion: calc('suspendUponAccountDeletion', vs => vs.some(v => v === true)),
 			canHideAds: calc('canHideAds', vs => vs.some(v => v === true)),
 			driveCapacityMb: calc('driveCapacityMb', vs => Math.max(...vs)),
 			pinLimit: calc('pinLimit', vs => Math.max(...vs)),
@@ -372,7 +378,7 @@ export class RoleService implements OnApplicationShutdown {
 	@bindThis
 	public async unassign(userId: User['id'], roleId: Role['id']): Promise<void> {
 		const now = new Date();
-	
+
 		const existing = await this.roleAssignmentsRepository.findOneBy({ roleId, userId });
 		if (existing == null) {
 			throw new RoleService.NotAssignedError();

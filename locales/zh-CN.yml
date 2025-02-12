@@ -1000,6 +1000,7 @@ drivecleaner: "网盘整理"
 retryAllQueuesNow: "立刻重试所有队列"
 retryAllQueuesConfirmTitle: "要再尝试一次吗？"
 retryAllQueuesConfirmText: "可能会使服务器负荷在一定时间内增加"
+suspendReasonWhenBanRoleIsGranted: "由于您的账户被冻结，您的账户将被冻结。"
 _achievements:
   earnedAt: "达成时间"
   _types:
@@ -1275,6 +1276,7 @@ _role:
   _options:
     gtlAvailable: "查看全局时间线"
     ltlAvailable: "查看本地时间线"
+    canNote: "发帖"
     canPublicNote: "允许公开发帖"
     canInvite: "发放实例邀请码"
     canManageCustomEmojis: "管理自定义表情符号"
@@ -1291,6 +1293,7 @@ _role:
     descriptionOfRateLimitFactor: "值越小限制越少，值越大限制越多。"
     canHideAds: "可以隐藏广告"
     canSearchNotes: "是否可以搜索帖子"
+    suspendUponAccountDeletion: "删除账户时暂停"
   _condition:
     isLocal: "是本地用户"
     isRemote: "是远程用户"

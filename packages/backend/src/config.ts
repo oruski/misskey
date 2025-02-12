@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import * as yaml from 'js-yaml';
-import packageMeta from '../../../package.json' assert { type: 'json' };
+import packageMeta from '../../../package.json' with { type: 'json' };
 
 /**
  * ユーザーが設定する必要のある情報

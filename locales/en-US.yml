@@ -1000,6 +1000,7 @@ drivecleaner: "Drive Cleaner"
 retryAllQueuesNow: "Retry running all queues"
 retryAllQueuesConfirmTitle: "Really retry all?"
 retryAllQueuesConfirmText: "This will temporarily increase the server load."
+suspendReasonWhenBanRoleIsGranted: "Reason for suspension when the ban role is assigned"
 _achievements:
   earnedAt: "Unlocked at"
   _types:
@@ -1275,6 +1276,7 @@ _role:
   _options:
     gtlAvailable: "Can view the global timeline"
     ltlAvailable: "Can view the local timeline"
+    canNote: "Can send post notes"
     canPublicNote: "Can send public notes"
     canInvite: "Can create instance invite codes"
     canManageCustomEmojis: "Can manage custom emojis"
@@ -1291,6 +1293,7 @@ _role:
     descriptionOfRateLimitFactor: "Lower rate limits are less restrictive, higher ones more restrictive. "
     canHideAds: "Can hide ads"
     canSearchNotes: "Usage of note search"
+    suspendUponAccountDeletion: "Suspend upon account deletion"
   _condition:
     isLocal: "Local user"
     isRemote: "Remote user"

@@ -1131,6 +1131,7 @@ _role:
   _options:
     gtlAvailable: "Xem Timeline xã hội"
     ltlAvailable: "Xem Timeline trong máy chủ này"
+    canNote: "Đăng bài"
     canPublicNote: "Cho phép đăng bài công khai"
     canManageCustomEmojis: "Quản lý CustomEmoji"
     driveCapacity: "Dữ liệu Drive"

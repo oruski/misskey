@@ -1000,6 +1000,7 @@ drivecleaner: "雲端硬碟清掃器"
 retryAllQueuesNow: "立刻重試所有佇列"
 retryAllQueuesConfirmTitle: "要現在重試嗎？"
 retryAllQueuesConfirmText: "伺服器的負荷可能會暫時增加。"
+suspendReasonWhenBanRoleIsGranted: "當被封鎖角色被授予時"
 _achievements:
   earnedAt: "獲得日期"
   _types:
@@ -1275,6 +1276,7 @@ _role:
   _options:
     gtlAvailable: "瀏覽全域時間軸"
     ltlAvailable: "瀏覽本地時間軸"
+    canNote: "發布貼文"
     canPublicNote: "允許公開貼文"
     canInvite: "發行實例邀請碼"
     canManageCustomEmojis: "管理自訂表情符號"
@@ -1291,6 +1293,7 @@ _role:
     descriptionOfRateLimitFactor: "值越小限制越少，值越大限制越多。"
     canHideAds: "不顯示廣告"
     canSearchNotes: "可否搜尋貼文"
+    suspendUponAccountDeletion: "刪除帳戶時暫停"
   _condition:
     isLocal: "本地使用者"
     isRemote: "遠端使用者"

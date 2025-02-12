@@ -11,7 +11,7 @@ import { loadConfig } from '@/config.js';
 import type { Config } from '@/config.js';
 import { showMachineInfo } from '@/misc/show-machine-info.js';
 import { envOption } from '@/env.js';
-import packageMeta from '../../../../package.json' assert { type: 'json' };
+import packageMeta from '../../../../package.json' with { type: 'json' };
 import { jobQueue, server } from './common.js';
 
 const _filename = fileURLToPath(import.meta.url);

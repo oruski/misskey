@@ -1232,6 +1232,7 @@ _role:
   _options:
     gtlAvailable: "Dapat melihat linimasa global"
     ltlAvailable: "Dapat melihat linimasa lokal"
+    canNote: "Dapat membuat catatan"
     canPublicNote: "Dapat mengirim catatan publik"
     canInvite: "Dapat membuat kode undangan instansi"
     canManageCustomEmojis: "Dapat mengelola Emoji kustom"

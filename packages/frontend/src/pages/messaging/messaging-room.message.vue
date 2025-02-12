@@ -9,7 +9,7 @@
           </div>
         </template>
         <div class="inner2">
-          <div class="balloon" :class="{ noText: message.text == null }">
+          <div class="balloon" :class="{ noText: message.text == null || isOneEmoji, isStamp: isOneEmoji }">
             <div
               v-if="!message.isDeleted"
               class="content"
@@ -79,6 +79,7 @@ const props = defineProps<{
 
 const isMe = $computed(() => props.message.userId === $i?.id);
 const urls = $computed(() => (props.message.text ? extractUrlFromMfm(mfm.parse(props.message.text)) : []));
+const isOneEmoji = $computed(() => props.message.text?.match(/^:[a-zA-Z0-9_]+:$/));
 
 // @ts-ignore
 // eslint-disable-next-line no-undef
@@ -429,6 +430,21 @@ async function onPointerup(ev: PointerEvent): Promise<void> {
               border-left: solid 8px transparent;
             }
 
+            &.isStamp {
+              > .content {
+                > .text {
+                  &,
+                  ::v-deep(*) {
+                    min-width: 120px;
+                    min-height: 120px;
+                    max-width: 100%;
+                    max-height: 370px;
+                    object-fit: contain;
+                  }
+                }
+              }
+            }
+
             > .content {
               > .text {
                 color: var(--fg);
@@ -480,6 +496,21 @@ async function onPointerup(ev: PointerEvent): Promise<void> {
               border-right: solid 8px transparent;
               border-bottom: solid 8px transparent;
               border-left: solid 8px $me-balloon-color;
+            }
+
+            &.isStamp {
+              > .content {
+                > .text {
+                  &,
+                  ::v-deep(*) {
+                    min-width: 120px;
+                    min-height: 120px;
+                    max-width: 100%;
+                    max-height: 370px;
+                    object-fit: contain;
+                  }
+                }
+              }
             }
 
             > .content {

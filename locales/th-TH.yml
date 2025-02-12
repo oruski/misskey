@@ -1251,6 +1251,7 @@ _role:
   _options:
     gtlAvailable: "การดูไทม์ไลน์ทั่วโลก"
     ltlAvailable: "การดูไทม์ไลน์ในท้องถิ่น"
+    canNote: "สามารถโพสต์โน้ต"
     canPublicNote: "สามารถส่งโน้ตสาธารณะ"
     canInvite: "สร้างรหัสเชิญอินสแตนซ์"
     canManageCustomEmojis: "จัดการอีโมจิแบบกำหนดเอง"

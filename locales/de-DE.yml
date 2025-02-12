@@ -1000,6 +1000,7 @@ drivecleaner: "Drive-Reiniger"
 retryAllQueuesNow: "Sofort Warteschlangen erneut ausführen"
 retryAllQueuesConfirmTitle: "Wirklich erneut versuchen?"
 retryAllQueuesConfirmText: "Dies wird zu einer temporären Erhöhung der Serverlast führen."
+suspendReasonWhenBanRoleIsGranted: "Grund für Sperre, wenn die Rolle „Gebannt“ zugewiesen wird"
 _achievements:
   earnedAt: "Freigeschaltet am"
   _types:
@@ -1275,6 +1276,7 @@ _role:
   _options:
     gtlAvailable: "Kann auf die globale Chronik zugreifen"
     ltlAvailable: "Kann auf die lokale Chronik zugreifen"
+    canNote: "Kann Notizen erstellen"
     canPublicNote: "Kann öffentliche Notizen erstellen"
     canInvite: "Kann Einladungscodes für diese Instanz erstellen"
     canManageCustomEmojis: "Benutzerdefinierte Emojis verwalten"
@@ -1291,6 +1293,7 @@ _role:
     descriptionOfRateLimitFactor: "Je niedriger desto weniger restriktiv, je höher destro restriktiver."
     canHideAds: "Kann Werbung ausblenden"
     canSearchNotes: "Nutzung der Notizsuchfunktion"
+    suspendUponAccountDeletion: "Bei Löschung des Benutzerkontos sperren"
   _condition:
     isLocal: "Lokaler Benutzer"
     isRemote: "Benutzer fremder Instanz"

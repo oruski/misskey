@@ -45,6 +45,7 @@ import { bindThis } from '@/decorators.js';
 import { DB_MAX_NOTE_TEXT_LENGTH } from '@/const.js';
 import { RoleService } from '@/core/RoleService.js';
 import { MetaService } from '@/core/MetaService.js';
+import { ApiError } from '@/server/api/error.js';
 
 const mutedWordsCache = new Cache<{ userId: UserProfile['userId']; mutedWords: UserProfile['mutedWords']; }[]>(1000 * 60 * 5);
 
@@ -231,10 +232,20 @@ export class NoteCreateService implements OnApplicationShutdown {
 		if (data.channel != null) data.visibleUsers = [];
 		if (data.channel != null) data.localOnly = true;
 
+    const policies = await this.roleService.getUserPolicies(user.id);
+
+    if (policies.canNote === false) {
+      throw new ApiError({
+        id: 'd5ff14b4-d023-4a4e-a43d-f50134f7d969',
+        message: 'Note creation is not allowed',
+        code: 'NOTE_CREATION_NOT_ALLOWED',
+      });
+    }
+
 		if (data.visibility === 'public' && data.channel == null) {
 			if ((data.text != null) && (await this.metaService.fetch()).sensitiveWords.some(w => data.text!.includes(w))) {
 				data.visibility = 'home';
-			} else if ((await this.roleService.getUserPolicies(user.id)).canPublicNote === false) {
+			} else if (policies.canPublicNote === false) {
 				data.visibility = 'home';
 			}
 		}

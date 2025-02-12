@@ -1229,6 +1229,7 @@ _role:
   _options:
     gtlAvailable: "Can view the global timeline"
     ltlAvailable: "Can view the local timeline"
+    canNote: "Can post notes"
     canPublicNote: "Can send public notes"
     canInvite: "Can create instance invite codes"
     canManageCustomEmojis: "Can manage custom emojis"

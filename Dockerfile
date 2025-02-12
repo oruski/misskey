@@ -1,4 +1,4 @@
-ARG NODE_VERSION=21.6.2-bullseye
+ARG NODE_VERSION=23.7.0-bullseye
 
 FROM node:${NODE_VERSION} AS builder
 

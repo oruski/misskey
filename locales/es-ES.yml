@@ -1000,6 +1000,7 @@ drivecleaner: "Limpiador del Drive"
 retryAllQueuesNow: "Reintentar inmediatamente todas las colas"
 retryAllQueuesConfirmTitle: "Desea ¿reintentar inmediatamente todas las colas?"
 retryAllQueuesConfirmText: "La carga del servidor está incrementándose temporalmente "
+suspendReasonWhenBanRoleIsGranted: "La cuenta ha sido suspendida debido a que se ha eliminado con el rol de BAN."
 _achievements:
   earnedAt: "Desbloqueado el"
   _types:
@@ -1275,6 +1276,7 @@ _role:
   _options:
     gtlAvailable: "Explorar la línea de tiempo global"
     ltlAvailable: "Explorar la línea de tiempo local"
+    canNote: "Publicar notas"
     canPublicNote: "Permitir la publicación"
     canInvite: "Puede crear códigos de invitación"
     canManageCustomEmojis: "Administrar emojis personalizados"
@@ -1291,6 +1293,7 @@ _role:
     descriptionOfRateLimitFactor: "Límites más bajos son menos restrictivos, más altos menos restrictivos"
     canHideAds: "Puede ocultar anuncios"
     canSearchNotes: "Uso de la búsqueda de notas"
+    suspendUponAccountDeletion: "Suspender al borrar la cuenta"
   _condition:
     isLocal: "Usuario local"
     isRemote: "Usuario remoto"
