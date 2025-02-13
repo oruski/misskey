@@ -440,6 +440,10 @@ async function onPointerup(ev: PointerEvent): Promise<void> {
                     max-width: 100%;
                     max-height: 370px;
                     object-fit: contain;
+
+                    @media (min-width: 500px) {
+                      max-width: 370px;
+                    }
                   }
                 }
               }
@@ -508,6 +512,10 @@ async function onPointerup(ev: PointerEvent): Promise<void> {
                     max-width: 100%;
                     max-height: 370px;
                     object-fit: contain;
+
+                    @media (min-width: 500px) {
+                      max-width: 370px;
+                    }
                   }
                 }
               }
