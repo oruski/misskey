@@ -1867,6 +1867,7 @@ _notification:
     groupInvited: "加入社群邀請"
     achievementEarned: "獲得成就"
     app: "應用程式通知"
+    messaging: "私訊"
   _actions:
     followBack: "回關"
     reply: "回覆"

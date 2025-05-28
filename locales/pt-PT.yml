@@ -542,6 +542,7 @@ _notification:
     followRequestAccepted: "Aceitou pedidos de seguimento"
     groupInvited: "Convites de grupo"
     app: "Notificações de aplicativos conectados"
+    messaging: "Mensagens de bate-papo"
   _actions:
     followBack: "te seguiu de volta"
     reply: "Responder"

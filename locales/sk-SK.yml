@@ -1465,6 +1465,7 @@ _notification:
     followRequestAccepted: "Schválené žiadosti o sledovanie"
     groupInvited: "Pozvánky do skupín"
     app: "Oznámenia z prepojených aplikácií"
+    messaging: "Správy"
   _actions:
     followBack: "Sledovať späť\n"
     reply: "Odpovedať"

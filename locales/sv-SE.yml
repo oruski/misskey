@@ -435,6 +435,7 @@ _notification:
     renote: "Omnotera"
     quote: "Citat"
     reaction: "Reaktioner"
+    messaging: "Meddelanden"
   _actions:
     reply: "Svara"
     renote: "Omnotera"

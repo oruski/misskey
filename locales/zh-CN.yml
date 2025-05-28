@@ -1867,6 +1867,7 @@ _notification:
     groupInvited: "加入群组邀请"
     achievementEarned: "取得的成就"
     app: "关联应用的通知"
+    messaging: "聊天"
   _actions:
     followBack: "回关"
     reply: "回复"

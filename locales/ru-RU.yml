@@ -1833,6 +1833,7 @@ _notification:
     groupInvited: "Приглашение в группы"
     achievementEarned: "Получение достижений"
     app: "Уведомления из приложений"
+    messaging: "Сообщения"
   _actions:
     followBack: "отвечает взаимной подпиской"
     reply: "Ответить"

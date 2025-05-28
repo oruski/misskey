@@ -1803,6 +1803,7 @@ _notification:
     followRequestAccepted: "Permintaan mengikuti disetujui"
     groupInvited: "Diundang ke grup"
     app: "Pemberitahuan dari aplikasi"
+    messaging: "Pesan"
   _actions:
     followBack: "Ikuti Kembali"
     reply: "Balas"

@@ -1867,6 +1867,7 @@ _notification:
     groupInvited: "グループに招待されたで"
     achievementEarned: "実績の獲得"
     app: "連携アプリからの通知や"
+    messaging: "チャット"
   _actions:
     followBack: "フォローバック"
     reply: "返事"

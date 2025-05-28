@@ -1867,6 +1867,7 @@ _notification:
     groupInvited: "Group invitations"
     achievementEarned: "Achievement unlocked"
     app: "Notifications from linked apps"
+    messaging: "Chat"
   _actions:
     followBack: "followed you back"
     reply: "Reply"

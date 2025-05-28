@@ -360,6 +360,7 @@ _notification:
     renote: "Renote"
     quote: "ລວມຂໍ້ຄວາມອ້າງອີງ"
     reaction: "ປະຕິກິລິຍາ"
+    messaging: "ການສົນທະນາ"
   _actions:
     reply: "ຕອບ​ໄປ​ທີ"
     renote: "Renote"

@@ -477,6 +477,7 @@ _notification:
     renote: "Herdelen"
     quote: "Quote"
     reaction: "Reacties"
+    messaging: "Chat"
   _actions:
     reply: "Antwoord"
     renote: "Herdelen"

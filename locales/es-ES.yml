@@ -1867,6 +1867,7 @@ _notification:
     groupInvited: "Invitado al grupo"
     achievementEarned: "Logro desbloqueado"
     app: "Notificaciones desde aplicaciones"
+    messaging: "Mensajes"
   _actions:
     followBack: "Te sigue de vuelta"
     reply: "Responder"

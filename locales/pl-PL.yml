@@ -1352,6 +1352,7 @@ _notification:
     followRequestAccepted: "Przyjęto prośbę o możliwość obserwacji"
     groupInvited: "Zaproszono do grup"
     app: "Powiadomienia z aplikacji"
+    messaging: "Wiadomości"
   _actions:
     followBack: "zaobserwował cię z powrotem"
     reply: "Odpowiedz"
