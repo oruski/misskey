@@ -1845,6 +1845,7 @@ _notification:
     groupInvited: "그룹에 초대되었을 때"
     achievementEarned: "도전 과제 획득"
     app: "연동된 앱을 통한 알림"
+    messaging: "대화"
   _actions:
     followBack: "팔로우"
     reply: "답글"

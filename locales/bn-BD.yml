@@ -1352,6 +1352,7 @@ _notification:
     followRequestAccepted: "গৃহীত অনুসরণের অনুরোধসমূহ"
     groupInvited: "গ্রুপের আমন্ত্রনসমূহ"
     app: "লিঙ্ক করা অ্যাপ থেকে বিজ্ঞপ্তি"
+    messaging: "মেসেজিং"
   _actions:
     followBack: "ফলো ব্যাক করেছে"
     reply: "জবাব"

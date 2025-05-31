@@ -778,6 +778,7 @@ _notification:
     renote: "Přeposlat"
     quote: "Citovat"
     reaction: "Reakce"
+    messaging: "Zprávy"
   _actions:
     reply: "Odpovědět"
     renote: "Přeposlat"

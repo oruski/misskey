@@ -708,6 +708,7 @@ _notification:
     renote: "Re-notează"
     quote: "Citează"
     reaction: "Reacție"
+    messaging: "Mesaj"
   _actions:
     reply: "Răspunde"
     renote: "Re-notează"

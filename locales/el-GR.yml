@@ -392,6 +392,7 @@ _notification:
     renote: "Κοινοποίηση σημειώματος"
     quote: "Παράθεση"
     reaction: "Αντιδράσεις"
+    messaging: "Μηνύματα συνομιλίας"
   _actions:
     reply: "Απάντηση"
     renote: "Κοινοποίηση σημειώματος"

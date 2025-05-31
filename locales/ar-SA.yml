@@ -1275,6 +1275,7 @@ _notification:
     followRequestAccepted: "طلبات المتابعة المقبولة"
     groupInvited: "دعوات الفريق"
     app: "إشعارات التطبيقات المرتبطة"
+    messaging: "المحادثات"
   _actions:
     followBack: "تابعك بالمثل"
     reply: "رد"

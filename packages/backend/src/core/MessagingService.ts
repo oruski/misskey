@@ -24,6 +24,7 @@ import { ApRendererService } from '@/core/activitypub/ApRendererService.js';
 import { MessagingMessageEntityService } from '@/core/entities/MessagingMessageEntityService.js';
 import { PushNotificationService } from '@/core/PushNotificationService.js';
 import { bindThis } from '@/decorators.js';
+import { NotificationService } from '@/core/NotificationService.js';
 
 @Injectable()
 export class MessagingService {
@@ -53,6 +54,7 @@ export class MessagingService {
 		private apRendererService: ApRendererService,
 		private queueService: QueueService,
 		private pushNotificationService: PushNotificationService,
+    private notificationService: NotificationService,
 	) {
 	}
 
@@ -119,12 +121,20 @@ export class MessagingService {
 
 				this.globalEventService.publishMainStream(recipientUser.id, 'unreadMessagingMessage', messageObj);
 				this.pushNotificationService.pushNotification(recipientUser.id, 'unreadMessagingMessage', messageObj);
+        this.notificationService.emailNotificationChatWhenOffline(recipientUser.id, {
+          senderId: user.id,
+          message: text || '',
+        });
 			} else if (recipientGroup) {
 				const joinings = await this.userGroupJoiningsRepository.findBy({ userGroupId: recipientGroup.id, userId: Not(user.id) });
 				for (const joining of joinings) {
 					if (freshMessage.reads.includes(joining.userId)) return; // 既読
 					this.globalEventService.publishMainStream(joining.userId, 'unreadMessagingMessage', messageObj);
 					this.pushNotificationService.pushNotification(joining.userId, 'unreadMessagingMessage', messageObj);
+          this.notificationService.emailNotificationChatWhenOffline(joining.userId, {
+            senderId: user.id,
+            message: text || '',
+          });
 				}
 			}
 		}, 2000);

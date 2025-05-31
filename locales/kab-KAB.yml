@@ -97,6 +97,7 @@ _notification:
   _types:
     follow: "Ig ṭṭafaṛ"
     mention: "Bder"
+    messaging: "Tawriwt"
   _actions:
     reply: "Err"
 _deck:

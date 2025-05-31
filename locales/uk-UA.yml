@@ -1639,6 +1639,7 @@ _notification:
     followRequestAccepted: "Прийняті підписки"
     groupInvited: "Запрошення до груп"
     app: "Сповіщення від додатків"
+    messaging: "Повідомлення"
   _actions:
     reply: "Відповісти"
     renote: "Поширити"

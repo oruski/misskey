@@ -1867,6 +1867,7 @@ _notification:
     groupInvited: "Erhaltene Gruppeneinladungen"
     achievementEarned: "Errungenschaft freigeschaltet"
     app: "Benachrichtigungen von Apps"
+    messaging: "Chatnachrichten"
   _actions:
     followBack: "folgt dir nun auch"
     reply: "Antworten"

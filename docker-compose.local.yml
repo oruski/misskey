@@ -1,5 +1,7 @@
 version: "3"
 
+name: misskey
+
 services:
 #  web:
 #    build: .

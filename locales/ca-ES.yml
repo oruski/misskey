@@ -440,6 +440,7 @@ _notification:
     renote: "Renotar"
     quote: "Citar"
     reaction: "Reaccions"
+    messaging: "Xat"
   _actions:
     followBack: "t'ha seguit també"
     reply: "Respondre"

@@ -1697,6 +1697,7 @@ _notification:
     groupInvited: "Mời vào nhóm"
     achievementEarned: "Hoàn thành Achievement"
     app: "Từ app liên kết"
+    messaging: "Tin nhắn"
   _actions:
     followBack: "đã theo dõi lại bạn"
     reply: "Trả lời"

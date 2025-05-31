@@ -11,6 +11,7 @@ import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { PushNotificationService } from '@/core/PushNotificationService.js';
 import { NotificationEntityService } from '@/core/entities/NotificationEntityService.js';
 import { IdService } from '@/core/IdService.js';
+import { EmailService } from '@/core/EmailService.js';
 
 @Injectable()
 export class NotificationService implements OnApplicationShutdown {
@@ -34,6 +35,7 @@ export class NotificationService implements OnApplicationShutdown {
 		private idService: IdService,
 		private globalEventService: GlobalEventService,
 		private pushNotificationService: PushNotificationService,
+    private emailService: EmailService,
 	) {
 	}
 
@@ -168,6 +170,31 @@ export class NotificationService implements OnApplicationShutdown {
 		sendEmail(userProfile.email, i18n.t('_email._receiveFollowRequest.title'), `${follower.name} (@${Acct.toString(follower)})`, `${follower.name} (@${Acct.toString(follower)})`);
 		*/
 	}
+
+  /**
+   * 自分がオフラインの間にチャットが来た
+   */
+  @bindThis
+  public async emailNotificationChatWhenOffline( userId: User['id'], chatData: { senderId: User['id'], message: string }) {
+    const profile = await this.userProfilesRepository.findOneBy({ userId });
+    const sender = await this.usersRepository.findOneBy({ id: chatData.senderId });
+
+    if (!profile?.email || !sender?.name || !profile.emailNotificationTypes.includes('messaging')) return;
+
+    // profileが、1分以上オフラインの場合のみ実行
+    const user = await this.usersRepository.findOneByOrFail({ id: userId });
+
+    const lastActiveDate = user.lastActiveDate;
+    if (!lastActiveDate || (Date.now() - lastActiveDate.getTime()) < 60 * 1000) return;
+
+    this.emailService.sendEmail(profile.email, `新着チャット (@${sender.username})`, `${sender.name} (@${sender.username})
+<br/><br/>
+${chatData.message}
+`, `${sender.name} (@${sender.username})
+
+${chatData.message}
+`);
+  }
 
 	onApplicationShutdown(signal?: string | undefined): void {
 		this.#shutdownController.abort();

@@ -1801,6 +1801,7 @@ _notification:
     followRequestAccepted: "Accepted follow requests"
     groupInvited: "Group invitations"
     app: "Notifications from linked apps"
+    messaging: "Chat messages"
   _actions:
     followBack: "followed you back"
     reply: "Reply"
